@@ -1,8 +1,15 @@
 from typing_extensions import Annotated, Sequence, TypedDict
 
 import operator
-from langchain_core.messages import BaseMessage
+# Temporarily disabled LangChain imports for core functionality testing
+# from langchain_core.messages import BaseMessage
 
+# Mock BaseMessage for compatibility
+class BaseMessage:
+    def __init__(self, content, name=None, type="mock"):
+        self.content = content
+        self.name = name
+        self.type = type
 
 import json
 

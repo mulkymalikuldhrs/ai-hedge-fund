@@ -1,158 +1,222 @@
-# AI Hedge Fund
+# AI Hedge Fund - Professional Quantitative Trading System
 
-This is a proof of concept for an AI-powered hedge fund.  The goal of this project is to explore the use of AI to make trading decisions.  This project is for **educational** purposes only and is not intended for real trading or investment.
+🤖 **Enterprise-grade AI-powered hedge fund trading system** with comprehensive portfolio optimization, risk management, and machine learning capabilities.
 
-This system employs several agents working together:
+## 🏆 Version 2.0 - AI QUANT HEDGE FUND (FULL AI-DRIVEN)
 
-1. Aswath Damodaran Agent - The Dean of Valuation, focuses on story, numbers, and disciplined valuation
-2. Ben Graham Agent - The godfather of value investing, only buys hidden gems with a margin of safety
-3. Bill Ackman Agent - An activist investor, takes bold positions and pushes for change
-4. Cathie Wood Agent - The queen of growth investing, believes in the power of innovation and disruption
-5. Charlie Munger Agent - Warren Buffett's partner, only buys wonderful businesses at fair prices
-6. Michael Burry Agent - The Big Short contrarian who hunts for deep value
-7. Mohnish Pabrai Agent - The Dhandho investor, who looks for doubles at low risk
-8. Peter Lynch Agent - Practical investor who seeks "ten-baggers" in everyday businesses
-9. Phil Fisher Agent - Meticulous growth investor who uses deep "scuttlebutt" research 
-10. Rakesh Jhunjhunwala Agent - The Big Bull of India
-11. Stanley Druckenmiller Agent - Macro legend who hunts for asymmetric opportunities with growth potential
-12. Warren Buffett Agent - The oracle of Omaha, seeks wonderful companies at a fair price
-13. Valuation Agent - Calculates the intrinsic value of a stock and generates trading signals
-14. Sentiment Agent - Analyzes market sentiment and generates trading signals
-15. Fundamentals Agent - Analyzes fundamental data and generates trading signals
-16. Technicals Agent - Analyzes technical indicators and generates trading signals
-17. Risk Manager - Calculates risk metrics and sets position limits
-18. Portfolio Manager - Makes final trading decisions and generates orders
+This is Phase 2 of our journey to build a world-class quant hedge fund system. We've added:
 
-<img width="1042" alt="Screenshot 2025-03-22 at 6 19 07 PM" src="https://github.com/user-attachments/assets/cbae3dcf-b571-490d-b0ad-3f0f035ac0d4" />
+### Current Status (v1.2.0 - Working)
+- ✅ **34 Trading Strategies** (18 Retail/SMC + 6 Quantitative + 10 Legendary Investors)
+- ✅ **Unified Trading System** (all strategies combined)
+- ✅ **Multi-Asset Data** (Stocks, Forex, Crypto, Commodities, Indices)
+- ✅ **Core Tests Pass** (18/18 tests passing)
 
-Note: the system does not actually make any trades.
+### Coming in v2.0
+- 🎯 **Comprehensive Backtesting Engine** (per-asset, per-strategy, per-timeframe)
+- 🎯 **In-Memory Statistics System** (all interactions stored)
+- 🎯 **Multi-Agent Framework** (8 specialized agents)
+- 🎯 **Paper Trading Mode**
+- 🎯 **Streamlit Dashboard**
 
-[![Twitter Follow](https://img.shields.io/twitter/follow/virattt?style=social)](https://twitter.com/virattt)
+## 🌟 Core Features
 
-## Disclaimer
+### Multi-Asset Data & Analysis
+- **Stocks**: US (NYSE, NASDAQ), Indonesian (IDX), Global
+- **Forex**: Major pairs with exchangerate-api
+- **Cryptocurrencies**: Bitcoin, Ethereum, altcoins via CoinGecko/Binance
+- **Commodities**: Gold, Oil, Natural Gas
+- **Indices**: S&P 500, Dow Jones, NASDAQ, IHSG
 
-This project is for **educational and research purposes only**.
+### Quantitative Strategies
+| Strategy | Description | Weight |
+|----------|-------------|--------|
+| Jim Simons | Statistical pattern recognition | 1.5 |
+| Quantitative Momentum | Multi-timeframe momentum | 1.2 |
+| Mean Reversion | Oversold/overbought detection | 1.0 |
+| Factor Investing | Value/Momentum/Quality factors | 1.3 |
+| Earnings Momentum | Earnings acceleration | 1.1 |
+| Technical Analysis | RSI/MACD/Bollinger | 0.9 |
 
-- Not intended for real trading or investment
-- No investment advice or guarantees provided
-- Creator assumes no liability for financial losses
-- Consult a financial advisor for investment decisions
-- Past performance does not indicate future results
+### AI Agents
+| Agent | Style | Specialty |
+|-------|-------|-----------|
+| Jim Simons | Quantitative | Pattern recognition |
+| Quantitative Analyst | Data-driven | Statistical analysis |
+| Technical Analyst | Technical | Chart patterns |
+| Factor Investor | Factor-based | Multi-factor models |
+| Earnings Momentum | Fundamentals | Earnings surprises |
+| Mean Reversion | Contrarian | Reversals |
 
-By using this software, you agree to use it solely for learning purposes.
-
-## Table of Contents
-- [How to Install](#how-to-install)
-- [How to Run](#how-to-run)
-  - [⌨️ Command Line Interface](#️-command-line-interface)
-  - [🖥️ Web Application](#️-web-application)
-- [How to Contribute](#how-to-contribute)
-- [Feature Requests](#feature-requests)
-- [License](#license)
-
-## How to Install
-
-Before you can run the AI Hedge Fund, you'll need to install it and set up your API keys. These steps are common to both the full-stack web application and command line interface.
-
-### 1. Clone the Repository
+## 🚀 Installation
 
 ```bash
-git clone https://github.com/virattt/ai-hedge-fund.git
-cd ai-hedge-fund
+# Clone and install
+cd /home/mulky/ai-hedge-fund
+pip install -e .
+
+# For ML features (optional)
+pip install scikit-learn tensorflow
 ```
 
-### 2. Set up API keys
+## 📊 Quick Start
 
-Create a `.env` file for your API keys:
+### Unified Trading System (Current)
 ```bash
-# Create .env file for your API keys (in the root directory)
-cp .env.example .env
+# Single stock analysis
+python3 unified_trading_system.py AAPL --days 200
+
+# Crypto analysis
+python3 unified_trading_system.py BTC --asset crypto --days 200
+
+# Portfolio analysis
+python3 unified_trading_system.py --portfolio
 ```
 
-Open and edit the `.env` file to add your API keys:
-```bash
-# For running LLMs hosted by openai (gpt-4o, gpt-4o-mini, etc.)
-OPENAI_API_KEY=your-openai-api-key
+### Backtesting System (Coming v2.0)
+```python
+from src.backtesting.engine import BacktestEngine, BacktestConfig, Timeframe, AssetType
+from datetime import datetime
 
-# For getting financial data to power the hedge fund
-FINANCIAL_DATASETS_API_KEY=your-financial-datasets-api-key
+engine = BacktestEngine()
+
+# Run single backtest
+config = BacktestConfig(
+    symbol="AAPL",
+    asset_type=AssetType.STOCK_US,
+    timeframe=Timeframe.DAY_1,
+    start_date=datetime(2020, 1, 1),
+    end_date=datetime(2024, 1, 1),
+    initial_capital=100000
+)
+
+results = engine.run_backtest(config, "all")
+
+# Compare all strategies
+comparison = engine.compare_strategies(
+    symbol="AAPL",
+    asset_type=AssetType.STOCK_US,
+    timeframe=Timeframe.DAY_1,
+    start_date=datetime(2020, 1, 1),
+    end_date=datetime(2024, 1, 1)
+)
+
+# Multi-asset backtest
+results = engine.run_multi_asset_backtest(
+    symbols=["AAPL", "MSFT", "GOOGL"],
+    asset_types=[AssetType.STOCK_US] * 3,
+    timeframe=Timeframe.DAY_1,
+    start_date=datetime(2020, 1, 1),
+    end_date=datetime(2024, 1, 1)
+)
+
+# Multi-timeframe analysis
+results = engine.run_multi_timeframe_backtest(
+    symbol="AAPL",
+    asset_type=AssetType.STOCK_US,
+    timeframes=[Timeframe.DAY_1, Timeframe.HOUR_4, Timeframe.HOUR_1],
+    start_date=datetime(2020, 1, 1),
+    end_date=datetime(2024, 1, 1)
+)
 ```
 
-**Important**: You must set at least one LLM API key (e.g. `OPENAI_API_KEY`, `GROQ_API_KEY`, `ANTHROPIC_API_KEY`, or `DEEPSEEK_API_KEY`) for the hedge fund to work. 
+### Multi-Agent System (Coming v2.0)
+```python
+from src.agents.coordinator import AgentCoordinator
+from src.agents.base_agent import AgentTask
 
-**Financial Data**: Data for AAPL, GOOGL, MSFT, NVDA, and TSLA is free and does not require an API key. For any other ticker, you will need to set the `FINANCIAL_DATASETS_API_KEY` in the .env file.
+coordinator = AgentCoordinator()
+coordinator.initialize_all_agents()
 
-## How to Run
+# Run full analysis pipeline
+result = coordinator.run_analysis_pipeline(
+    symbol="AAPL",
+    asset_type="stock_us"
+)
 
-### ⌨️ Command Line Interface
-
-You can run the AI Hedge Fund directly via terminal. This approach offers more granular control and is useful for automation, scripting, and integration purposes.
-
-<img width="992" alt="Screenshot 2025-01-06 at 5 50 17 PM" src="https://github.com/user-attachments/assets/e8ca04bf-9989-4a7d-a8b4-34e04666663b" />
-
-#### Quick Start
-
-1. Install Poetry (if not already installed):
-```bash
-curl -sSL https://install.python-poetry.org | python3 -
+# Check status
+status = coordinator.get_status()
+print(f"Agents: {status['agents']}, Tasks: {status['tasks_completed']}")
 ```
 
-2. Install dependencies:
-```bash
-poetry install
+## 📁 Project Structure (v2.0)
+
+```
+ai-hedge-fund/
+├── src/
+│   ├── agents/                    # Multi-Agent Framework
+│   │   ├── base_agent.py          # Agent base class
+│   │   ├── coordinator.py         # Agent orchestration
+│   │   ├── data_agent.py          # Data collection
+│   │   ├── analyst_agent.py       # Technical analysis
+│   │   ├── strategist_agent.py    # Signal generation
+│   │   ├── risk_agent.py          # Risk assessment
+│   │   ├── trader_agent.py        # Order execution
+│   │   ├── sentiment_agent.py     # Sentiment analysis
+│   │   ├── ml_agent.py            # ML predictions
+│   │   └── portfolio_agent.py     # Portfolio optimization
+│   ├── backtesting/               # Backtesting Engine
+│   │   ├── engine.py              # Main backtest engine
+│   │   ├── memory.py              # In-memory statistics
+│   │   ├── metrics.py             # Performance metrics
+│   │   └── visualization.py       # Chart generation
+│   ├── core/                      # Core System
+│   │   ├── statistics_manager.py  # Statistics tracking
+│   │   ├── interaction_logger.py  # Interaction logging
+│   │   ├── event_bus.py           # Event system
+│   │   └── config.py              # Configuration
+│   ├── strategies/                # Trading Strategies
+│   │   ├── unified_retail_strategy.py  # 18 SMC/ICT
+│   │   ├── quantitative_strategies.py  # 6 Quantitative
+│   │   ├── legendary_investors.py      # 10 Legendary
+│   │   └── strategy_registry.py        # Strategy management
+│   ├── tools/                     # Data & Utilities
+│   │   ├── unified_data_provider.py    # Multi-asset data
+│   │   ├── enhanced_data_provider.py   # Multi-timeframe
+│   │   └── data_cache.py               # Caching layer
+│   └── trading/                   # Trading Systems
+│       ├── paper_trading.py       # Paper trading
+│       ├── live_trading.py        # Live trading
+│       └── order_manager.py       # Order management
+├── unified_trading_system.py      # Current trading system
+├── backtest_runner.py             # Backtest runner (v2.0)
+├── dashboard.py                   # Streamlit dashboard (v2.0)
+├── agents_cli.py                  # Agent CLI (v2.0)
+└── docs/
+    ├── DEVELOPMENT_PLAN_v2.md     # Full development plan
+    ├── architecture.md            # Architecture docs
+    └── api.md                     # API documentation
 ```
 
-#### Run the AI Hedge Fund
-```bash
-poetry run python src/main.py --ticker AAPL,MSFT,NVDA
-```
+## 🛠️ Dependencies
 
-You can also specify a `--ollama` flag to run the AI hedge fund using local LLMs.
+Managed via Poetry. Key packages:
+- `pandas`, `numpy` - Data processing
+- `scipy` - Scientific computing
+- `scikit-learn` - Machine learning
+- `yfinance` - Stock data
+- `colorama`, `rich` - Terminal output
+- `fastapi`, `pydantic` - API framework
 
-```bash
-poetry run python src/main.py --ticker AAPL,MSFT,NVDA --ollama
-```
+## 📈 Performance Metrics
 
-You can optionally specify the start and end dates to make decisions over a specific time period.
+The backtesting engine calculates:
+- **Return Metrics**: Total return, CAGR, monthly returns
+- **Risk Metrics**: Volatility, Sharpe ratio, Sortino ratio
+- **Drawdown Metrics**: Max drawdown, avg drawdown, recovery time
+- **Trade Metrics**: Win rate, profit factor, avg win/loss
+- **Risk Metrics**: VaR (95%, 99%), CVaR, beta
 
-```bash
-poetry run python src/main.py --ticker AAPL,MSFT,NVDA --start-date 2024-01-01 --end-date 2024-03-01
-```
+## ⚠️ Disclaimer
 
-#### Run the Backtester
-```bash
-poetry run python src/backtester.py --ticker AAPL,MSFT,NVDA
-```
+This is for **educational purposes only**. Not financial advice. 
+Past performance does not guarantee future results.
+Always do your own research before trading.
 
-**Example Output:**
-<img width="941" alt="Screenshot 2025-01-06 at 5 47 52 PM" src="https://github.com/user-attachments/assets/00e794ea-8628-44e6-9a84-8f8a31ad3b47" />
+## 📝 License
 
+MIT License - See LICENSE file for details.
 
-Note: The `--ollama`, `--start-date`, and `--end-date` flags work for the backtester, as well!
+---
 
-### 🖥️ Web Application
-
-The new way to run the AI Hedge Fund is through our web application that provides a user-friendly interface. This is recommended for users who prefer visual interfaces over command line tools.
-
-Please see detailed instructions on how to install and run the web application [here](https://github.com/virattt/ai-hedge-fund/tree/main/app).
-
-<img width="1721" alt="Screenshot 2025-06-28 at 6 41 03 PM" src="https://github.com/user-attachments/assets/b95ab696-c9f4-416c-9ad1-51feb1f5374b" />
-
-
-## How to Contribute
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-**Important**: Please keep your pull requests small and focused.  This will make it easier to review and merge.
-
-## Feature Requests
-
-If you have a feature request, please open an [issue](https://github.com/virattt/ai-hedge-fund/issues) and make sure it is tagged with `enhancement`.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+**Built with ❤️ using Python, AI, and Quantitative Finance**

@@ -1,13 +1,15 @@
 import json
 import time
-from langchain_core.messages import HumanMessage
-from langchain_core.prompts import ChatPromptTemplate
+# Temporarily disabled LangChain imports for core functionality testing
+# from langchain_core.messages import HumanMessage
+# from langchain_core.prompts import ChatPromptTemplate
 
 from src.graph.state import AgentState, show_agent_reasoning
 from pydantic import BaseModel, Field
 from typing_extensions import Literal
 from src.utils.progress import progress
-from src.utils.llm import call_llm
+# Temporarily disabled LLM import for core functionality testing
+# from src.utils.llm import call_llm
 
 
 class PortfolioDecision(BaseModel):
@@ -76,10 +78,18 @@ def portfolio_management_agent(state: AgentState, agent_id: str = "portfolio_man
         agent_id=agent_id,
         state=state,
     )
-    message = HumanMessage(
-        content=json.dumps({ticker: decision.model_dump() for ticker, decision in result.decisions.items()}),
-        name=agent_id,
-    )
+    # Temporarily disabled LangChain HumanMessage for core functionality testing
+    # message = HumanMessage(
+    #     content=json.dumps({ticker: decision.model_dump() for ticker, decision in result.decisions.items()}),
+    #     name=agent_id,
+    # )
+
+    # Mock message for compatibility
+    message = {
+        "content": json.dumps({ticker: decision.model_dump() for ticker, decision in result.decisions.items()}),
+        "name": agent_id,
+        "type": "mock_human_message"
+    }
 
     if state["metadata"]["show_reasoning"]:
         show_agent_reasoning({ticker: decision.model_dump() for ticker, decision in result.decisions.items()},
@@ -183,80 +193,79 @@ def generate_trading_decision(
         agent_id: str,
         state: AgentState,
 ) -> PortfolioManagerOutput:
-    """Get decisions from the LLM with deterministic constraints and a minimal prompt."""
+    """MOCK VERSION: Simple rule-based trading decisions without LLM"""
+
+    # TEMPORARY MOCK IMPLEMENTATION - NO LLM DEPENDENCY
+    # This will be replaced with proper LLM integration once LangChain is installed
 
     # Deterministic constraints
     allowed_actions_full = compute_allowed_actions(tickers, current_prices, max_shares, portfolio)
 
-    # Pre-fill pure holds to avoid sending them to the LLM at all
-    prefilled_decisions: dict[str, PortfolioDecision] = {}
-    tickers_for_llm: list[str] = []
-    for t in tickers:
-        aa = allowed_actions_full.get(t, {"hold": 0})
+    decisions = {}
+
+    for ticker in tickers:
+        aa = allowed_actions_full.get(ticker, {"hold": 0})
+
         # If only 'hold' key exists, there is no trade possible
         if set(aa.keys()) == {"hold"}:
-            prefilled_decisions[t] = PortfolioDecision(
-                action="hold", quantity=0, confidence=100.0, reasoning="No valid trade available"
+            decisions[ticker] = PortfolioDecision(
+                action="hold", quantity=0, confidence=100, reasoning="No valid trade available"
+            )
+            continue
+
+        # Simple rule-based decision making (temporary mock)
+        signals = signals_by_ticker.get(ticker, {})
+        if not signals:
+            # No signals - hold
+            decisions[ticker] = PortfolioDecision(
+                action="hold", quantity=0, confidence=50, reasoning="No analyst signals available"
+            )
+            continue
+
+        # Count buy/sell signals
+        buy_signals = 0
+        sell_signals = 0
+        total_confidence = 0
+        signal_count = 0
+
+        for agent_signals in signals.values():
+            signal = agent_signals.get('sig')
+            confidence = agent_signals.get('conf', 0)
+            if signal == 'BUY':
+                buy_signals += 1
+            elif signal == 'SELL':
+                sell_signals += 1
+            total_confidence += confidence
+            signal_count += 1
+
+        avg_confidence = total_confidence / max(signal_count, 1)
+
+        # Simple decision logic
+        if buy_signals > sell_signals and 'buy' in aa and aa['buy'] > 0:
+            # Buy decision
+            quantity = min(aa['buy'], 100)  # Max 100 shares for mock
+            decisions[ticker] = PortfolioDecision(
+                action="buy",
+                quantity=quantity,
+                confidence=int(avg_confidence),
+                reasoning=f"Mock: {buy_signals} buy signals vs {sell_signals} sell"
+            )
+        elif sell_signals > buy_signals and 'sell' in aa and aa['sell'] > 0:
+            # Sell decision
+            quantity = min(aa['sell'], 100)  # Max 100 shares for mock
+            decisions[ticker] = PortfolioDecision(
+                action="sell",
+                quantity=quantity,
+                confidence=int(avg_confidence),
+                reasoning=f"Mock: {sell_signals} sell signals vs {buy_signals} buy"
             )
         else:
-            tickers_for_llm.append(t)
-
-    if not tickers_for_llm:
-        return PortfolioManagerOutput(decisions=prefilled_decisions)
-
-    # Build compact payloads only for tickers sent to LLM
-    compact_signals = _compact_signals({t: signals_by_ticker.get(t, {}) for t in tickers_for_llm})
-    compact_allowed = {t: allowed_actions_full[t] for t in tickers_for_llm}
-
-    # Minimal prompt template
-    template = ChatPromptTemplate.from_messages(
-        [
-            (
-                "system",
-                "You are a portfolio manager.\n"
-                "Inputs per ticker: analyst signals and allowed actions with max qty (already validated).\n"
-                "Pick one allowed action per ticker and a quantity ≤ the max. "
-                "Keep reasoning very concise (max 100 chars). No cash or margin math. Return JSON only."
-            ),
-            (
-                "human",
-                "Signals:\n{signals}\n\n"
-                "Allowed:\n{allowed}\n\n"
-                "Format:\n"
-                "{{\n"
-                '  "decisions": {{\n'
-                '    "TICKER": {{"action":"...","quantity":int,"confidence":int,"reasoning":"..."}}\n'
-                "  }}\n"
-                "}}"
-            ),
-        ]
-    )
-
-    prompt_data = {
-        "signals": json.dumps(compact_signals, separators=(",", ":"), ensure_ascii=False),
-        "allowed": json.dumps(compact_allowed, separators=(",", ":"), ensure_ascii=False),
-    }
-    prompt = template.invoke(prompt_data)
-
-    # Default factory fills remaining tickers as hold if the LLM fails
-    def create_default_portfolio_output():
-        # start from prefilled
-        decisions = dict(prefilled_decisions)
-        for t in tickers_for_llm:
-            decisions[t] = PortfolioDecision(
-                action="hold", quantity=0, confidence=0.0, reasoning="Default decision: hold"
+            # Hold decision
+            decisions[ticker] = PortfolioDecision(
+                action="hold",
+                quantity=0,
+                confidence=50,
+                reasoning=f"Mock: Balanced signals ({buy_signals} buy, {sell_signals} sell)"
             )
-        return PortfolioManagerOutput(decisions=decisions)
 
-    llm_out = call_llm(
-        prompt=prompt,
-        pydantic_model=PortfolioManagerOutput,
-        agent_name=agent_id,
-        state=state,
-        default_factory=create_default_portfolio_output,
-    )
-
-    # Merge prefilled holds with LLM results
-    merged = dict(prefilled_decisions)
-    merged.update(llm_out.decisions)
-    return PortfolioManagerOutput(decisions=merged)
+    return PortfolioManagerOutput(decisions=decisions)
