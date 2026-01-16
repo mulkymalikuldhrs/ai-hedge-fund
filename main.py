@@ -329,11 +329,8 @@ class AnalysisEngine:
 
 
 def cmd_dashboard(args):
-    """Launch Streamlit dashboard"""
+    """Launch Streamlit dashboard with auto-browser open"""
     print_banner()
-    print(f"\n{Fore.CYAN}🌐 Starting Streamlit Dashboard...{Style.RESET_ALL}\n")
-    print(f"   URL: http://localhost:{args.port}")
-    print(f"   Press Ctrl+C to stop\n")
 
     dashboard_path = Path(__file__).parent / "src" / "dashboard" / "streamlit_app.py"
 
@@ -341,10 +338,74 @@ def cmd_dashboard(args):
         print(f"{Fore.RED}✗ Dashboard not found at {dashboard_path}{Style.RESET_ALL}")
         return
 
+    url = f"http://localhost:{args.port}"
+
+    print(f"""
+{Fore.CYAN}╔════════════════════════════════════════════════════════════════════╗
+║                    🌐 STREAMLIT DASHBOARD v{VERSION}                  ║
+╠════════════════════════════════════════════════════════════════════════╣
+║                                                                    ║
+║  🚀 Starting dashboard at: {Fore.GREEN}{url}{Style.RESET_ALL}                          ║
+║                                                                    ║
+║  📝 Streamlit will open automatically in your browser              ║
+║  📍 If browser doesn't open, manually navigate to:                 ║
+║     {Fore.WHITE}{url}{Style.RESET_ALL}                                         ║
+║                                                                    ║
+║  ⏳ Waiting for server to start...                                 ║
+║                                                                    ║
+║  🛑 Press Ctrl+C to stop                                           ║
+║                                                                    ║
+╚════════════════════════════════════════════════════════════════════╝
+{Style.RESET_ALL}
+    """)
+
     import subprocess
+    import time
+    import threading
+
+    def wait_and_open_browser():
+        """Wait for server then open browser"""
+        max_wait = 10
+        waited = 0
+
+        while waited < max_wait:
+            try:
+                import urllib.request
+
+                urllib.request.urlopen(url, timeout=1)
+                break
+            except:
+                time.sleep(1)
+                waited += 1
+
+        if waited < max_wait:
+            print(
+                f"\n{Fore.GREEN}✅ Server ready! Opening browser...{Style.RESET_ALL}\n"
+            )
+            try:
+                subprocess.run(["xdg-open", url], check=False)
+                print(f"{Fore.CYAN}🌐 Browser opened at: {url}{Style.RESET_ALL}")
+            except FileNotFoundError:
+                print(
+                    f"{Fore.YELLOW}⚠ xdg-open not found. Manually open: {url}{Style.RESET_ALL}"
+                )
+            except Exception as e:
+                print(f"{Fore.YELLOW}⚠ Could not open browser: {e}{Style.RESET_ALL}")
+        else:
+            print(f"\n{Fore.YELLOW}⚠ Server took too long to start{Style.RESET_ALL}")
+
+    def streamlit_running():
+        """Check if streamlit is running"""
+        try:
+            import urllib.request
+
+            urllib.request.urlopen(url, timeout=1)
+            return True
+        except:
+            return False
 
     try:
-        subprocess.run(
+        process = subprocess.Popen(
             [
                 sys.executable,
                 "-m",
@@ -353,10 +414,26 @@ def cmd_dashboard(args):
                 str(dashboard_path),
                 "--server.port",
                 str(args.port),
-            ]
+                "--server.headless",
+                "true",
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
-    except KeyboardInterrupt:
+
+        browser_thread = threading.Thread(target=wait_and_open_browser)
+        browser_thread.start()
+
+        print(f"{Fore.CYAN}⏳ Dashboard is starting...{Style.RESET_ALL}\n")
+
+        while streamlit_running():
+            time.sleep(2)
+
+        process.terminate()
         print(f"\n{Fore.YELLOW}🛑 Dashboard stopped{Style.RESET_ALL}")
+
+    except KeyboardInterrupt:
+        print(f"\n{Fore.YELLOW}🛑 Dashboard stopped by user{Style.RESET_ALL}")
     except Exception as e:
         print(f"{Fore.RED}✗ Error: {e}{Style.RESET_ALL}")
 
