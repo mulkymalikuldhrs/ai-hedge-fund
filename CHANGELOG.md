@@ -4,7 +4,7 @@ All notable changes to AI Hedge Fund project.
 
 ## [2.3.0] - 2026-01-19
 
-### AGENTS.md Complete Integration
+### AGENTS.md Complete Integration & Version Harmonization
 
 #### New Features
 - **Agent Constitution Integration** (from `/home/mulky/Desktop/aturan agent.txt`)
@@ -22,6 +22,27 @@ All notable changes to AI Hedge Fund project.
   - Checklist Aksi Besar
   - Protokol "If in Doubt"
 
+#### Version Harmonization
+- **All Entry Points Updated to v2.3.0:**
+  - `main.py`: 2.2.2 → 2.3.0
+  - `launcher.py`: 2.2 → 2.3.0
+  - `start_live_trading.py`: 2.2.1 → 2.3.0
+  - `pyproject.toml`: 1.0.0 → 2.3.0
+  - `auto_heal_system.py`: 2.2 → 2.3.0
+  - `comprehensive_backtest.py`: 2.2.2 → 2.3.0
+  - `fast_backtest.py`: 2.2.2 → 2.3.0
+  - `ultrafast_backtest.py`: 2.2.2 → 2.3.0
+  - `test_integration.py`: 2.2 → 2.3.0
+  - `src/main.py`: Added header with v2.3.0
+
+#### Critical Modules Updated to v2.3.0:
+- `src/strategies/comprehensive_registry.py`: v2.2.2 → v2.3.0
+- `src/strategies/riset_registry.py`: v2.2.2 → v2.3.0
+- `src/llm/llm7_client.py`: v2.2.2 → v2.3.0
+- `src/risk/var.py`: v2.2.2 → v2.3.0
+- `src/risk/kelly.py`: Added v2.3.0 header
+- `src/risk/risk_parity.py`: Added v2.3.0 header
+
 #### Enhancements
 - **Complete AGENTS.md Rewrite** (23 sections, ~2,300 lines)
 - All content in Indonesian language
@@ -37,6 +58,7 @@ All notable changes to AI Hedge Fund project.
 - Comprehensive agent lifecycle documented
 - Conflict resolution protocols added
 - Session export format standardized
+- README.md updated to v2.3.0
 
 ## [2.2.2] - 2026-01-18
 
