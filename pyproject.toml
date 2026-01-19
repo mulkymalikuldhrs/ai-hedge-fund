@@ -1,9 +1,10 @@
 [tool.poetry]
 name = "ai-hedge-fund"
-version = "1.0.0"
-description = "An AI-powered hedge fund that uses multiple agents to make trading decisions"
-authors = ["Your Name <your.email@example.com>"]
+version = "2.3.0"
+description = "AI Hedge Fund v2.3.0 - Multi-Agent Trading System with Agent Constitution"
+authors = ["Mulky Malikul Dhaher <mulky@ai-hedge-fund.com>"]
 readme = "README.md"
+license = "MIT"
 packages = [
     { include = "src", from = "." },
     { include = "app", from = "." }

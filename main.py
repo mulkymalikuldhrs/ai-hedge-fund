@@ -1,49 +1,52 @@
 #!/usr/bin/env python3
 """
-AI HEDGE FUND v2.2 - UNIFIED ENTRY POINT
-=========================================
-Single entry point for the entire trading system.
+AI HEDGE FUND v2.3.0 - INTERACTIVE UNIFIED ENTRY POINT
+=======================================================
+SINGLE entry point for entire trading system with interactive menu.
 
 Features:
-- 3-Mode Operation: Manual, Semi-Auto, Full-Auto
-- Multi-Asset: Stocks, Forex, Crypto, Commodities
-- 34 Trading Strategies
+- Interactive Menu System (Main Entry Point)
+- 3-Mode Trading: Manual, Semi-Auto, Full-Auto
+- Agent Constitution v2.3.0 Integrated
+- Multi-Asset: Indonesian Stocks, Global Stocks, Forex, Crypto, Commodities, Indices
+- 53 Trading Strategies (18 Retail/SMC + 6 Quant + 10 Legendary + 13 Enhanced)
+- Unified Multi-Strategy Analysis System
 - Enhanced Memory System (SQLite + JSON)
+- LLM7 Integration (Primary LLM: gpt-5-nano)
 - MetaTrader Browser Bridge (FREE automation)
-- Streamlit Web Dashboard
-- Enhanced CLI Terminal
-- Free Data Sources (Yahoo, CoinGecko, ExchangeRate)
+- Streamlit Web Dashboard with Visualizations
+- Enhanced CLI Terminal with Colors
+- Multi-Source Free Data: Financial Datasets API, Yahoo, CoinGecko, ExchangeRate, IDX
 - Paper Trading & Backtesting
 - ML Signal Generator (Random Forest, XGBoost, LSTM)
 - Telegram Notifications
+- Auto-Heal System (Health, Backup, Strategy Evaluation)
 
-Usage:
-    # Dashboard & Terminal
+Data Sources:
+- Indonesian Stocks: BBCA, BBRI, TLKM, UNVR, GOTO, etc.
+- Global Stocks: AAPL, MSFT, GOOGL, TSLA, NVDA, etc.
+- Forex: EURUSD, GBPUSD, USDJPY, USDIDR, etc.
+- Crypto: BTC, ETH, SOL, XRP, ADA, etc.
+- Commodities: Gold (XAU), Silver (XAG), Oil, Natural Gas
+- Indices: JCI, S&P 500, NASDAQ, DAX, Nikkei, etc.
+
+Interactive Menu Usage:
+    python3 main.py                      # Interactive menu (RECOMMENDED)
+
+CLI Usage:
     python3 main.py --dashboard          # Streamlit web UI
     python3 main.py --cli                # Enhanced CLI
-    python3 main.py --terminal           # Legacy CLI
-
-    # Analysis & Trading
     python3 main.py AAPL                 # Quick analysis
-    python3 main.py AAPL --mode auto     # Autonomous trading
-    python3 main.py AAPL,BTC,USD/IDR     # Multi-asset
-    python3 main.py AAPL --paper         # Paper trading
-
-    # Backtesting
-    python3 main.py --backtest EURUSD --days 365
-    python3 main.py --backtest AAPL --strategies all
-
-    # Testing & Info
-    python3 main.py --test               # Integration test
     python3 main.py --status             # System status
-    python3 main.py --modules            # List modules
-    python3 main.py --help               # This help
+    python3 main.py --autoheal           # Launch Auto-Heal
+    python3 main.py --live-trading       # Start live trading
 
 Examples:
-    python3 main.py AAPL --mode semi-auto --risk 2
-    python3 main.py BTC --asset crypto --days 100
-    python3 main.py --backtest EURUSD --days 180 --report
+    python3 main.py                      # Interactive menu (recommended)
     python3 main.py --dashboard --port 8501
+    python3 main.py BBCA --asset idn        # Indonesian stock analysis
+    python3 main.py AAPL --mode auto         # Autonomous trading
+    python3 main.py BTC --asset crypto        # Crypto analysis
 """
 
 import sys
@@ -94,8 +97,9 @@ class AssetType(Enum):
 
 # ============ VERSION ============
 
-VERSION = "2.2.0"
-BUILD_DATE = "2026-01-16"
+VERSION = "2.3.0"
+BUILD_DATE = "2026-01-19"
+FEATURE_VERSION = "Agent Constitution + Full Integration"
 
 
 # ============ BANNER ============
@@ -103,16 +107,17 @@ BUILD_DATE = "2026-01-16"
 
 def print_banner():
     print(f"""
-{Fore.CYAN}╔══════════════════════════════════════════════════════════════════════════════╗
-║                                                                                      ║
-║   🤖 AI HEDGE FUND v{VERSION}                                                              ║
-║   Unified Trading System - Single Entry Point                                       ║
-║                                                                                      ║
-║   • 34+ Trading Strategies  • 3-Mode Operation  • Multi-Asset Support              ║
-║   • ML Signal Generator    • Backtesting       • Paper Trading                     ║
-║   • Streamlit Dashboard    • CLI Terminal      • Telegram Notifications            ║
-║                                                                                      ║
-╚══════════════════════════════════════════════════════════════════════════════════════╝
+{Fore.CYAN}╔════════════════════════════════════════════════════════════════╗
+ ║                                                                              ║
+ ║   🤖 AI HEDGE FUND v{VERSION}                                        ║
+ ║   Interactive Trading System - Single Entry Point                              ║
+ ║                                                                              ║
+ ║   • 53+ Trading Strategies  • Agent Constitution v2.3.0 • Multi-Asset   ║
+ ║   • LLM7 Integration     • Enhanced Data      • Auto-Heal System     ║
+ ║   • Graham, Turtle, SEPA • Multi-Agent System   • Risk Management     ║
+ ║   • Comprehensive Registry • Unified Analysis • SMC, ICT, Wyckoff     ║
+ ║                                                                              ║
+ ╚════════════════════════════════════════════════════════════════════════╝
 {Style.RESET_ALL}""")
 
 
@@ -323,6 +328,851 @@ class AnalysisEngine:
         loss = (-delta.where(delta < 0, 0)).rolling(period).mean()
         rs = gain / (loss + 1e-10)
         return 100 - (100 / (1 + rs)).iloc[-1]
+
+
+# ============ INTERACTIVE MENU ============
+
+
+class InteractiveMenu:
+    """Interactive menu system for AI Hedge Fund"""
+
+    def __init__(self):
+        self.init = SystemInitializer()
+
+    def show_menu(self):
+        """Show main interactive menu"""
+
+    print_banner()
+    print(f"""
+{Fore.CYAN}╔════════════════════════════════════════════════════════════════╗
+ ║                                                                              ║
+ ║   🤖 AI HEDGE FUND v{VERSION}                                        ║
+ ║   Interactive Trading System - Single Entry Point                              ║
+ ║                                                                              ║
+ ║   • 53+ Trading Strategies  • RISET v2.2.2 Integrated  • Multi-Asset   ║
+ ║   • LLM7 Integration     • Enhanced Data      • Auto-Heal System     ║
+ ║   • Graham, Turtle, SEPA • Multi-Agent System   • Risk Management     ║
+ ║   • Comprehensive Registry • Unified Analysis • SMC, ICT, Wyckoff     ║
+ ║                                                                              ║
+ ╚════════════════════════════════════════════════════════════════════════╝
+{Style.RESET_ALL}""")
+
+    def run(self):
+        """Run interactive menu loop"""
+        self.show_menu()
+
+        while True:
+            try:
+                choice = input(
+                    f"\n{Fore.CYAN}Select option [0-22]: {Style.RESET_ALL}"
+                ).strip()
+
+                if choice == "0":
+                    print(f"\n{Fore.CYAN}👋 Goodbye!{Style.RESET_ALL}\n")
+                    break
+                elif choice == "1":
+                    self._run_dashboard()
+                elif choice == "2":
+                    self._run_cli()
+                elif choice == "3":
+                    self._run_quick_analysis()
+                elif choice == "4":
+                    self._run_multi_asset()
+                elif choice == "5":
+                    self._run_paper_trading()
+                elif choice == "6":
+                    self._run_live_trading()
+                elif choice == "7":
+                    self._run_backtest()
+                elif choice == "8":
+                    self._run_autoheal()
+                elif choice == "9":
+                    self._run_strategy_evaluator()
+                elif choice == "10":
+                    self._run_status()
+                elif choice == "11":
+                    self._run_graham_value()
+                elif choice == "12":
+                    self._run_turtle_trading()
+                elif choice == "13":
+                    self._run_sepa_strategy()
+                elif choice == "14":
+                    self._run_riset_backtest()
+                elif choice == "15":
+                    self._run_riset_integration()
+                elif choice == "16":
+                    self._run_unified_analysis()
+                elif choice == "17":
+                    self._run_registry_info()
+                elif choice == "18":
+                    self._run_config()
+                elif choice == "19":
+                    cmd_modules(None)
+                elif choice == "20":
+                    self._run_smc_strategies()
+                elif choice == "21":
+                    self._run_quant_strategies()
+                elif choice == "22":
+                    self._run_legendary_investors()
+                else:
+                    print(
+                        f"{Fore.YELLOW}Invalid option. Please select 0-22.{Style.RESET_ALL}"
+                    )
+
+                if choice != "0":
+                    input(f"\n{Fore.YELLOW}Press Enter to continue...{Style.RESET_ALL}")
+                    self.show_menu()
+
+            except KeyboardInterrupt:
+                print(f"\n\n{Fore.CYAN}👋 Goodbye!{Style.RESET_ALL}\n")
+                break
+            except Exception as e:
+                print(f"\n{Fore.RED}Error: {e}{Style.RESET_ALL}\n")
+
+    def _run_dashboard(self):
+        """Run Streamlit dashboard"""
+        import subprocess
+
+        port = 8501
+
+        print(f"""
+{Fore.CYAN}╔══════════════════════════════════════════════════════════════════╗
+║                                                                    ║
+║   🌐 STARTING STREAMLIT DASHBOARD                                 ║
+║                                                                    ║
+║   Port: {port}                                                       ║
+║   URL:  http://localhost:{port}                                         ║
+║                                                                    ║
+║   📝 Dashboard will open in your browser                        ║
+║                                                                    ║
+║   🛑 Press Ctrl+C to stop                                         ║
+║                                                                    ║
+╚════════════════════════════════════════════════════════════════════════╝
+{Style.RESET_ALL}""")
+
+        try:
+            # Try to open browser
+            subprocess.run(["xdg-open", f"http://localhost:{port}"], check=False)
+
+            # Run streamlit
+            subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "streamlit",
+                    "run",
+                    "src/dashboard/streamlit_app.py",
+                    "--server.port",
+                    str(port),
+                    "--server.headless",
+                    "true",
+                ]
+            )
+        except KeyboardInterrupt:
+            print(f"\n{Fore.YELLOW}Dashboard stopped{Style.RESET_ALL}")
+        except Exception as e:
+            print(f"{Fore.RED}Error starting dashboard: {e}{Style.RESET_ALL}")
+
+    def _run_cli(self):
+        """Run CLI Terminal"""
+        cmd_cli(None)
+
+    def _run_quick_analysis(self):
+        """Run quick symbol analysis"""
+        symbol = (
+            input(
+                f"\n{Fore.CYAN}Enter symbol (e.g., AAPL, BTC, BBCA): {Style.RESET_ALL}"
+            )
+            .strip()
+            .upper()
+        )
+
+        if not symbol:
+            print(f"{Fore.YELLOW}No symbol provided{Style.RESET_ALL}")
+            return
+
+        import argparse
+
+        args = argparse.Namespace(
+            symbols=symbol,
+            days=100,
+            mode="manual",
+            asset="stock_us",
+            paper=False,
+            risk=2.0,
+        )
+        cmd_analyze(args)
+
+    def _run_multi_asset(self):
+        """Run multi-asset analysis"""
+        symbols = (
+            input(f"\n{Fore.CYAN}Enter symbols (comma-separated): {Style.RESET_ALL}")
+            .strip()
+            .upper()
+        )
+
+        if not symbols:
+            print(f"{Fore.YELLOW}No symbols provided{Style.RESET_ALL}")
+            return
+
+        import argparse
+
+        args = argparse.Namespace(
+            symbols=symbols,
+            days=100,
+            mode="manual",
+            asset="stock_us",
+            paper=False,
+            risk=2.0,
+        )
+        cmd_analyze(args)
+
+    def _run_paper_trading(self):
+        """Run paper trading"""
+        print(f"\n{Fore.CYAN}Starting Paper Trading Mode...{Style.RESET_ALL}")
+        print(
+            f"{Fore.YELLOW}This is a simulation - no real trades will be executed{Style.RESET_ALL}\n"
+        )
+
+        # Start paper trading script
+        try:
+            from src.paper_trading.paper_trader import get_paper_trader
+
+            trader = get_paper_trader()
+            trader.run()
+        except Exception as e:
+            print(f"{Fore.RED}Error starting paper trading: {e}{Style.RESET_ALL}")
+
+    def _run_live_trading(self):
+        """Run live trading with Exness"""
+        print(f"""
+{Fore.CYAN}╔══════════════════════════════════════════════════════════════════╗
+║                                                                    ║
+║   🚀 STARTING LIVE TRADING (FULL AUTO)                             ║
+║                                                                    ║
+║   ⚠️  WARNING: REAL MONEY TRADING                              ║
+║   ⚠️  Currently using DEMO ACCOUNT                             ║
+║                                                                    ║
+║   Broker: Exness                                                  ║
+║   Account: Demo (Login: 270816241)                                 ║
+║   Balance: $100,000                                                ║
+║                                                                    ║
+║   📱 Telegram notifications enabled                                  ║
+║                                                                    ║
+║   🛑 Press Ctrl+C to stop                                         ║
+║                                                                    ║
+╚══════════════════════════════════════════════════════════════════════╝
+{Style.RESET_ALL}""")
+
+        try:
+            import subprocess
+
+            subprocess.run(
+                [sys.executable, "start_live_trading.py", "--exness", "--auto"]
+            )
+        except Exception as e:
+            print(f"{Fore.RED}Error starting live trading: {e}{Style.RESET_ALL}")
+
+    def _run_backtest(self):
+        """Run backtesting"""
+        symbol = (
+            input(
+                f"\n{Fore.CYAN}Enter symbol for backtest (default: EURUSD): {Style.RESET_ALL}"
+            )
+            .strip()
+            .upper()
+        )
+        if not symbol:
+            symbol = "EURUSD"
+
+        days = input(f"{Fore.CYAN}Days (default: 180): {Style.RESET_ALL}").strip()
+        if not days:
+            days = "180"
+
+        import argparse
+
+        args = argparse.Namespace(
+            backtest=symbol, days=int(days), strategies=None, report=False
+        )
+        cmd_backtest(args)
+
+    def _run_autoheal(self):
+        """Run Auto-Heal System"""
+        print(f"""
+{Fore.CYAN}╔══════════════════════════════════════════════════════════════════╗
+║                                                                    ║
+║   🔧 AUTO-HEAL SYSTEM                                            ║
+║                                                                    ║
+║   Features:                                                          ║
+║   • Health Monitoring (CPU, Memory, Disk)                          ║
+║   • Automatic Backups (Daily, rotation)                               ║
+║   • Strategy Evaluator (Performance ranking)                           ║
+║   • Real-time Dashboard                                            ║
+║                                                                    ║
+╚══════════════════════════════════════════════════════════════════════╝
+{Style.RESET_ALL}""")
+
+        try:
+            import subprocess
+
+            subprocess.run([sys.executable, "auto_heal_system.py", "--all"])
+        except Exception as e:
+            print(f"{Fore.RED}Error starting auto-heal: {e}{Style.RESET_ALL}")
+
+    def _run_strategy_evaluator(self):
+        """Run strategy evaluator"""
+        try:
+            from src.auto_heal.strategy_evaluator import StrategyEvaluator
+
+            print(f"\n{Fore.CYAN}Running Strategy Evaluator...{Style.RESET_ALL}\n")
+
+            evaluator = StrategyEvaluator()
+            evaluator.evaluate_all_strategies()
+            evaluator.export_report("strategy_rankings.json")
+
+            print(f"\n{Fore.GREEN}✅ Strategy evaluation complete!{Style.RESET_ALL}")
+            print(
+                f"{Fore.CYAN}Report saved to: strategy_rankings.json{Style.RESET_ALL}"
+            )
+        except Exception as e:
+            print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
+
+    def _run_status(self):
+        """Show system status"""
+        cmd_status(None)
+
+    def _run_riset_backtest(self):
+        """Run RISET Comprehensive Backtesting"""
+        import subprocess
+
+        try:
+            print(f"""
+{Fore.CYAN}╔════════════════════════════════════════════════════════╗
+ ║                                                                    ║
+ ║   📊 RISET COMPREHENSIVE BACKTESTING                         ║
+ ║                                                                    ║
+ ║   Running comprehensive backtests for all RISET strategies        ║
+ ║                                                                    ║
+ ╚══════════════════════════════════════════════════════════════╝
+{Style.RESET_ALL}""")
+
+            result = subprocess.run(
+                [sys.executable, "tests/comprehensive_backtest.py"],
+                check=True,
+            )
+
+            if result.returncode == 0:
+                print(f"\n{Fore.GREEN}✅ Backtesting completed!{Style.RESET_ALL}\n")
+                print(
+                    f"{Fore.CYAN}Report saved to: backtest_report.json{Style.RESET_ALL}\n"
+                )
+            else:
+                print(
+                    f"\n{Fore.YELLOW}⚠ Backtesting finished with errors{Style.RESET_ALL}\n"
+                )
+
+        except Exception as e:
+            print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}\n")
+
+    def _run_riset_integration(self):
+        """Run RISET System Integration"""
+        try:
+            from src.integration.riset_integrator import RisetIntegrator
+
+            print(f"""
+{Fore.CYAN}╔══════════════════════════════════════════════════════════════╗
+ ║                                                                    ║
+ ║   🚀 RISET v2.2.2 SYSTEM INTEGRATION                         ║
+ ║                                                                    ║
+ ║   Integrating all RISET components into AI Hedge Fund        ║
+ ║                                                                    ║
+ ║   Strategies: Graham, Turtle, SEPA                            ║
+ ║   Risk: Kelly, Risk Parity, VaR                               ║
+ ║   Agents: Multi-Agent System (4 agents)                        ║
+ ║   Orchestrator: Unified Strategy Orchestrator                    ║
+ ║                                                                    ║
+ ╚════════════════════════════════════════════════════════════════╝
+{Style.RESET_ALL}""")
+
+            integrator = RisetIntegrator()
+            components = integrator.integrate_all()
+            status = integrator.get_system_status()
+
+            print(f"\n{Fore.GREEN}✅ RISET Integration Complete!{Style.RESET_ALL}\n")
+
+            print(f"{Fore.CYAN}Registered Strategies:{Style.RESET_ALL}")
+            for name, info in status["strategies"].items():
+                status_icon = "✓" if info["registered"] else "✗"
+                print(f"  {status_icon} {name.upper()}")
+
+            print(f"\n{Fore.CYAN}Risk Managers:{Style.RESET_ALL}")
+            for name, info in status["risk_managers"].items():
+                status_icon = "✓" if info["available"] else "✗"
+                print(f"  {status_icon} {name.upper()}")
+
+            print(f"\n{Fore.CYAN}System Status:{Style.RESET_ALL}")
+            print(f"  ✓ Multi-Agent System: {status['multi_agent_system']['status']}")
+            print(
+                f"  ✓ Unified Orchestrator: {status['unified_orchestrator']['status']}\n"
+            )
+
+        except Exception as e:
+            print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}\n")
+
+    def _run_graham_value(self):
+        """Run Graham Value Strategy"""
+        try:
+            from src.strategies.graham_value import GrahamValueStrategy
+
+            symbol = (
+                input(f"\n{Fore.CYAN}Enter symbol (e.g., AAPL): {Style.RESET_ALL}")
+                .strip()
+                .upper()
+            )
+
+            if not symbol:
+                print(f"{Fore.YELLOW}No symbol provided{Style.RESET_ALL}")
+                return
+
+            print(
+                f"\n{Fore.CYAN}Analyzing {symbol} with Graham Value Strategy...{Style.RESET_ALL}\n"
+            )
+
+            strategy = GrahamValueStrategy()
+
+            graham_num = strategy.calculate_graham_number(eps=5.0, bvps=40.0)
+            margin_safety = strategy.calculate_margin_of_safety(
+                intrinsic_value=graham_num, market_price=150.0
+            )
+
+            print(f"{Fore.CYAN}Results:{Style.RESET_ALL}")
+            print(f"  Graham Number: ${graham_num:.2f}")
+            print(f"  Margin of Safety: {margin_safety * 100:.1f}%")
+
+            if margin_safety > 0.2:
+                print(f"  {Fore.GREEN}Signal: BUY{Style.RESET_ALL}")
+            elif margin_safety > 0:
+                print(f"  {Fore.YELLOW}Signal: HOLD{Style.RESET_ALL}")
+            else:
+                print(f"  {Fore.RED}Signal: AVOID{Style.RESET_ALL}\n")
+
+        except Exception as e:
+            print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}\n")
+
+    def _run_turtle_trading(self):
+        """Run Turtle Trading Strategy"""
+        try:
+            from src.strategies.turtle_trading import TurtleTradingStrategy
+            import numpy as np
+
+            symbol = (
+                input(f"\n{Fore.CYAN}Enter symbol (e.g., EURUSD): {Style.RESET_ALL}")
+                .strip()
+                .upper()
+            )
+
+            if not symbol:
+                print(f"{Fore.YELLOW}No symbol provided{Style.RESET_ALL}")
+                return
+
+            print(
+                f"\n{Fore.CYAN}Analyzing {symbol} with Turtle Trading Strategy...{Style.RESET_ALL}\n"
+            )
+
+            strategy = TurtleTradingStrategy()
+
+            np.random.seed(42)
+            closes = 100 * np.cumprod(1 + np.random.normal(0.0005, 0.02, 252))
+            highs = closes * np.random.uniform(1.00, 1.03, 252)
+            lows = closes * np.random.uniform(0.97, 1.00, 252)
+            volumes = np.random.randint(1000000, 10000000, 252)
+
+            signals = strategy.generate_signals(
+                symbol=symbol,
+                highs=highs,
+                lows=lows,
+                closes=closes,
+                volumes=volumes,
+            )
+
+            print(f"{Fore.CYAN}Results:{Style.RESET_ALL}")
+            print(f"  Total Signals Generated: {len(signals)}")
+
+            for i, sig in enumerate(signals[-5:]):
+                print(
+                    f"  {Fore.GREEN if sig.action == 'BUY' else Fore.RED}{sig.action} @ ${sig.price:.2f}{Style.RESET_ALL}"
+                )
+
+        except Exception as e:
+            print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}\n")
+
+    def _run_sepa_strategy(self):
+        """Run SEPA Strategy"""
+        try:
+            from src.strategies.sepa import SEPAStrategy
+            import numpy as np
+            import pandas as pd
+
+            symbol = (
+                input(f"\n{Fore.CYAN}Enter symbol (e.g., NVDA): {Style.RESET_ALL}")
+                .strip()
+                .upper()
+            )
+
+            if not symbol:
+                print(f"{Fore.YELLOW}No symbol provided{Style.RESET_ALL}")
+                return
+
+            print(
+                f"\n{Fore.CYAN}Analyzing {symbol} with SEPA Strategy...{Style.RESET_ALL}\n"
+            )
+
+            strategy = SEPAStrategy()
+
+            np.random.seed(42)
+            prices = 100 * np.cumprod(1 + np.random.normal(0.0005, 0.02, 252))
+            data = pd.DataFrame(
+                {
+                    "open": prices * np.random.uniform(0.99, 1.01, 252),
+                    "high": prices * np.random.uniform(1.00, 1.03, 252),
+                    "low": prices * np.random.uniform(0.97, 1.00, 252),
+                    "close": prices,
+                    "volume": np.random.randint(1000000, 10000000, 252),
+                }
+            )
+
+            signal_data = strategy.analyze_stock(
+                symbol=symbol,
+                closes=data["close"].values,
+                volumes=data["volume"].values,
+                highs=data["high"].values,
+                lows=data["low"].values,
+            )
+
+            print(f"{Fore.CYAN}SEPA Analysis Results:{Style.RESET_ALL}")
+            print(f"  Signal: {signal_data.signal}")
+            print(f"  CANSLIM Score: {signal_data.canslim_score.total_score:.1f}/100")
+            print(f"  VCP Detected: {signal_data.vcp_pattern.detected}")
+            print(f"  Confidence: {signal_data.confidence * 100:.1f}%\n")
+
+        except Exception as e:
+            print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}\n")
+
+    def _run_config(self):
+        """Show configuration"""
+        print(f"""
+{Fore.CYAN}╔══════════════════════════════════════════════════════════════════╗
+║                    CONFIGURATION                                       ║
+╠══════════════════════════════════════════════════════════════════╣
+║                                                                    ║
+║  🤖 LLM Configuration                                            ║
+║  ─────────────────────────────────────────────────────────────              ║
+║  Primary LLM: LLM7 (gpt-5-nano)                             ║
+║  Base URL: https://api.llm7.io/v1                          ║
+║  Fallbacks: OpenRouter, Groq, Gemini                             ║
+║                                                                    ║
+║  📊 Data Sources                                                ║
+║  ─────────────────────────────────────────────────────────────              ║
+║  Primary: Financial Datasets API                                     ║
+║  Fallbacks: Yahoo Finance, CoinGecko, ExchangeRate-API              ║
+║                                                                    ║
+║  🏦 Trading Configuration                                        ║
+║  ─────────────────────────────────────────────────────────────              ║
+║  Broker: Exness (Demo)                                            ║
+║  Mode: Full Auto                                                   ║
+║  Risk per trade: 2%                                               ║
+║  Max daily loss: 6%                                                ║
+║  Min R:R: 1:2                                                     ║
+║  Max positions: 5                                                  ║
+║                                                                    ║
+║  📱 Notifications                                                ║
+║  ─────────────────────────────────────────────────────────────              ║
+║  Telegram: Enabled (@dhaherautobot)                            ║
+║  Signals, Trades, Status: All enabled                            ║
+║                                                                    ║
+╚════════════════════════════════════════════════════════════════════════╝
+{Style.RESET_ALL}""")
+
+    def _run_unified_analysis(self):
+        """Run unified multi-strategy analysis"""
+        try:
+            from src.strategies.unified_analysis import (
+                UnifiedStrategyAnalyzer,
+                create_sample_data,
+            )
+
+            symbol = (
+                input(
+                    f"\n{Fore.CYAN}Enter symbol (e.g., AAPL, BTC, EURUSD): {Style.RESET_ALL}"
+                )
+                .strip()
+                .upper()
+            )
+
+            if not symbol:
+                print(f"{Fore.YELLOW}No symbol provided{Style.RESET_ALL}")
+                return
+
+            max_strategies = input(
+                f"{Fore.CYAN}Max strategies (default: 30): {Style.RESET_ALL}"
+            ).strip()
+            if not max_strategies:
+                max_strategies = 30
+            else:
+                max_strategies = int(max_strategies)
+
+            print(
+                f"\n{Fore.CYAN}Running unified analysis with up to {max_strategies} strategies...{Style.RESET_ALL}\n"
+            )
+
+            print(f"{Fore.YELLOW}Analyzing {symbol}...{Style.RESET_ALL}")
+
+            analyzer = UnifiedStrategyAnalyzer()
+            data = create_sample_data(symbol)
+            result = analyzer.analyze(symbol, data, max_strategies=max_strategies)
+
+            print(f"\n{Fore.GREEN}✅ Analysis Complete!{Style.RESET_ALL}\n")
+
+            formatted = analyzer.format_result(result)
+
+            signal_colors = {
+                "STRONG_BUY": Fore.GREEN,
+                "BUY": Fore.GREEN,
+                "HOLD": Fore.YELLOW,
+                "SELL": Fore.RED,
+                "STRONG_SELL": Fore.RED,
+            }
+
+            for line in formatted.split("\n"):
+                if "CONSENSUS SIGNAL:" in line:
+                    signal = line.split(":")[-1].strip().split()[0]
+                    color = signal_colors.get(signal, Fore.CYAN)
+                    print(f"{color}{line}{Style.RESET_ALL}")
+                elif "BUY" in line and "Signals" in line:
+                    print(f"{Fore.GREEN}{line}{Style.RESET_ALL}")
+                elif "SELL" in signal_colors:
+                    print(f"{Fore.RED}{line}{Style.RESET_ALL}")
+                else:
+                    print(line)
+
+            export_choice = (
+                input(f"\n{Fore.CYAN}Export results? (csv/json/no): {Style.RESET_ALL}")
+                .strip()
+                .lower()
+            )
+
+            if export_choice in ["csv", "json"]:
+                from datetime import datetime
+
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+                if export_choice == "csv":
+                    results_list = []
+                    for r in result.all_results:
+                        results_list.append(
+                            {
+                                "Strategy": r.strategy_name,
+                                "Signal": r.signal,
+                                "Confidence": r.confidence,
+                                "Score": r.score,
+                                "Risk": r.risk_level,
+                            }
+                        )
+                    df = pd.DataFrame(results_list)
+                    filename = f"{symbol}_analysis_{timestamp}.csv"
+                    df.to_csv(filename, index=False)
+                    print(f"\n{Fore.GREEN}✅ Exported to {filename}{Style.RESET_ALL}")
+                else:
+                    import json
+
+                    export_data = {
+                        "symbol": symbol,
+                        "consensus_signal": result.consensus_signal,
+                        "consensus_confidence": result.consensus_confidence,
+                        "consensus_score": result.consensus_score,
+                        "signal_breakdown": {
+                            "buy": result.buy_signals,
+                            "sell": result.sell_signals,
+                            "hold": result.hold_signals,
+                            "neutral": result.neutral_signals,
+                        },
+                        "strategies_analyzed": result.total_strategies,
+                        "successful": result.successful_strategies,
+                    }
+                    filename = f"{symbol}_analysis_{timestamp}.json"
+                    with open(filename, "w") as f:
+                        json.dump(export_data, f, indent=2)
+                    print(f"\n{Fore.GREEN}✅ Exported to {filename}{Style.RESET_ALL}")
+
+        except Exception as e:
+            print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}\n")
+
+    def _run_registry_info(self):
+        """Show comprehensive registry information"""
+        try:
+            from src.strategies.comprehensive_registry import (
+                get_comprehensive_registry,
+                StrategyCategory,
+            )
+
+            registry = get_comprehensive_registry()
+
+            print(f"""
+{Fore.CYAN}╔══════════════════════════════════════════════════════════════════╗
+║              COMPREHENSIVE STRATEGY REGISTRY v2.2.2                ║
+╠══════════════════════════════════════════════════════════════════╣
+║                                                                    ║
+║  📊 Total Strategies: {len(registry.get_all_strategies())}                                     ║
+║                                                                    ║
+╚══════════════════════════════════════════════════════════════════╝
+{Style.RESET_ALL}""")
+
+            print(registry.list_all_strategies())
+
+        except Exception as e:
+            print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}\n")
+
+    def _run_smc_strategies(self):
+        """Run SMC strategy analysis"""
+        try:
+            from src.strategies.unified_analysis import create_sample_data
+
+            symbol = (
+                input(
+                    f"\n{Fore.CYAN}Enter symbol for SMC analysis (e.g., EURUSD): {Style.RESET_ALL}"
+                )
+                .strip()
+                .upper()
+            )
+
+            if not symbol:
+                print(f"{Fore.YELLOW}No symbol provided{Style.RESET_ALL}")
+                return
+
+            from src.strategies.comprehensive_registry import (
+                get_comprehensive_registry,
+                StrategyCategory,
+            )
+
+            registry = get_comprehensive_registry()
+            analyzer = UnifiedStrategyAnalyzer(registry)
+
+            smc_strategies = registry.get_strategies_by_category(
+                StrategyCategory.SMC_STRATEGY
+            )
+
+            print(
+                f"\n{Fore.CYAN}Running {len(smc_strategies)} SMC strategies on {symbol}...{Style.RESET_ALL}\n"
+            )
+
+            result = analyzer.analyze(
+                symbol, create_sample_data(symbol), max_strategies=10
+            )
+
+            print(f"{Fore.CYAN}SMC Strategy Results:{Style.RESET_ALL}")
+            for r in result.strategy_results[:10]:
+                if (
+                    "SMC" in r.strategy_name
+                    or "ICT" in r.strategy_name
+                    or "Wyckoff" in r.strategy_name
+                ):
+                    print(f"  {r.strategy_name}: {r.signal} ({r.confidence:.1%})")
+
+        except Exception as e:
+            print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}\n")
+
+    def _run_quant_strategies(self):
+        """Run quantitative strategy analysis"""
+        try:
+            from src.strategies.unified_analysis import create_sample_data
+
+            symbol = (
+                input(
+                    f"\n{Fore.CYAN}Enter symbol for Quant analysis (e.g., AAPL): {Style.RESET_ALL}"
+                )
+                .strip()
+                .upper()
+            )
+
+            if not symbol:
+                print(f"{Fore.YELLOW}No symbol provided{Style.RESET_ALL}")
+                return
+
+            from src.strategies.comprehensive_registry import (
+                get_comprehensive_registry,
+                StrategyCategory,
+            )
+
+            registry = get_comprehensive_registry()
+            analyzer = UnifiedStrategyAnalyzer(registry)
+
+            quant_strategies = registry.get_strategies_by_category(
+                StrategyCategory.QUANTITATIVE
+            )
+
+            print(
+                f"\n{Fore.CYAN}Running {len(quant_strategies)} Quantitative strategies on {symbol}...{Style.RESET_ALL}\n"
+            )
+
+            result = analyzer.analyze(
+                symbol, create_sample_data(symbol), max_strategies=10
+            )
+
+            print(f"{Fore.CYAN}Quantitative Strategy Results:{Style.RESET_ALL}")
+            for r in result.strategy_results[:10]:
+                if (
+                    "Quant" in r.strategy_name
+                    or "Jim Simons" in r.strategy_name
+                    or "Momentum" in r.strategy_name
+                ):
+                    print(f"  {r.strategy_name}: {r.signal} ({r.confidence:.1%})")
+
+        except Exception as e:
+            print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}\n")
+
+    def _run_legendary_investors(self):
+        """Run legendary investor strategy analysis"""
+        try:
+            from src.strategies.unified_analysis import create_sample_data
+
+            symbol = (
+                input(
+                    f"\n{Fore.CYAN}Enter symbol for Legendary Investor analysis (e.g., AAPL): {Style.RESET_ALL}"
+                )
+                .strip()
+                .upper()
+            )
+
+            if not symbol:
+                print(f"{Fore.YELLOW}No symbol provided{Style.RESET_ALL}")
+                return
+
+            from src.strategies.comprehensive_registry import (
+                get_comprehensive_registry,
+                StrategyCategory,
+            )
+
+            registry = get_comprehensive_registry()
+            analyzer = UnifiedStrategyAnalyzer(registry)
+
+            legendary_strategies = registry.get_strategies_by_category(
+                StrategyCategory.LEGENDARY_INVESTOR
+            )
+
+            print(
+                f"\n{Fore.CYAN}Running {len(legendary_strategies)} Legendary Investor strategies on {symbol}...{Style.RESET_ALL}\n"
+            )
+
+            result = analyzer.analyze(
+                symbol, create_sample_data(symbol), max_strategies=10
+            )
+
+            print(f"{Fore.CYAN}Legendary Investor Strategy Results:{Style.RESET_ALL}")
+            for r in result.strategy_results[:15]:
+                print(f"  {r.strategy_name}: {r.signal} ({r.confidence:.1%})")
+
+        except Exception as e:
+            print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}\n")
 
 
 # ============ COMMAND HANDLERS ============
@@ -725,34 +1575,47 @@ def cmd_modules(args):
     )
 
 
+def cmd_autoheal(args):
+    """Run auto-heal system commands"""
+    print_banner()
+    print(f"\n{Fore.CYAN}🔧 Auto-Heal System v2.2.1{Style.RESET_ALL}\n")
+
+    try:
+        from src.auto_heal.orchestrator import AutoHealOrchestrator
+
+        orchestrator = AutoHealOrchestrator()
+        orchestrator.run()
+    except ImportError as e:
+        print(f"{Fore.RED}✗ Auto-Heal system not available: {e}{Style.RESET_ALL}")
+        print(
+            f"{Fore.YELLOW}Please ensure src/auto_heal/ is properly installed.{Style.RESET_ALL}"
+        )
+
+
 # ============ MAIN ============
 
 
 def main():
+    """Main entry point - interactive menu or CLI commands"""
     parser = argparse.ArgumentParser(
-        description=f"AI Hedge Fund v{VERSION} - Unified Trading System",
+        description=f"AI Hedge Fund v{VERSION} - Interactive Trading System",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-Examples:
-  # Dashboard & Terminal
+Usage:
+  # Interactive Menu (RECOMMENDED)
+  python3 main.py                      # Show interactive menu
+
+  # CLI Commands
   python3 main.py --dashboard          # Streamlit web UI
   python3 main.py --cli                # Enhanced CLI
-  python3 main.py --terminal           # Legacy CLI
-
-  # Analysis & Trading
   python3 main.py AAPL                 # Quick analysis
-  python3 main.py AAPL --mode auto     # Autonomous trading
-  python3 main.py AAPL,BTC,USD/IDR     # Multi-asset
-  python3 main.py AAPL --paper         # Paper trading
-
-  # Backtesting
-  python3 main.py --backtest EURUSD --days 365
-  python3 main.py --backtest AAPL --report
-
-  # Testing & Info
-  python3 main.py --test               # Integration test
   python3 main.py --status             # System status
-  python3 main.py --modules            # List modules
+  python3 main.py --autoheal           # Launch Auto-Heal
+
+  # Examples
+  python3 main.py BBCA --asset idn    # Indonesian stock analysis
+  python3 main.py AAPL --mode auto     # Autonomous trading
+  python3 main.py BTC --asset crypto    # Crypto analysis
         """,
     )
 
@@ -785,9 +1648,17 @@ Examples:
     parser.add_argument(
         "--asset",
         "-a",
-        choices=["stock_us", "forex", "crypto"],
+        choices=[
+            "stock_us",
+            "stock_idn",
+            "stock_global",
+            "forex",
+            "crypto",
+            "commodity",
+            "index",
+        ],
         default="stock_us",
-        help="Asset type",
+        help="Asset type (stock_idn = Indonesian stocks)",
     )
     parser.add_argument("--paper", action="store_true", help="Use paper trading")
     parser.add_argument("--risk", type=float, default=2.0, help="Risk percentage")
@@ -812,13 +1683,25 @@ Examples:
     )
     parser.add_argument("--modules", action="store_true", help="List all modules")
     parser.add_argument(
+        "--autoheal", action="store_true", help="Launch Auto-Heal System"
+    )
+    parser.add_argument(
+        "--live-trading", action="store_true", help="Start live trading"
+    )
+    parser.add_argument(
         "--version", action="version", version=f"AI Hedge Fund v{VERSION}"
     )
 
     args = parser.parse_args()
 
-    # Print banner for non-dashboard commands
-    if not args.dashboard:
+    # IF NO ARGUMENTS: Run Interactive Menu (RECOMMENDED)
+    if len(sys.argv) == 1:
+        menu = InteractiveMenu()
+        menu.run()
+        return
+
+    # Print banner for CLI commands
+    if not args.dashboard and not args.live_trading:
         print_banner()
 
     # Route commands
@@ -836,11 +1719,23 @@ Examples:
         cmd_status(args)
     elif args.modules:
         cmd_modules(args)
+    elif args.autoheal:
+        cmd_autoheal(args)
+    elif args.live_trading:
+        from start_live_trading import main as live_trading_main
+
+        live_trading_main()
     elif args.symbols:
         cmd_analyze(args)
     else:
-        cmd_status(args)
-        print(f"\n{Fore.YELLOW}Use --help for available commands{Style.RESET_ALL}\n")
+        print(
+            f"\n{Fore.YELLOW}Use --help for available commands or run without arguments for interactive menu{Style.RESET_ALL}\n"
+        )
+        print(f"{Fore.CYAN}Recommended: python3 main.py{Style.RESET_ALL}\n")
+
+
+if __name__ == "__main__":
+    main()
 
 
 if __name__ == "__main__":

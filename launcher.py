@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-AI HEDGE FUND v2.2 - INTERACTIVE LAUNCHER
-=========================================
+AI HEDGE FUND v2.3.0 - INTERACTIVE LAUNCHER
+===========================================
 
 Complete interactive launcher with menu system for:
 - Web Dashboard (Streamlit)
@@ -10,6 +10,7 @@ Complete interactive launcher with menu system for:
 - Paper Trading
 - System Status
 - Configuration
+- Agent Constitution v2.3.0
 
 Usage:
     python3 launcher.py                    # Interactive menu
@@ -82,7 +83,8 @@ class InteractiveLauncher:
 ║   {Fore.GREEN}[5]{Style.RESET_ALL} 📈  Quick Analysis    Analyze single or symbols             ║
 ║   {Fore.GREEN}[6]{Style.RESET_ALL} 🔧  System Status     Check all components and connections           ║
 ║   {Fore.GREEN}[7]{Style.RESET_ALL} ⚙️  Configuration     System settings and parameters                ║
-║   {Fore.GREEN}[8]{Style.RESET_ALL} ℹ️   Help              Show help and documentation                   ║
+║   {Fore.GREEN}[8]{Style.RESET_ALL} 🤖 Auto-Heal System   Health monitoring, backup, strategies          ║
+║   {Fore.GREEN}[9]{Style.RESET_ALL} ℹ️   Help              Show help and documentation                   ║
 ║                                                                                      ║
 ║   {Fore.YELLOW}[0]{Style.RESET_ALL} 🚪  Exit              Quit the launcher                              ║
 ║                                                                                      ║
@@ -572,6 +574,141 @@ Time: {results.execution_time_seconds:.2f}s
         )
         input(f"{Fore.CYAN}Press Enter to continue...{Style.RESET_ALL}")
 
+    def show_auto_heal(self):
+        """Show Auto-Heal System menu"""
+        print(f"""
+{Fore.CYAN}╔════════════════════════════════════════════════════════════════════╗
+║                    🤖 AUTO-HEAL SYSTEM MENU                          ║
+╠════════════════════════════════════════════════════════════════════════╣
+║                                                                    ║
+║   {Fore.GREEN}[1]{Style.RESET_ALL} Health Check        Run system health check                      ║
+║   {Fore.GREEN}[2]{Style.RESET_ALL} Start Monitoring    Start background health monitoring            ║
+║   {Fore.GREEN}[3]{Style.RESET_ALL} Create Backup       Create system backup (manual)                ║
+║   {Fore.GREEN}[4]{Style.RESET_ALL} Evaluate Strategies Run strategy evaluation and ranking          ║
+║   {Fore.GREEN}[5]{Style.RESET_ALL} Run Dashboard       Real-time monitoring dashboard             ║
+║   {Fore.GREEN}[6]{Style.RESET_ALL} System Status       Show all auto-systems status               ║
+║   {Fore.GREEN}[7]{Style.RESET_ALL} Run All Checks      Health + Backup + Evaluation               ║
+║                                                                    ║
+║   {Fore.YELLOW}[0]{Style.RESET_ALL} Back              Return to main menu                         ║
+╚════════════════════════════════════════════════════════════════════╝
+{Style.RESET_ALL}""")
+
+        choice = input(f"  {Fore.WHITE}Auto-Heal ➜ {Style.RESET_ALL}").strip()
+
+        if choice == "1" or choice.lower() == "health":
+            self._run_health_check()
+        elif choice == "2" or choice.lower() == "monitor":
+            self._start_monitoring()
+        elif choice == "3" or choice.lower() == "backup":
+            self._run_backup()
+        elif choice == "4" or choice.lower() == "evaluate":
+            self._run_strategy_evaluation()
+        elif choice == "5" or choice.lower() == "dashboard":
+            self._run_dashboard()
+        elif choice == "6" or choice.lower() == "status":
+            self._show_auto_heal_status()
+        elif choice == "7" or choice.lower() == "all":
+            self._run_all_checks()
+        elif choice == "0":
+            return
+        else:
+            print(f"\n{Fore.YELLOW}⚠ Invalid option{Style.RESET_ALL}\n")
+
+    def _run_health_check(self):
+        """Run health check"""
+        print(f"\n{Fore.CYAN}🔍 Running health check...{Style.RESET_ALL}\n")
+        try:
+            from src.auto_heal.health_monitor import HealthChecker, HealthConfig
+
+            config = HealthConfig(check_interval=30)
+            health = HealthChecker(config)
+            metrics = health.run_full_check()
+            health.print_status()
+        except Exception as e:
+            print(f"{Fore.RED}✗ Health check failed: {e}{Style.RESET_ALL}")
+        input(f"\n{Fore.CYAN}Press Enter to continue...{Style.RESET_ALL}")
+
+    def _start_monitoring(self):
+        """Start background monitoring"""
+        print(f"\n{Fore.CYAN}🚀 Starting background monitoring...{Style.RESET_ALL}")
+        print("  Press Ctrl+C to stop\n")
+        try:
+            from src.auto_heal.health_monitor import HealthChecker, HealthConfig
+
+            config = HealthConfig(check_interval=30)
+            health = HealthChecker(config)
+            health.start_monitoring(background=False)
+        except KeyboardInterrupt:
+            print(f"\n{Fore.YELLOW}Monitoring stopped{Style.RESET_ALL}")
+        except Exception as e:
+            print(f"{Fore.RED}✗ Error: {e}{Style.RESET_ALL}")
+
+    def _run_backup(self):
+        """Run backup"""
+        print(f"\n{Fore.CYAN}💾 Creating backup...{Style.RESET_ALL}\n")
+        try:
+            from src.auto_heal.backup_manager import BackupManager, BackupConfig
+
+            config = BackupConfig(retention_days=7)
+            backup = BackupManager(config)
+            result = backup.create_backup("manual")
+            if result:
+                print(
+                    f"{Fore.GREEN}✓ Backup created: {result.filename}{Style.RESET_ALL}"
+                )
+                print(f"  Size: {result.size_bytes / 1024 / 1024:.2f} MB")
+            else:
+                print(f"{Fore.RED}✗ Backup failed{Style.RESET_ALL}")
+        except Exception as e:
+            print(f"{Fore.RED}✗ Error: {e}{Style.RESET_ALL}")
+        input(f"\n{Fore.CYAN}Press Enter to continue...{Style.RESET_ALL}")
+
+    def _run_strategy_evaluation(self):
+        """Run strategy evaluation"""
+        print(f"\n{Fore.CYAN}📊 Evaluating strategies...{Style.RESET_ALL}\n")
+        try:
+            from src.auto_heal.strategy_evaluator import StrategyEvaluator
+
+            evaluator = StrategyEvaluator()
+            evaluator.evaluate_all_strategies()
+            evaluator.print_summary()
+        except Exception as e:
+            print(f"{Fore.RED}✗ Error: {e}{Style.RESET_ALL}")
+        input(f"\n{Fore.CYAN}Press Enter to continue...{Style.RESET_ALL}")
+
+    def _run_dashboard(self):
+        """Run monitoring dashboard"""
+        print(f"\n{Fore.CYAN}📈 Starting monitoring dashboard...{Style.RESET_ALL}")
+        print("  Press Ctrl+C to exit\n")
+        try:
+            from src.auto_heal.monitoring_dashboard import MonitoringDashboard
+
+            dashboard = MonitoringDashboard()
+            dashboard.run_cli_dashboard()
+        except KeyboardInterrupt:
+            print(f"\n{Fore.YELLOW}Dashboard stopped{Style.RESET_ALL}")
+
+    def _show_auto_heal_status(self):
+        """Show auto-heal system status"""
+        print(f"\n{Fore.CYAN}📊 Auto-Heal System Status{Style.RESET_ALL}\n")
+        try:
+            from src.auto_heal.orchestrator import SystemOrchestrator
+
+            orchestrator = SystemOrchestrator()
+            orchestrator.print_unified_status()
+        except Exception as e:
+            print(f"{Fore.RED}✗ Error: {e}{Style.RESET_ALL}")
+        input(f"\n{Fore.CYAN}Press Enter to continue...{Style.RESET_ALL}")
+
+    def _run_all_checks(self):
+        """Run all auto-heal checks"""
+        print(f"\n{Fore.CYAN}🔄 Running all checks...{Style.RESET_ALL}\n")
+        self._run_health_check()
+        print("\n")
+        self._run_backup()
+        print("\n")
+        self._run_strategy_evaluation()
+
     def show_help(self):
         """Show help"""
         print(f"""
@@ -642,7 +779,9 @@ Time: {results.execution_time_seconds:.2f}s
                 self.show_system_status()
             elif choice == "7" or choice.lower() in ["config", "cfg"]:
                 self.show_configuration()
-            elif choice == "8" or choice.lower() in ["help", "h", "?"]:
+            elif choice == "8" or choice.lower() in ["auto", "autoheal", "a"]:
+                self.show_auto_heal()
+            elif choice == "9" or choice.lower() in ["help", "h", "?"]:
                 self.show_help()
             elif choice in ["0", "exit", "quit"]:
                 print(f"\n{Fore.CYAN}👋 Goodbye!{Style.RESET_ALL}\n")
