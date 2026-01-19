@@ -1,8 +1,9 @@
 """
-Complete Integration Test for AI Hedge Fund v2.2
-=================================================
+Complete Integration Test for AI Hedge Fund v2.3.0
+===================================================
 
 Tests all major modules and their interactions.
+Agent Constitution v2.3.0 Compliant
 
 Usage:
     python3 test_integration.py

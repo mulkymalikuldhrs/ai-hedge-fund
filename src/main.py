@@ -1,3 +1,21 @@
+#!/usr/bin/env python3
+"""
+AI Hedge Fund v2.3.0 - Multi-Agent System (MAS)
+================================================
+LangGraph-based Multi-Agent Trading System
+Agent Constitution v2.3.0 Compliant
+
+Features:
+- Portfolio Management Agent
+- Risk Management Agent
+- Analyst Nodes (Warren Buffett, Ben Graham, Peter Lynch, etc.)
+- State Management with LangGraph
+- Workflow Compilation and Execution
+
+Usage:
+    python3 src/main.py --help
+"""
+
 import sys
 
 from dotenv import load_dotenv
@@ -35,10 +53,14 @@ def parse_hedge_fund_response(response):
         print(f"JSON decoding error: {e}\nResponse: {repr(response)}")
         return None
     except TypeError as e:
-        print(f"Invalid response type (expected string, got {type(response).__name__}): {e}")
+        print(
+            f"Invalid response type (expected string, got {type(response).__name__}): {e}"
+        )
         return None
     except Exception as e:
-        print(f"Unexpected error while parsing response: {e}\nResponse: {repr(response)}")
+        print(
+            f"Unexpected error while parsing response: {e}\nResponse: {repr(response)}"
+        )
         return None
 
 
