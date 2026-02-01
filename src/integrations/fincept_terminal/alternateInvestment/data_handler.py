@@ -42,16 +42,14 @@ import csv
 from dataclasses import asdict
 import logging
 
-from config import (
-    MarketData, CashFlow, Performance, AssetParameters, AssetClass,
-    Config, ValidationRules, Constants
-)
+from config import MarketData, CashFlow, Performance, AssetParameters, AssetClass, Config, ValidationRules, Constants
 
 logger = logging.getLogger(__name__)
 
 
 class DataValidationError(Exception):
     """Custom exception for data validation errors"""
+
     pass
 
 
@@ -91,23 +89,13 @@ class DataHandler:
 
     def _from_dataframe(self, df: pd.DataFrame) -> List[MarketData]:
         """Convert DataFrame to MarketData objects"""
-        required_columns = ['timestamp', 'price']
+        required_columns = ["timestamp", "price"]
         if not all(col in df.columns for col in required_columns):
             raise DataValidationError(f"DataFrame must contain columns: {required_columns}")
 
         market_data = []
         for _, row in df.iterrows():
-            md = MarketData(
-                timestamp=self._standardize_timestamp(row['timestamp']),
-                price=self._to_decimal(row['price']),
-                volume=self._to_decimal(row.get('volume')),
-                bid=self._to_decimal(row.get('bid')),
-                ask=self._to_decimal(row.get('ask')),
-                high=self._to_decimal(row.get('high')),
-                low=self._to_decimal(row.get('low')),
-                open=self._to_decimal(row.get('open')),
-                close=self._to_decimal(row.get('close'))
-            )
+            md = MarketData(timestamp=self._standardize_timestamp(row["timestamp"]), price=self._to_decimal(row["price"]), volume=self._to_decimal(row.get("volume")), bid=self._to_decimal(row.get("bid")), ask=self._to_decimal(row.get("ask")), high=self._to_decimal(row.get("high")), low=self._to_decimal(row.get("low")), open=self._to_decimal(row.get("open")), close=self._to_decimal(row.get("close")))
             self._validate_market_data(md)
             market_data.append(md)
 
@@ -115,8 +103,8 @@ class DataHandler:
 
     def _from_dict(self, data: Dict) -> List[MarketData]:
         """Convert dictionary to MarketData objects"""
-        if 'data' in data:
-            data = data['data']
+        if "data" in data:
+            data = data["data"]
 
         if isinstance(data, list):
             return [self._dict_to_market_data(item) for item in data]
@@ -130,15 +118,15 @@ class DataHandler:
     def _dict_to_market_data(self, item: Dict) -> MarketData:
         """Convert single dictionary item to MarketData"""
         md = MarketData(
-            timestamp=self._standardize_timestamp(item.get('timestamp', item.get('date', item.get('time')))),
-            price=self._to_decimal(item.get('price', item.get('close'))),
-            volume=self._to_decimal(item.get('volume')),
-            bid=self._to_decimal(item.get('bid')),
-            ask=self._to_decimal(item.get('ask')),
-            high=self._to_decimal(item.get('high')),
-            low=self._to_decimal(item.get('low')),
-            open=self._to_decimal(item.get('open')),
-            close=self._to_decimal(item.get('close'))
+            timestamp=self._standardize_timestamp(item.get("timestamp", item.get("date", item.get("time")))),
+            price=self._to_decimal(item.get("price", item.get("close"))),
+            volume=self._to_decimal(item.get("volume")),
+            bid=self._to_decimal(item.get("bid")),
+            ask=self._to_decimal(item.get("ask")),
+            high=self._to_decimal(item.get("high")),
+            low=self._to_decimal(item.get("low")),
+            open=self._to_decimal(item.get("open")),
+            close=self._to_decimal(item.get("close")),
         )
         self._validate_market_data(md)
         return md
@@ -169,18 +157,13 @@ class DataHandler:
 
     def _cash_flows_from_dataframe(self, df: pd.DataFrame) -> List[CashFlow]:
         """Convert DataFrame to CashFlow objects"""
-        required_columns = ['date', 'amount']
+        required_columns = ["date", "amount"]
         if not all(col in df.columns for col in required_columns):
             raise DataValidationError(f"Cash flow DataFrame must contain columns: {required_columns}")
 
         cash_flows = []
         for _, row in df.iterrows():
-            cf = CashFlow(
-                date=self._standardize_date(row['date']),
-                amount=self._to_decimal(row['amount']),
-                cf_type=row.get('type', 'inflow' if float(row['amount']) > 0 else 'outflow'),
-                description=row.get('description')
-            )
+            cf = CashFlow(date=self._standardize_date(row["date"]), amount=self._to_decimal(row["amount"]), cf_type=row.get("type", "inflow" if float(row["amount"]) > 0 else "outflow"), description=row.get("description"))
             self._validate_cash_flow(cf)
             cash_flows.append(cf)
 
@@ -188,8 +171,8 @@ class DataHandler:
 
     def _cash_flows_from_dict(self, data: Dict) -> List[CashFlow]:
         """Convert dictionary to CashFlow objects"""
-        if 'cash_flows' in data:
-            data = data['cash_flows']
+        if "cash_flows" in data:
+            data = data["cash_flows"]
 
         if isinstance(data, list):
             return [self._dict_to_cash_flow(item) for item in data]
@@ -202,16 +185,11 @@ class DataHandler:
 
     def _dict_to_cash_flow(self, item: Dict) -> CashFlow:
         """Convert single dictionary item to CashFlow"""
-        cf = CashFlow(
-            date=self._standardize_date(item.get('date', item.get('timestamp'))),
-            amount=self._to_decimal(item.get('amount', item.get('value'))),
-            cf_type=item.get('type', item.get('cf_type', 'inflow' if float(item.get('amount', 0)) > 0 else 'outflow')),
-            description=item.get('description', item.get('desc'))
-        )
+        cf = CashFlow(date=self._standardize_date(item.get("date", item.get("timestamp"))), amount=self._to_decimal(item.get("amount", item.get("value"))), cf_type=item.get("type", item.get("cf_type", "inflow" if float(item.get("amount", 0)) > 0 else "outflow")), description=item.get("description", item.get("desc")))
         self._validate_cash_flow(cf)
         return cf
 
-    def load_from_csv(self, file_path: str, data_type: str = 'price') -> Union[List[MarketData], List[CashFlow]]:
+    def load_from_csv(self, file_path: str, data_type: str = "price") -> Union[List[MarketData], List[CashFlow]]:
         """
         Load data from CSV file
 
@@ -225,9 +203,9 @@ class DataHandler:
         try:
             df = pd.read_csv(file_path)
 
-            if data_type == 'price':
+            if data_type == "price":
                 return self.standardize_price_data(df)
-            elif data_type == 'cash_flow':
+            elif data_type == "cash_flow":
                 return self.standardize_cash_flows(df)
             else:
                 raise DataValidationError(f"Unsupported data type: {data_type}")
@@ -236,7 +214,7 @@ class DataHandler:
             logger.error(f"Error loading CSV file {file_path}: {str(e)}")
             raise DataValidationError(f"Failed to load CSV: {str(e)}")
 
-    def load_from_json(self, file_path: str, data_type: str = 'price') -> Union[List[MarketData], List[CashFlow]]:
+    def load_from_json(self, file_path: str, data_type: str = "price") -> Union[List[MarketData], List[CashFlow]]:
         """
         Load data from JSON file
 
@@ -248,12 +226,12 @@ class DataHandler:
             Standardized data objects
         """
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path, "r") as f:
                 data = json.load(f)
 
-            if data_type == 'price':
+            if data_type == "price":
                 return self.standardize_price_data(data)
-            elif data_type == 'cash_flow':
+            elif data_type == "cash_flow":
                 return self.standardize_cash_flows(data)
             else:
                 raise DataValidationError(f"Unsupported data type: {data_type}")
@@ -262,7 +240,7 @@ class DataHandler:
             logger.error(f"Error loading JSON file {file_path}: {str(e)}")
             raise DataValidationError(f"Failed to load JSON: {str(e)}")
 
-    def calculate_returns(self, prices: List[MarketData], method: str = 'simple') -> pd.DataFrame:
+    def calculate_returns(self, prices: List[MarketData], method: str = "simple") -> pd.DataFrame:
         """
         Calculate returns from price data
 
@@ -277,26 +255,23 @@ class DataHandler:
             raise DataValidationError("Need at least 2 price points to calculate returns")
 
         # Convert to DataFrame
-        df = pd.DataFrame([{
-            'timestamp': p.timestamp,
-            'price': float(p.price)
-        } for p in prices])
+        df = pd.DataFrame([{"timestamp": p.timestamp, "price": float(p.price)} for p in prices])
 
-        df = df.sort_values('timestamp')
-        df['timestamp'] = pd.to_datetime(df['timestamp'])
+        df = df.sort_values("timestamp")
+        df["timestamp"] = pd.to_datetime(df["timestamp"])
 
-        if method == 'simple':
-            df['return'] = df['price'].pct_change()
-        elif method == 'log':
-            df['return'] = np.log(df['price'] / df['price'].shift(1))
-        elif method == 'compound':
-            df['return'] = (df['price'] / df['price'].shift(1)) - 1
+        if method == "simple":
+            df["return"] = df["price"].pct_change()
+        elif method == "log":
+            df["return"] = np.log(df["price"] / df["price"].shift(1))
+        elif method == "compound":
+            df["return"] = (df["price"] / df["price"].shift(1)) - 1
         else:
             raise DataValidationError(f"Unsupported return calculation method: {method}")
 
         return df.dropna()
 
-    def aggregate_to_frequency(self, data: List[MarketData], frequency: str = 'monthly') -> List[MarketData]:
+    def aggregate_to_frequency(self, data: List[MarketData], frequency: str = "monthly") -> List[MarketData]:
         """
         Aggregate data to specified frequency
 
@@ -311,51 +286,22 @@ class DataHandler:
             return []
 
         # Convert to DataFrame
-        df = pd.DataFrame([{
-            'timestamp': pd.to_datetime(d.timestamp),
-            'price': float(d.price),
-            'volume': float(d.volume) if d.volume else 0,
-            'high': float(d.high) if d.high else float(d.price),
-            'low': float(d.low) if d.low else float(d.price),
-            'open': float(d.open) if d.open else float(d.price),
-            'close': float(d.close) if d.close else float(d.price)
-        } for d in data])
+        df = pd.DataFrame([{"timestamp": pd.to_datetime(d.timestamp), "price": float(d.price), "volume": float(d.volume) if d.volume else 0, "high": float(d.high) if d.high else float(d.price), "low": float(d.low) if d.low else float(d.price), "open": float(d.open) if d.open else float(d.price), "close": float(d.close) if d.close else float(d.price)} for d in data])
 
-        df = df.set_index('timestamp').sort_index()
+        df = df.set_index("timestamp").sort_index()
 
         # Aggregate based on frequency
-        freq_map = {
-            'daily': 'D',
-            'weekly': 'W',
-            'monthly': 'M',
-            'quarterly': 'Q',
-            'yearly': 'Y'
-        }
+        freq_map = {"daily": "D", "weekly": "W", "monthly": "M", "quarterly": "Q", "yearly": "Y"}
 
         if frequency not in freq_map:
             raise DataValidationError(f"Unsupported frequency: {frequency}")
 
-        agg_df = df.resample(freq_map[frequency]).agg({
-            'price': 'last',
-            'volume': 'sum',
-            'high': 'max',
-            'low': 'min',
-            'open': 'first',
-            'close': 'last'
-        }).dropna()
+        agg_df = df.resample(freq_map[frequency]).agg({"price": "last", "volume": "sum", "high": "max", "low": "min", "open": "first", "close": "last"}).dropna()
 
         # Convert back to MarketData objects
         result = []
         for timestamp, row in agg_df.iterrows():
-            md = MarketData(
-                timestamp=timestamp.strftime('%Y-%m-%d'),
-                price=Decimal(str(row['price'])),
-                volume=Decimal(str(row['volume'])) if row['volume'] > 0 else None,
-                high=Decimal(str(row['high'])),
-                low=Decimal(str(row['low'])),
-                open=Decimal(str(row['open'])),
-                close=Decimal(str(row['close']))
-            )
+            md = MarketData(timestamp=timestamp.strftime("%Y-%m-%d"), price=Decimal(str(row["price"])), volume=Decimal(str(row["volume"])) if row["volume"] > 0 else None, high=Decimal(str(row["high"])), low=Decimal(str(row["low"])), open=Decimal(str(row["open"])), close=Decimal(str(row["close"])))
             result.append(md)
 
         return result
@@ -378,11 +324,11 @@ class DataHandler:
         if isinstance(timestamp, str):
             try:
                 dt = pd.to_datetime(timestamp)
-                return dt.strftime('%Y-%m-%d %H:%M:%S')
+                return dt.strftime("%Y-%m-%d %H:%M:%S")
             except:
                 return timestamp
         elif isinstance(timestamp, (datetime, date)):
-            return timestamp.strftime('%Y-%m-%d %H:%M:%S')
+            return timestamp.strftime("%Y-%m-%d %H:%M:%S")
         else:
             return str(timestamp)
 
@@ -391,11 +337,11 @@ class DataHandler:
         if isinstance(date_value, str):
             try:
                 dt = pd.to_datetime(date_value)
-                return dt.strftime('%Y-%m-%d')
+                return dt.strftime("%Y-%m-%d")
             except:
                 return date_value
         elif isinstance(date_value, (datetime, date)):
-            return date_value.strftime('%Y-%m-%d')
+            return date_value.strftime("%Y-%m-%d")
         else:
             return str(date_value)
 
@@ -419,7 +365,7 @@ class DataHandler:
         if cf.amount == 0:
             logger.warning(f"Zero cash flow amount on {cf.date}")
 
-        valid_types = ['inflow', 'outflow', 'distribution', 'capital_call', 'dividend', 'interest']
+        valid_types = ["inflow", "outflow", "distribution", "capital_call", "dividend", "interest"]
         if cf.cf_type not in valid_types:
             logger.warning(f"Unknown cash flow type: {cf.cf_type}")
 
@@ -430,42 +376,13 @@ class DataHandler:
 
         if isinstance(data[0], MarketData):
             prices = [float(d.price) for d in data]
-            return {
-                "data_type": "MarketData",
-                "count": len(data),
-                "price_stats": {
-                    "mean": np.mean(prices),
-                    "std": np.std(prices),
-                    "min": np.min(prices),
-                    "max": np.max(prices)
-                },
-                "date_range": {
-                    "start": min(d.timestamp for d in data),
-                    "end": max(d.timestamp for d in data)
-                }
-            }
+            return {"data_type": "MarketData", "count": len(data), "price_stats": {"mean": np.mean(prices), "std": np.std(prices), "min": np.min(prices), "max": np.max(prices)}, "date_range": {"start": min(d.timestamp for d in data), "end": max(d.timestamp for d in data)}}
         elif isinstance(data[0], CashFlow):
             amounts = [float(d.amount) for d in data]
-            return {
-                "data_type": "CashFlow",
-                "count": len(data),
-                "amount_stats": {
-                    "total": sum(amounts),
-                    "mean": np.mean(amounts),
-                    "std": np.std(amounts),
-                    "min": np.min(amounts),
-                    "max": np.max(amounts)
-                },
-                "date_range": {
-                    "start": min(d.date for d in data),
-                    "end": max(d.date for d in data)
-                },
-                "inflows": sum(1 for d in data if d.amount > 0),
-                "outflows": sum(1 for d in data if d.amount < 0)
-            }
+            return {"data_type": "CashFlow", "count": len(data), "amount_stats": {"total": sum(amounts), "mean": np.mean(amounts), "std": np.std(amounts), "min": np.min(amounts), "max": np.max(amounts)}, "date_range": {"start": min(d.date for d in data), "end": max(d.date for d in data)}, "inflows": sum(1 for d in data if d.amount > 0), "outflows": sum(1 for d in data if d.amount < 0)}
 
         return {"error": "Unknown data type"}
 
 
 # Export main components
-__all__ = ['DataHandler', 'DataValidationError']
+__all__ = ["DataHandler", "DataValidationError"]

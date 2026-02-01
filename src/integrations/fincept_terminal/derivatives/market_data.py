@@ -42,16 +42,14 @@ import pandas as pd
 import logging
 from enum import Enum
 
-from .core import (
-    UnderlyingType, DayCountConvention, ValidationError,
-    ModelValidator, calculate_time_fraction
-)
+from .core import UnderlyingType, DayCountConvention, ValidationError, ModelValidator, calculate_time_fraction
 
 logger = logging.getLogger(__name__)
 
 
 class DataProvider(Enum):
     """Supported market data providers"""
+
     BLOOMBERG = "bloomberg"
     REFINITIV = "refinitiv"
     YAHOO = "yahoo"
@@ -62,6 +60,7 @@ class DataProvider(Enum):
 
 class DataFrequency(Enum):
     """Data frequency options"""
+
     REAL_TIME = "real_time"
     MINUTE = "1min"
     HOURLY = "1hour"
@@ -73,6 +72,7 @@ class DataFrequency(Enum):
 @dataclass
 class YieldCurvePoint:
     """Single point on yield curve"""
+
     maturity: float  # Years
     rate: float  # Interest rate
     instrument_type: str = "government"  # government, corporate, swap
@@ -85,6 +85,7 @@ class YieldCurvePoint:
 @dataclass
 class VolatilitySurfacePoint:
     """Single point on volatility surface"""
+
     strike: float
     time_to_expiry: float
     implied_volatility: float
@@ -99,6 +100,7 @@ class VolatilitySurfacePoint:
 @dataclass
 class MarketSnapshot:
     """Complete market data snapshot for pricing"""
+
     timestamp: datetime
     spot_price: float
     risk_free_rate: float
@@ -118,6 +120,7 @@ class MarketSnapshot:
 @dataclass
 class CurveData:
     """Interest rate curve data"""
+
     curve_date: datetime
     curve_type: str  # government, swap, corporate
     currency: str
@@ -147,9 +150,7 @@ class CurveData:
         for i in range(len(sorted_points) - 1):
             if sorted_points[i].maturity <= maturity <= sorted_points[i + 1].maturity:
                 if method == "linear":
-                    return self._linear_interpolation(
-                        sorted_points[i], sorted_points[i + 1], maturity
-                    )
+                    return self._linear_interpolation(sorted_points[i], sorted_points[i + 1], maturity)
                 elif method == "cubic":
                     return self._cubic_interpolation(sorted_points, maturity, i)
 
@@ -304,18 +305,10 @@ class ManualDataProvider(MarketDataProvider):
 
     def get_yield_curve(self, currency: str, curve_type: str = "government") -> CurveData:
         """Get yield curve (simplified for manual input)"""
-        curve = CurveData(
-            curve_date=datetime.now(),
-            curve_type=curve_type,
-            currency=currency,
-            day_count=DayCountConvention.ACT_365
-        )
+        curve = CurveData(curve_date=datetime.now(), curve_type=curve_type, currency=currency, day_count=DayCountConvention.ACT_365)
 
         # Add default curve points if none exist
-        default_rates = [
-            (0.25, 0.02), (0.5, 0.022), (1.0, 0.025), (2.0, 0.028),
-            (5.0, 0.032), (10.0, 0.035), (30.0, 0.038)
-        ]
+        default_rates = [(0.25, 0.02), (0.5, 0.022), (1.0, 0.025), (2.0, 0.028), (5.0, 0.032), (10.0, 0.035), (30.0, 0.038)]
 
         for maturity, rate in default_rates:
             rf_rate = self.get_risk_free_rate(currency, maturity)
@@ -386,18 +379,10 @@ class YahooFinanceProvider(MarketDataProvider):
             raise ConnectionError("Not connected to Yahoo Finance")
 
         # Placeholder implementation
-        curve = CurveData(
-            curve_date=datetime.now(),
-            curve_type=curve_type,
-            currency=currency,
-            day_count=DayCountConvention.ACT_365
-        )
+        curve = CurveData(curve_date=datetime.now(), curve_type=curve_type, currency=currency, day_count=DayCountConvention.ACT_365)
 
         # Add sample treasury rates
-        treasury_rates = [
-            (0.25, 0.020), (0.5, 0.022), (1.0, 0.025), (2.0, 0.028),
-            (5.0, 0.032), (10.0, 0.035), (30.0, 0.038)
-        ]
+        treasury_rates = [(0.25, 0.020), (0.5, 0.022), (1.0, 0.025), (2.0, 0.028), (5.0, 0.032), (10.0, 0.035), (30.0, 0.038)]
 
         for maturity, rate in treasury_rates:
             curve.add_point(maturity, rate)
@@ -463,12 +448,7 @@ class MarketDataManager:
             return cached_data
 
         try:
-            snapshot = MarketSnapshot(
-                timestamp=datetime.now(),
-                spot_price=self.primary_provider.get_spot_price(symbol),
-                risk_free_rate=self.primary_provider.get_risk_free_rate(currency),
-                dividend_yield=self.primary_provider.get_dividend_yield(symbol)
-            )
+            snapshot = MarketSnapshot(timestamp=datetime.now(), spot_price=self.primary_provider.get_spot_price(symbol), risk_free_rate=self.primary_provider.get_risk_free_rate(currency), dividend_yield=self.primary_provider.get_dividend_yield(symbol))
 
             self.cache.set(cache_key, snapshot)
             return snapshot
@@ -499,8 +479,4 @@ class MarketDataManager:
 market_data_manager = MarketDataManager()
 
 # Export main classes and functions
-__all__ = [
-    'DataProvider', 'DataFrequency', 'YieldCurvePoint', 'VolatilitySurfacePoint',
-    'MarketSnapshot', 'CurveData', 'MarketDataProvider', 'ManualDataProvider',
-    'YahooFinanceProvider', 'DataCache', 'MarketDataManager', 'market_data_manager'
-]
+__all__ = ["DataProvider", "DataFrequency", "YieldCurvePoint", "VolatilitySurfacePoint", "MarketSnapshot", "CurveData", "MarketDataProvider", "ManualDataProvider", "YahooFinanceProvider", "DataCache", "MarketDataManager", "market_data_manager"]

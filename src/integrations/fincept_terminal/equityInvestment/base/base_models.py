@@ -42,6 +42,7 @@ from datetime import datetime
 
 class ValuationMethod(Enum):
     """Enumeration of available valuation methods"""
+
     DDM_GORDON = "dividend_discount_gordon"
     DDM_TWO_STAGE = "dividend_discount_two_stage"
     DDM_THREE_STAGE = "dividend_discount_three_stage"
@@ -60,6 +61,7 @@ class ValuationMethod(Enum):
 
 class MarketEfficiencyForm(Enum):
     """Market efficiency forms as per CFA curriculum"""
+
     WEAK = "weak_form"
     SEMI_STRONG = "semi_strong_form"
     STRONG = "strong_form"
@@ -67,6 +69,7 @@ class MarketEfficiencyForm(Enum):
 
 class SecurityType(Enum):
     """Types of securities for analysis"""
+
     COMMON_STOCK = "common_stock"
     PREFERRED_STOCK = "preferred_stock"
     CORPORATE_BOND = "corporate_bond"
@@ -80,6 +83,7 @@ class SecurityType(Enum):
 @dataclass
 class CompanyData:
     """Standard company data structure"""
+
     symbol: str
     name: str
     sector: str
@@ -95,6 +99,7 @@ class CompanyData:
 @dataclass
 class ValuationResult:
     """Standard valuation result structure"""
+
     method: ValuationMethod
     intrinsic_value: float
     current_price: float
@@ -109,6 +114,7 @@ class ValuationResult:
 @dataclass
 class MarketData:
     """Market data structure"""
+
     risk_free_rate: float
     market_return: float
     beta: float
@@ -291,14 +297,12 @@ class CalculationEngine:
         return payout_ratio * (1 + growth_rate) / (required_return - growth_rate)
 
     @staticmethod
-    def free_cash_flow_to_equity(net_income: float, depreciation: float, capex: float,
-                                 working_capital_change: float, net_borrowing: float) -> float:
+    def free_cash_flow_to_equity(net_income: float, depreciation: float, capex: float, working_capital_change: float, net_borrowing: float) -> float:
         """Calculate Free Cash Flow to Equity"""
         return net_income + depreciation - capex - working_capital_change + net_borrowing
 
     @staticmethod
-    def free_cash_flow_to_firm(ebit: float, tax_rate: float, depreciation: float,
-                               capex: float, working_capital_change: float) -> float:
+    def free_cash_flow_to_firm(ebit: float, tax_rate: float, depreciation: float, capex: float, working_capital_change: float) -> float:
         """Calculate Free Cash Flow to Firm"""
         nopat = ebit * (1 - tax_rate)
         return nopat + depreciation - capex - working_capital_change
@@ -347,7 +351,7 @@ class ModelValidator:
     @staticmethod
     def validate_company_data(company_data: CompanyData) -> bool:
         """Validate company data structure"""
-        required_fields = ['symbol', 'current_price', 'shares_outstanding']
+        required_fields = ["symbol", "current_price", "shares_outstanding"]
         for field in required_fields:
             if not hasattr(company_data, field) or getattr(company_data, field) is None:
                 raise ValueError(f"Company data missing required field: {field}")
@@ -357,24 +361,29 @@ class ModelValidator:
 # Exception classes for better error handling
 class FinceptAnalyticsError(Exception):
     """Base exception for analytics module"""
+
     pass
 
 
 class DataProviderError(FinceptAnalyticsError):
     """Exception for data provider issues"""
+
     pass
 
 
 class ValidationError(FinceptAnalyticsError):
     """Exception for input validation failures"""
+
     pass
 
 
 class CalculationError(FinceptAnalyticsError):
     """Exception for calculation failures"""
+
     pass
 
 
 class ModelError(FinceptAnalyticsError):
     """Exception for model-specific issues"""
+
     pass

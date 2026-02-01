@@ -17,6 +17,7 @@ try:
     from rich.text import Text
     from rich.columns import Columns
     from rich.layout import Layout
+
     console = Console()
 except ImportError:
     console = None
@@ -25,6 +26,7 @@ from src.integrations.retail_strategies import retail_strategies, RetailSignal
 from src.agents.enhanced_agents import run_enhanced_multi_agent_analysis
 from src.strategies.quantitative_strategies import analyze_with_all_strategies
 
+
 class AnalysisDisplay:
     """Comprehensive analysis display system"""
 
@@ -32,7 +34,7 @@ class AnalysisDisplay:
         self.last_analysis = {}
         self.selected_entry = None
 
-    def display_full_analysis(self, ticker: str, asset_type: str = 'stock_us') -> Dict[str, Any]:
+    def display_full_analysis(self, ticker: str, asset_type: str = "stock_us") -> Dict[str, Any]:
         """Display comprehensive analysis for a ticker"""
         console.print(f"\n[bold blue]🎯 COMPREHENSIVE ANALYSIS - {ticker} ({asset_type})[/bold blue]")
         console.print("=" * 80)
@@ -49,13 +51,7 @@ class AnalysisDisplay:
             retail_signals = self._run_retail_strategies(ticker)
 
         # Store results
-        analysis_data = {
-            'ticker': ticker,
-            'agent_results': agent_results,
-            'strategy_results': strategy_results,
-            'retail_signals': retail_signals,
-            'timestamp': datetime.now().isoformat()
-        }
+        analysis_data = {"ticker": ticker, "agent_results": agent_results, "strategy_results": strategy_results, "retail_signals": retail_signals, "timestamp": datetime.now().isoformat()}
 
         self.last_analysis[ticker] = analysis_data
 
@@ -74,21 +70,15 @@ class AnalysisDisplay:
         import numpy as np
 
         # Generate sample data
-        dates = pd.date_range(start='2024-01-01', periods=100, freq='1D')
+        dates = pd.date_range(start="2024-01-01", periods=100, freq="1D")
         np.random.seed(42)
-        data = pd.DataFrame({
-            'open': np.random.randn(100).cumsum() + 100,
-            'high': np.random.randn(100).cumsum() + 105,
-            'low': np.random.randn(100).cumsum() + 95,
-            'close': np.random.randn(100).cumsum() + 100,
-            'volume': np.random.randint(1000, 10000, 100)
-        }, index=dates)
+        data = pd.DataFrame({"open": np.random.randn(100).cumsum() + 100, "high": np.random.randn(100).cumsum() + 105, "low": np.random.randn(100).cumsum() + 95, "close": np.random.randn(100).cumsum() + 100, "volume": np.random.randint(1000, 10000, 100)}, index=dates)
 
-        current_price = data['close'].iloc[-1]
+        current_price = data["close"].iloc[-1]
         portfolio_value = 10000  # Mock
 
         retail_signals = []
-        for strategy_name in ['scalping_momentum', 'swing_trading', 'breakout_trading']:
+        for strategy_name in ["scalping_momentum", "swing_trading", "breakout_trading"]:
             signal = retail_strategies.execute_strategy(strategy_name, data, current_price, portfolio_value)
             if signal:
                 retail_signals.append(signal)
@@ -104,21 +94,16 @@ class AnalysisDisplay:
             table.add_column("Confidence", style="yellow")
             table.add_column("Analysis Type", style="magenta")
 
-            if 'results' in agent_results and ticker in agent_results['results']:
-                ticker_data = agent_results['results'][ticker]
+            if "results" in agent_results and ticker in agent_results["results"]:
+                ticker_data = agent_results["results"][ticker]
 
                 # Sentiment Analysis
-                if 'sentiment_analysis' in ticker_data:
-                    sentiment = ticker_data['sentiment_analysis']
-                    table.add_row(
-                        "🎭 Sentiment Agent",
-                        sentiment.get('overall_sentiment', 'N/A').upper(),
-                        f"{sentiment.get('confidence', 0):.1%}",
-                        "News + Social Media"
-                    )
+                if "sentiment_analysis" in ticker_data:
+                    sentiment = ticker_data["sentiment_analysis"]
+                    table.add_row("🎭 Sentiment Agent", sentiment.get("overall_sentiment", "N/A").upper(), f"{sentiment.get('confidence', 0):.1%}", "News + Social Media")
 
                 # Enhanced analysis results
-                if 'traditional_signals' in ticker_data:
+                if "traditional_signals" in ticker_data:
                     # This would show traditional strategy results
                     pass
 
@@ -134,14 +119,7 @@ class AnalysisDisplay:
             table.add_column("Description", style="white")
 
             # Mock strategy results for display
-            strategies = [
-                ("Jim Simons", "BUY", "25%", "Quantitative momentum"),
-                ("Momentum Strategy", "BUY", "20%", "Price momentum"),
-                ("Mean Reversion", "HOLD", "15%", "Oversold/overbought"),
-                ("Factor Investing", "BUY", "20%", "Value factors"),
-                ("Earnings Momentum", "HOLD", "10%", "Earnings trends"),
-                ("Technical Analysis", "BUY", "10%", "Chart patterns")
-            ]
+            strategies = [("Jim Simons", "BUY", "25%", "Quantitative momentum"), ("Momentum Strategy", "BUY", "20%", "Price momentum"), ("Mean Reversion", "HOLD", "15%", "Oversold/overbought"), ("Factor Investing", "BUY", "20%", "Value factors"), ("Earnings Momentum", "HOLD", "10%", "Earnings trends"), ("Technical Analysis", "BUY", "10%", "Chart patterns")]
 
             for strategy, signal, weight, desc in strategies:
                 table.add_row(strategy, signal, weight, desc)
@@ -160,19 +138,11 @@ class AnalysisDisplay:
 
             for signal in retail_signals[:5]:  # Show top 5
                 rr_ratio = f"{signal.risk_reward_ratio:.1f}" if signal.risk_reward_ratio else "N/A"
-                table.add_row(
-                    signal.strategy_name.replace('_', ' ').title(),
-                    signal.action,
-                    f"{signal.strength:.1%}",
-                    signal.timeframe,
-                    rr_ratio
-                )
+                table.add_row(signal.strategy_name.replace("_", " ").title(), signal.action, f"{signal.strength:.1%}", signal.timeframe, rr_ratio)
 
             console.print(table)
 
-    def _display_entry_recommendation(self, agent_results: Dict,
-                                    strategy_results: Any,
-                                    retail_signals: List[RetailSignal]):
+    def _display_entry_recommendation(self, agent_results: Dict, strategy_results: Any, retail_signals: List[RetailSignal]):
         """Display final entry recommendation"""
         if console:
             # Analyze all signals to find best entry
@@ -180,13 +150,9 @@ class AnalysisDisplay:
 
             # Create recommendation panel
             rec_panel = Panel.fit(
-                f"[bold green]🎯 RECOMMENDED ENTRY: {signals_summary['recommended_action']}[/bold_green]\n\n"
-                f"[blue]Confidence: {signals_summary['confidence']:.1%}[/blue]\n"
-                f"[blue]Primary Strategy: {signals_summary['primary_strategy']}[/blue]\n"
-                f"[blue]Analysis Types: {', '.join(signals_summary['analysis_types'])}[/blue]\n\n"
-                f"[yellow]Reasoning: {signals_summary['reasoning']}[/yellow]",
+                f"[bold green]🎯 RECOMMENDED ENTRY: {signals_summary['recommended_action']}[/bold_green]\n\n" f"[blue]Confidence: {signals_summary['confidence']:.1%}[/blue]\n" f"[blue]Primary Strategy: {signals_summary['primary_strategy']}[/blue]\n" f"[blue]Analysis Types: {', '.join(signals_summary['analysis_types'])}[/blue]\n\n" f"[yellow]Reasoning: {signals_summary['reasoning']}[/yellow]",
                 title="[bold]📈 ENTRY ANALYSIS RECOMMENDATION[/bold]",
-                border_style="green"
+                border_style="green",
             )
 
             console.print(rec_panel)
@@ -194,8 +160,7 @@ class AnalysisDisplay:
             # Store selected entry
             self.selected_entry = signals_summary
 
-    def _analyze_all_signals(self, agent_results: Dict, strategy_results: Any,
-                           retail_signals: List[RetailSignal]) -> Dict[str, Any]:
+    def _analyze_all_signals(self, agent_results: Dict, strategy_results: Any, retail_signals: List[RetailSignal]) -> Dict[str, Any]:
         """Analyze all signals to create final recommendation"""
         buy_signals = 0
         sell_signals = 0
@@ -204,27 +169,27 @@ class AnalysisDisplay:
         analysis_types = []
 
         # Analyze agent results
-        if 'results' in agent_results:
-            for ticker_data in agent_results['results'].values():
-                if 'sentiment_analysis' in ticker_data:
-                    sentiment = ticker_data['sentiment_analysis']
-                    if sentiment.get('overall_sentiment') == 'positive':
+        if "results" in agent_results:
+            for ticker_data in agent_results["results"].values():
+                if "sentiment_analysis" in ticker_data:
+                    sentiment = ticker_data["sentiment_analysis"]
+                    if sentiment.get("overall_sentiment") == "positive":
                         buy_signals += 1
-                    elif sentiment.get('overall_sentiment') == 'negative':
+                    elif sentiment.get("overall_sentiment") == "negative":
                         sell_signals += 1
-                    total_confidence += sentiment.get('confidence', 0)
+                    total_confidence += sentiment.get("confidence", 0)
                     signal_count += 1
-                    analysis_types.append('Sentiment')
+                    analysis_types.append("Sentiment")
 
         # Analyze retail signals
         for signal in retail_signals:
-            if signal.action == 'BUY':
+            if signal.action == "BUY":
                 buy_signals += 1
-            elif signal.action == 'SELL':
+            elif signal.action == "SELL":
                 sell_signals += 1
             total_confidence += signal.strength
             signal_count += 1
-            analysis_types.append('Retail')
+            analysis_types.append("Retail")
 
         # Determine final recommendation
         avg_confidence = total_confidence / max(signal_count, 1)
@@ -242,25 +207,14 @@ class AnalysisDisplay:
             primary_strategy = "Neutral Signals"
             reasoning = "Balanced buy/sell signals"
 
-        return {
-            'recommended_action': recommended_action,
-            'confidence': avg_confidence,
-            'primary_strategy': primary_strategy,
-            'analysis_types': list(set(analysis_types)),
-            'reasoning': reasoning,
-            'buy_signals': buy_signals,
-            'sell_signals': sell_signals
-        }
+        return {"recommended_action": recommended_action, "confidence": avg_confidence, "primary_strategy": primary_strategy, "analysis_types": list(set(analysis_types)), "reasoning": reasoning, "buy_signals": buy_signals, "sell_signals": sell_signals}
 
     def display_strategy_comparison(self):
         """Display comparison of all available strategies"""
         if console:
             # Create layout with columns
             layout = Layout()
-            layout.split_row(
-                Layout(name="quantitative"),
-                Layout(name="retail")
-            )
+            layout.split_row(Layout(name="quantitative"), Layout(name="retail"))
 
             # Quantitative strategies
             quant_table = Table(title="📊 QUANTITATIVE STRATEGIES")
@@ -268,14 +222,7 @@ class AnalysisDisplay:
             quant_table.add_column("Type", style="green")
             quant_table.add_column("Risk Level", style="yellow")
 
-            quant_strategies = [
-                ("Jim Simons", "Quantitative", "Medium"),
-                ("Momentum", "Technical", "Medium"),
-                ("Mean Reversion", "Technical", "High"),
-                ("Factor Investing", "Fundamental", "Low"),
-                ("Earnings Momentum", "Fundamental", "Medium"),
-                ("Technical Analysis", "Technical", "Medium")
-            ]
+            quant_strategies = [("Jim Simons", "Quantitative", "Medium"), ("Momentum", "Technical", "Medium"), ("Mean Reversion", "Technical", "High"), ("Factor Investing", "Fundamental", "Low"), ("Earnings Momentum", "Fundamental", "Medium"), ("Technical Analysis", "Technical", "Medium")]
 
             for strategy, stype, risk in quant_strategies:
                 quant_table.add_row(strategy, stype, risk)
@@ -286,18 +233,7 @@ class AnalysisDisplay:
             retail_table.add_column("Timeframe", style="green")
             retail_table.add_column("Risk Level", style="yellow")
 
-            retail_strategies_list = [
-                ("Scalping Momentum", "1m-5m", "High"),
-                ("Swing Trading", "4h-1d", "Medium"),
-                ("Position Trading", "1w-1m", "Low"),
-                ("Breakout Trading", "1h-4h", "Medium"),
-                ("Reversal Trading", "1d", "Medium"),
-                ("Trend Following", "1d-1w", "Low"),
-                ("Range Trading", "1h", "Low"),
-                ("Gap Trading", "1d", "High"),
-                ("Options Straddle", "1d", "High"),
-                ("Statistical Arbitrage", "1h", "Medium")
-            ]
+            retail_strategies_list = [("Scalping Momentum", "1m-5m", "High"), ("Swing Trading", "4h-1d", "Medium"), ("Position Trading", "1w-1m", "Low"), ("Breakout Trading", "1h-4h", "Medium"), ("Reversal Trading", "1d", "Medium"), ("Trend Following", "1d-1w", "Low"), ("Range Trading", "1h", "Low"), ("Gap Trading", "1d", "High"), ("Options Straddle", "1d", "High"), ("Statistical Arbitrage", "1h", "Medium")]
 
             for strategy, timeframe, risk in retail_strategies_list[:6]:  # Show first 6
                 retail_table.add_row(strategy, timeframe, risk)
@@ -311,16 +247,17 @@ class AnalysisDisplay:
         """Get last analysis for a ticker"""
         return self.last_analysis.get(ticker)
 
-    def export_analysis(self, ticker: str, format: str = 'json') -> Optional[str]:
+    def export_analysis(self, ticker: str, format: str = "json") -> Optional[str]:
         """Export analysis results"""
         analysis = self.get_last_analysis(ticker)
         if not analysis:
             return None
 
-        if format == 'json':
+        if format == "json":
             import json
+
             return json.dumps(analysis, indent=2, default=str)
-        elif format == 'text':
+        elif format == "text":
             # Create text summary
             summary = f"Analysis for {ticker}\n"
             summary += "=" * 50 + "\n"
@@ -329,6 +266,7 @@ class AnalysisDisplay:
             return summary
 
         return None
+
 
 # Global instance
 analysis_display = AnalysisDisplay()

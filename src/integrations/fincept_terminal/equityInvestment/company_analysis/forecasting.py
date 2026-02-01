@@ -1,4 +1,3 @@
-
 """Equity Investment Forecasting Module
 ======================================
 
@@ -26,5 +25,3 @@ PARAMETERS:
   - earnings_multiple: Target earnings multiple (default: 15.0)
   - reporting_currency: Reporting currency (default: 'USD')
 """
-
-

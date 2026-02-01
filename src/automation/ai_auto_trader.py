@@ -21,11 +21,7 @@ from enum import Enum
 from collections import defaultdict
 import numpy as np
 import pandas as pd
-from src.brokers.free_broker_api import (
-    FreeBrokerGateway, BrokerAPI, BrokerType,
-    OrderRequest, OrderSide, OrderType, TimeInForce,
-    Account, Position, MarketData
-)
+from src.brokers.free_broker_api import FreeBrokerGateway, BrokerAPI, BrokerType, OrderRequest, OrderSide, OrderType, TimeInForce, Account, Position, MarketData
 from src.strategies.wyckoff.wyckoff_strategy import WyckoffAnalyzer, WyckoffPhase, WyckoffSignal
 from src.analysis.timeframe.multi_timeframe import MultiTimeframeAnalyzer, TrendDirection, TimeframeSignal, MultiTimeframeAnalysis
 from src.ml.ml_signal_generator import MLSignalGenerator
@@ -104,9 +100,7 @@ class AIAutoTrader:
         self.tf_analyzer = MultiTimeframeAnalyzer()
         self.ml_signal_generator = MLSignalGenerator()
 
-        self.risk_manager = RiskManagementFramework(
-            initial_capital=1000000
-        )
+        self.risk_manager = RiskManagementFramework(initial_capital=1000000)
         self.risk_manager.add_risk_limit(RiskMetric.MAX_POSITION_SIZE, 0.20)
         self.risk_manager.add_risk_limit(RiskMetric.MAX_DAILY_LOSS, 0.05)
         self.risk_manager.add_risk_limit(RiskMetric.MAX_DRAWDOWN, 0.15)
@@ -115,23 +109,12 @@ class AIAutoTrader:
         self.completed_trades: List[Trade] = []
         self.pending_signals: List[TradingSignal] = []
 
-        self.watchlist: List[str] = [
-            'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'AAPL', 'MSFT',
-            'EURUSD', 'GBPUSD', 'XAUUSD', 'NVDA', 'TSLA'
-        ]
+        self.watchlist: List[str] = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "AAPL", "MSFT", "EURUSD", "GBPUSD", "XAUUSD", "NVDA", "TSLA"]
 
         self.trading_enabled = True
         self.auto_execution = True
 
-        self.performance_metrics = {
-            'total_trades': 0,
-            'winning_trades': 0,
-            'total_pnl': 0.0,
-            'win_rate': 0.0,
-            'avg_trade_duration': timedelta(),
-            'sharpe_ratio': 0.0,
-            'max_drawdown': 0.0
-        }
+        self.performance_metrics = {"total_trades": 0, "winning_trades": 0, "total_pnl": 0.0, "win_rate": 0.0, "avg_trade_duration": timedelta(), "sharpe_ratio": 0.0, "max_drawdown": 0.0}
 
         self._setup_metrics()
 
@@ -153,9 +136,9 @@ class AIAutoTrader:
         """Analyze a symbol and generate trading signals from all sources"""
 
         signals = []
-        candles_1h = await self._fetch_candles(symbol, '1h', 100)
-        candles_4h = await self._fetch_candles(symbol, '4h', 100)
-        candles_1d = await self._fetch_candles(symbol, '1d', 100)
+        candles_1h = await self._fetch_candles(symbol, "1h", 100)
+        candles_4h = await self._fetch_candles(symbol, "4h", 100)
+        candles_1d = await self._fetch_candles(symbol, "1d", 100)
 
         wyckoff_signal = self._analyze_wyckoff(symbol, candles_1h)
         if wyckoff_signal:
@@ -182,32 +165,32 @@ class AIAutoTrader:
         if not analysis or not analysis.phase:
             return None
 
-        base_price = candles['close'].iloc[-1]
+        base_price = candles["close"].iloc[-1]
 
         if analysis.phase in [WyckoffPhase.ACCUMULATION_A, WyckoffPhase.ACCUMULATION_B]:
-            direction = 'long'
+            direction = "long"
             confidence = 60 + analysis.confidence * 0.3
             stop_loss = base_price * 0.98
             take_profit = base_price * 1.05
         elif analysis.phase in [WyckoffPhase.ACCUMULATION_C, WyckoffPhase.MARKUP]:
-            direction = 'long'
+            direction = "long"
             confidence = 70 + analysis.confidence * 0.2
             stop_loss = base_price * 0.97
             take_profit = base_price * 1.08
         elif analysis.phase in [WyckoffPhase.DISTRIBUTION_A, WyckoffPhase.DISTRIBUTION_B]:
-            direction = 'short'
+            direction = "short"
             confidence = 60 + analysis.confidence * 0.3
             stop_loss = base_price * 1.02
             take_profit = base_price * 0.95
         elif analysis.phase in [WyckoffPhase.DISTRIBUTION_C, WyckoffPhase.MARKDOWN]:
-            direction = 'short'
+            direction = "short"
             confidence = 70 + analysis.confidence * 0.2
             stop_loss = base_price * 1.03
             take_profit = base_price * 0.92
         else:
             return None
 
-        risk_reward = (take_profit - base_price) / (base_price - stop_loss) if direction == 'long' else (base_price - take_profit) / (stop_loss - base_price)
+        risk_reward = (take_profit - base_price) / (base_price - stop_loss) if direction == "long" else (base_price - take_profit) / (stop_loss - base_price)
 
         strength = SignalStrength.MODERATE
         if confidence > 80:
@@ -219,43 +202,19 @@ class AIAutoTrader:
         elif confidence > 60:
             strength = SignalStrength.WEAK
 
-        return TradingSignal(
-            symbol=symbol,
-            direction=direction,
-            strength=strength,
-            confidence=min(95, confidence),
-            sources=[SignalSource.WYCKOFF],
-            entry_price=base_price,
-            stop_loss=stop_loss,
-            take_profit=take_profit,
-            risk_reward_ratio=risk_reward,
-            timestamp=datetime.now(),
-            metadata={
-                'phase': analysis.phase.value,
-                'events': analysis.events,
-                'target': analysis.target,
-                'stop': analysis.stop
-            }
-        )
+        return TradingSignal(symbol=symbol, direction=direction, strength=strength, confidence=min(95, confidence), sources=[SignalSource.WYCKOFF], entry_price=base_price, stop_loss=stop_loss, take_profit=take_profit, risk_reward_ratio=risk_reward, timestamp=datetime.now(), metadata={"phase": analysis.phase.value, "events": analysis.events, "target": analysis.target, "stop": analysis.stop})
 
-    def _analyze_multi_timeframe(self, symbol: str, candles_1h: pd.DataFrame,
-                                   candles_4h: pd.DataFrame, candles_1d: pd.DataFrame) -> Optional[TradingSignal]:
+    def _analyze_multi_timeframe(self, symbol: str, candles_1h: pd.DataFrame, candles_4h: pd.DataFrame, candles_1d: pd.DataFrame) -> Optional[TradingSignal]:
         """Analyze using multi-timeframe alignment"""
 
-        tf_analysis = self.tf_analyzer.analyze_alignment(
-            symbol,
-            ['1h', '4h', '1d'],
-            candles_1h=candles_1h,
-            candles_4h=candles_4h,
-            candles_1d=candles_1d
-        )
+        tf_analysis = self.tf_analyzer.analyze_alignment(symbol, ["1h", "4h", "1d"], candles_1h=candles_1h, candles_4h=candles_4h, candles_1d=candles_1d)
 
         if not tf_analysis or not tf_analysis.direction:
             return None
 
-        base_price = candles_1h['close'].iloc[-1]
+        base_price = candles_1h["close"].iloc[-1]
 
-        direction = 'long' if tf_analysis.primary_trend == TrendDirection.BULLISH else 'short'
+        direction = "long" if tf_analysis.primary_trend == TrendDirection.BULLISH else "short"
 
         if tf_analysis.primary_trend == TrendDirection.BULLISH:
             stop_loss = base_price * 0.985
@@ -264,7 +223,7 @@ class AIAutoTrader:
             stop_loss = base_price * 1.015
             take_profit = base_price * 0.94
 
-        risk_reward = (take_profit - base_price) / (base_price - stop_loss) if direction == 'long' else (base_price - take_profit) / (stop_loss - base_price)
+        risk_reward = (take_profit - base_price) / (base_price - stop_loss) if direction == "long" else (base_price - take_profit) / (stop_loss - base_price)
 
         strength = SignalStrength.MODERATE
         if tf_analysis.confidence > 80:
@@ -272,22 +231,7 @@ class AIAutoTrader:
         elif tf_analysis.confidence > 90:
             strength = SignalStrength.VERY_STRONG
 
-        return TradingSignal(
-            symbol=symbol,
-            direction=direction,
-            strength=strength,
-            confidence=tf_analysis.confidence,
-            sources=[SignalSource.MULTI_TIMEFRAME],
-            entry_price=base_price,
-            stop_loss=stop_loss,
-            take_profit=take_profit,
-            risk_reward_ratio=risk_reward,
-            timestamp=datetime.now(),
-            metadata={
-                'timeframe_results': tf_analysis.timeframe_results,
-                'confluence_score': tf_analysis.confluence_score
-            }
-        )
+        return TradingSignal(symbol=symbol, direction=direction, strength=strength, confidence=tf_analysis.confidence, sources=[SignalSource.MULTI_TIMEFRAME], entry_price=base_price, stop_loss=stop_loss, take_profit=take_profit, risk_reward_ratio=risk_reward, timestamp=datetime.now(), metadata={"timeframe_results": tf_analysis.timeframe_results, "confluence_score": tf_analysis.confluence_score})
 
     async def _analyze_ml(self, symbol: str, candles: pd.DataFrame) -> Optional[TradingSignal]:
         """Analyze using ML models"""
@@ -298,21 +242,21 @@ class AIAutoTrader:
 
             signal = await self.ml_signal_generator.predict(candles)
 
-            if not signal or signal['direction'] == 'neutral':
+            if not signal or signal["direction"] == "neutral":
                 return None
 
-            base_price = candles['close'].iloc[-1]
-            direction = signal['direction']
-            confidence = signal['confidence'] * 100
+            base_price = candles["close"].iloc[-1]
+            direction = signal["direction"]
+            confidence = signal["confidence"] * 100
 
-            if direction == 'long':
+            if direction == "long":
                 stop_loss = base_price * 0.98
                 take_profit = base_price * 1.04
             else:
                 stop_loss = base_price * 1.02
                 take_profit = base_price * 0.96
 
-            risk_reward = (take_profit - base_price) / (base_price - stop_loss) if direction == 'long' else (base_price - take_profit) / (stop_loss - base_price)
+            risk_reward = (take_profit - base_price) / (base_price - stop_loss) if direction == "long" else (base_price - take_profit) / (stop_loss - base_price)
 
             strength = SignalStrength.MODERATE
             if confidence > 80:
@@ -320,22 +264,7 @@ class AIAutoTrader:
             elif confidence > 90:
                 strength = SignalStrength.VERY_STRONG
 
-            return TradingSignal(
-                symbol=symbol,
-                direction=direction,
-                strength=strength,
-                confidence=confidence,
-                sources=[SignalSource.ML_MODEL],
-                entry_price=base_price,
-                stop_loss=stop_loss,
-                take_profit=take_profit,
-                risk_reward_ratio=risk_reward,
-                timestamp=datetime.now(),
-                metadata={
-                    'model': signal.get('model', 'ensemble'),
-                    'features': signal.get('top_features', [])
-                }
-            )
+            return TradingSignal(symbol=symbol, direction=direction, strength=strength, confidence=confidence, sources=[SignalSource.ML_MODEL], entry_price=base_price, stop_loss=stop_loss, take_profit=take_profit, risk_reward_ratio=risk_reward, timestamp=datetime.now(), metadata={"model": signal.get("model", "ensemble"), "features": signal.get("top_features", [])})
         except Exception as e:
             logger.error(f"ML analysis error for {symbol}: {e}")
             return None
@@ -350,12 +279,12 @@ class AIAutoTrader:
 
         df_signals = pd.DataFrame([asdict(s) for s in signals])
 
-        direction_votes = df_signals['direction'].value_counts()
+        direction_votes = df_signals["direction"].value_counts()
         dominant_direction = direction_votes.index[0]
 
-        avg_confidence = df_signals['confidence'].mean()
+        avg_confidence = df_signals["confidence"].mean()
 
-        max_strength = max(s['strength'].value for s in signals)
+        max_strength = max(s["strength"].value for s in signals)
 
         all_sources = []
         for s in signals:
@@ -366,14 +295,14 @@ class AIAutoTrader:
         avg_stop_loss = np.mean([s.stop_loss for s in signals])
         avg_take_profit = np.mean([s.take_profit for s in signals])
 
-        if dominant_direction == 'long':
+        if dominant_direction == "long":
             stop_loss = min(s.stop_loss for s in signals)
             take_profit = max(s.take_profit for s in signals)
         else:
             stop_loss = max(s.stop_loss for s in signals)
             take_profit = min(s.take_profit for s in signals)
 
-        risk_reward = (take_profit - base_price) / (base_price - stop_loss) if dominant_direction == 'long' else (base_price - take_profit) / (stop_loss - base_price)
+        risk_reward = (take_profit - base_price) / (base_price - stop_loss) if dominant_direction == "long" else (base_price - take_profit) / (stop_loss - base_price)
 
         aggregated = TradingSignal(
             symbol=symbol,
@@ -386,11 +315,7 @@ class AIAutoTrader:
             take_profit=take_profit,
             risk_reward_ratio=risk_reward,
             timestamp=datetime.now(),
-            metadata={
-                'signal_count': len(signals),
-                'individual_signals': [asdict(s) for s in signals],
-                'direction_votes': direction_votes.to_dict()
-            }
+            metadata={"signal_count": len(signals), "individual_signals": [asdict(s) for s in signals], "direction_votes": direction_votes.to_dict()},
         )
 
         return aggregated
@@ -407,11 +332,7 @@ class AIAutoTrader:
         account = self.broker_gateway.broker_gateway.brokers.get(BrokerType.PAPER)
         if account:
             balance = asyncio.run(account.get_balance())
-            position_value = signal.entry_price * self.risk_manager.calculate_position_size(
-                signal.entry_price,
-                signal.stop_loss,
-                balance.portfolio_value
-            )
+            position_value = signal.entry_price * self.risk_manager.calculate_position_size(signal.entry_price, signal.stop_loss, balance.portfolio_value)
 
             if position_value > balance.buying_power * 0.5:
                 return False
@@ -424,19 +345,15 @@ class AIAutoTrader:
 
         existing_position = self._get_position_for_symbol(signal.symbol)
         if existing_position:
-            if existing_position['direction'] == signal.direction:
+            if existing_position["direction"] == signal.direction:
                 return False
 
         return True
 
     def _get_position_for_symbol(self, symbol: str) -> Optional[Dict]:
         for trade_id, trade in self.active_trades.items():
-            if trade.symbol == symbol and trade.status == 'open':
-                return {
-                    'trade_id': trade_id,
-                    'direction': trade.direction,
-                    'quantity': trade.quantity
-                }
+            if trade.symbol == symbol and trade.status == "open":
+                return {"trade_id": trade_id, "direction": trade.direction, "quantity": trade.quantity}
         return None
 
     async def execute_trade(self, signal: TradingSignal) -> Optional[Trade]:
@@ -449,11 +366,7 @@ class AIAutoTrader:
         broker = self.broker_gateway.get_best_broker(signal.symbol)
 
         account = await broker.get_balance()
-        position_size = self.risk_manager.calculate_position_size(
-            signal.entry_price,
-            signal.stop_loss,
-            account.portfolio_value
-        )
+        position_size = self.risk_manager.calculate_position_size(signal.entry_price, signal.stop_loss, account.portfolio_value)
 
         if position_size <= 0:
             logger.warning(f"Position size too small for {signal.symbol}")
@@ -461,29 +374,12 @@ class AIAutoTrader:
 
         quantity = position_size / signal.entry_price
 
-        order = OrderRequest(
-            symbol=signal.symbol,
-            side=OrderSide.BUY if signal.direction == 'long' else OrderSide.SELL,
-            order_type=OrderType.MARKET,
-            quantity=quantity,
-            price=signal.entry_price
-        )
+        order = OrderRequest(symbol=signal.symbol, side=OrderSide.BUY if signal.direction == "long" else OrderSide.SELL, order_type=OrderType.MARKET, quantity=quantity, price=signal.entry_price)
 
         try:
             order_result = await self.broker_gateway.place_order(order)
 
-            trade = Trade(
-                trade_id=f"AI_{order_result.order_id}",
-                symbol=signal.symbol,
-                direction=signal.direction,
-                entry_price=order_result.price,
-                quantity=quantity,
-                stop_loss=signal.stop_loss,
-                take_profit=signal.take_profit,
-                status='open',
-                entry_time=datetime.now(),
-                signals=[signal]
-            )
+            trade = Trade(trade_id=f"AI_{order_result.order_id}", symbol=signal.symbol, direction=signal.direction, entry_price=order_result.price, quantity=quantity, stop_loss=signal.stop_loss, take_profit=signal.take_profit, status="open", entry_time=datetime.now(), signals=[signal])
 
             self.active_trades[trade.trade_id] = trade
             logger.info(f"✅ Trade executed: {signal.direction} {quantity:.4f} {signal.symbol} @ ${order_result.price:.2f}")
@@ -501,24 +397,24 @@ class AIAutoTrader:
 
         broker = self.broker_gateway.get_best_broker(trade.symbol)
 
-        while trade.status == 'open':
+        while trade.status == "open":
             try:
                 market_data = await broker.get_market_data(trade.symbol)
                 current_price = market_data.price
 
-                if trade.direction == 'long':
+                if trade.direction == "long":
                     if current_price <= trade.stop_loss:
-                        await self._close_trade(trade, current_price, 'stop_loss')
+                        await self._close_trade(trade, current_price, "stop_loss")
                         break
                     elif current_price >= trade.take_profit:
-                        await self._close_trade(trade, current_price, 'take_profit')
+                        await self._close_trade(trade, current_price, "take_profit")
                         break
                 else:
                     if current_price >= trade.stop_loss:
-                        await self._close_trade(trade, current_price, 'stop_loss')
+                        await self._close_trade(trade, current_price, "stop_loss")
                         break
                     elif current_price <= trade.take_profit:
-                        await self._close_trade(trade, current_price, 'take_profit')
+                        await self._close_trade(trade, current_price, "take_profit")
                         break
 
                 await asyncio.sleep(5)
@@ -532,14 +428,8 @@ class AIAutoTrader:
 
         broker = self.broker_gateway.get_best_broker(trade.symbol)
 
-        side = OrderSide.SELL if trade.direction == 'long' else OrderSide.BUY
-        order = OrderRequest(
-            symbol=trade.symbol,
-            side=side,
-            order_type=OrderType.MARKET,
-            quantity=trade.quantity,
-            price=exit_price
-        )
+        side = OrderSide.SELL if trade.direction == "long" else OrderSide.BUY
+        order = OrderRequest(symbol=trade.symbol, side=side, order_type=OrderType.MARKET, quantity=trade.quantity, price=exit_price)
 
         try:
             await self.broker_gateway.place_order(order)
@@ -548,8 +438,8 @@ class AIAutoTrader:
 
         trade.exit_price = exit_price
         trade.exit_time = datetime.now()
-        trade.status = 'closed'
-        trade.pnl = (exit_price - trade.entry_price) * trade.quantity if trade.direction == 'long' else (trade.entry_price - exit_price) * trade.quantity
+        trade.status = "closed"
+        trade.pnl = (exit_price - trade.entry_price) * trade.quantity if trade.direction == "long" else (trade.entry_price - exit_price) * trade.quantity
         trade.pnl_pct = (trade.pnl / (trade.entry_price * trade.quantity)) * 100
 
         self.completed_trades.append(trade)
@@ -564,15 +454,14 @@ class AIAutoTrader:
             return
 
         pnls = [t.pnl for t in self.completed_trades]
-        self.performance_metrics['total_trades'] = len(self.completed_trades)
-        self.performance_metrics['winning_trades'] = len([p for p in pnls if p > 0])
-        self.performance_metrics['total_pnl'] = sum(pnls)
-        self.performance_metrics['win_rate'] = (self.performance_metrics['winning_trades'] /
-                                                  self.performance_metrics['total_trades']) * 100
+        self.performance_metrics["total_trades"] = len(self.completed_trades)
+        self.performance_metrics["winning_trades"] = len([p for p in pnls if p > 0])
+        self.performance_metrics["total_pnl"] = sum(pnls)
+        self.performance_metrics["win_rate"] = (self.performance_metrics["winning_trades"] / self.performance_metrics["total_trades"]) * 100
 
         returns = np.array([t.pnl_pct for t in self.completed_trades])
         if len(returns) > 1:
-            self.performance_metrics['sharpe_ratio'] = (np.mean(returns) / np.std(returns)) * np.sqrt(252) if np.std(returns) > 0 else 0
+            self.performance_metrics["sharpe_ratio"] = (np.mean(returns) / np.std(returns)) * np.sqrt(252) if np.std(returns) > 0 else 0
 
     async def run_autonomous_trading(self):
         """Run the autonomous trading loop"""
@@ -615,56 +504,36 @@ class AIAutoTrader:
         for account in account_summary:
             total_equity += account.balance.portfolio_value
 
-        return {
-            'status': 'running' if self.trading_enabled else 'stopped',
-            'trading_enabled': self.trading_enabled,
-            'auto_execution': self.auto_execution,
-            'watchlist_count': len(self.watchlist),
-            'active_trades': len(self.active_trades),
-            'completed_trades': len(self.completed_trades),
-            'performance': self.performance_metrics,
-            'total_equity': total_equity,
-            'pending_signals': len(self.pending_signals)
-        }
+        return {"status": "running" if self.trading_enabled else "stopped", "trading_enabled": self.trading_enabled, "auto_execution": self.auto_execution, "watchlist_count": len(self.watchlist), "active_trades": len(self.active_trades), "completed_trades": len(self.completed_trades), "performance": self.performance_metrics, "total_equity": total_equity, "pending_signals": len(self.pending_signals)}
 
     async def _fetch_candles(self, symbol: str, timeframe: str, limit: int) -> pd.DataFrame:
-        intervals = {
-            '1m': 60, '5m': 300, '15m': 900, '30m': 1800,
-            '1h': 3600, '4h': 14400, '1d': 86400, '1w': 604800
-        }
+        intervals = {"1m": 60, "5m": 300, "15m": 900, "30m": 1800, "1h": 3600, "4h": 14400, "1d": 86400, "1w": 604800}
 
         end_time = datetime.now()
         start_time = end_time - timedelta(seconds=intervals[timeframe] * limit)
 
         dates = pd.date_range(start=start_time, end=end_time, periods=limit)
         base_price = 100.0
-        if 'BTC' in symbol:
+        if "BTC" in symbol:
             base_price = 50000.0
-        elif 'ETH' in symbol:
+        elif "ETH" in symbol:
             base_price = 3000.0
-        elif 'EURUSD' in symbol:
+        elif "EURUSD" in symbol:
             base_price = 1.08
-        elif 'XAUUSD' in symbol:
+        elif "XAUUSD" in symbol:
             base_price = 2000.0
-        elif 'AAPL' in symbol:
+        elif "AAPL" in symbol:
             base_price = 175.0
-        elif 'NVDA' in symbol:
+        elif "NVDA" in symbol:
             base_price = 500.0
 
-        data = {
-            'timestamp': dates,
-            'open': [base_price * (1 + np.random.uniform(-0.01, 0.01)) for _ in range(limit)],
-            'high': [],
-            'low': [],
-            'close': [],
-            'volume': [np.random.uniform(1000, 10000) for _ in range(limit)]
-        }
+        data = {"timestamp": dates, "open": [base_price * (1 + np.random.uniform(-0.01, 0.01)) for _ in range(limit)], "high": [], "low": [], "close": [], "volume": [np.random.uniform(1000, 10000) for _ in range(limit)]}
 
         for i in range(limit):
             close = base_price * (1 + np.random.uniform(-0.02, 0.02))
-            data['close'].append(close)
-            data['high'].append(max(data['open'][i], close) * (1 + np.random.uniform(0, 0.01)))
-            data['low'].append(min(data['open'][i], close) * (1 - np.random.uniform(0, 0.01)))
+            data["close"].append(close)
+            data["high"].append(max(data["open"][i], close) * (1 + np.random.uniform(0, 0.01)))
+            data["low"].append(min(data["open"][i], close) * (1 - np.random.uniform(0, 0.01)))
 
         return pd.DataFrame(data)
 

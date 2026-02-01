@@ -49,27 +49,21 @@ from .core import EconomicsBase, ValidationError, CalculationError, DataError
 class ExchangeCalculator(EconomicsBase):
     """Main exchange rate calculations coordinator"""
 
-    def __init__(self, precision: int = 8, base_currency: str = 'USD'):
+    def __init__(self, precision: int = 8, base_currency: str = "USD"):
         super().__init__(precision, base_currency)
         self.cross_rate = CrossRateCalculator(precision, base_currency)
         self.forward_calc = ForwardCalculator(precision, base_currency)
 
     def calculate(self, calculation_type: str, **kwargs) -> Dict[str, Any]:
         """Route calculation to appropriate calculator"""
-        calculators = {
-            'cross_rate': self.cross_rate.calculate,
-            'forward_rate': self.forward_calc.calculate,
-            'percentage_change': self.calculate_percentage_change,
-            'arbitrage_check': self.check_arbitrage_relationship
-        }
+        calculators = {"cross_rate": self.cross_rate.calculate, "forward_rate": self.forward_calc.calculate, "percentage_change": self.calculate_percentage_change, "arbitrage_check": self.check_arbitrage_relationship}
 
         if calculation_type not in calculators:
             raise ValidationError(f"Unknown calculation type: {calculation_type}")
 
         return calculators[calculation_type](**kwargs)
 
-    def calculate_percentage_change(self, initial_rate: Decimal, final_rate: Decimal,
-                                    quote_convention: str = 'direct') -> Dict[str, Any]:
+    def calculate_percentage_change(self, initial_rate: Decimal, final_rate: Decimal, quote_convention: str = "direct") -> Dict[str, Any]:
         """Calculate percentage change in currency relative to another"""
         initial = self.to_decimal(initial_rate)
         final = self.to_decimal(final_rate)
@@ -77,26 +71,18 @@ class ExchangeCalculator(EconomicsBase):
         self.validator.validate_exchange_rate(initial)
         self.validator.validate_exchange_rate(final)
 
-        if quote_convention == 'direct':
+        if quote_convention == "direct":
             # Direct quote: domestic currency per unit of foreign currency
             # Increase means domestic currency weakening
             percentage_change = ((final - initial) / initial) * self.to_decimal(100)
-            currency_movement = 'weakened' if percentage_change > 0 else 'strengthened'
+            currency_movement = "weakened" if percentage_change > 0 else "strengthened"
         else:
             # Indirect quote: foreign currency per unit of domestic currency
             # Increase means domestic currency strengthening
             percentage_change = ((final - initial) / initial) * self.to_decimal(100)
-            currency_movement = 'strengthened' if percentage_change > 0 else 'weakened'
+            currency_movement = "strengthened" if percentage_change > 0 else "weakened"
 
-        return {
-            'initial_rate': initial,
-            'final_rate': final,
-            'percentage_change': percentage_change,
-            'absolute_change': final - initial,
-            'quote_convention': quote_convention,
-            'currency_movement': currency_movement,
-            'interpretation': self._interpret_currency_change(percentage_change, quote_convention)
-        }
+        return {"initial_rate": initial, "final_rate": final, "percentage_change": percentage_change, "absolute_change": final - initial, "quote_convention": quote_convention, "currency_movement": currency_movement, "interpretation": self._interpret_currency_change(percentage_change, quote_convention)}
 
     def _interpret_currency_change(self, change: Decimal, convention: str) -> str:
         """Provide interpretation of currency movement"""
@@ -112,14 +98,12 @@ class ExchangeCalculator(EconomicsBase):
             magnitude = "substantial"
 
         direction = "appreciation" if change > 0 else "depreciation"
-        if convention == 'indirect':
+        if convention == "indirect":
             direction = "depreciation" if change > 0 else "appreciation"
 
         return f"{magnitude} {direction} ({abs_change:.2f}%)"
 
-    def check_arbitrage_relationship(self, spot_rate: Decimal, forward_rate: Decimal,
-                                     domestic_rate: Decimal, foreign_rate: Decimal,
-                                     time_period: Decimal) -> Dict[str, Any]:
+    def check_arbitrage_relationship(self, spot_rate: Decimal, forward_rate: Decimal, domestic_rate: Decimal, foreign_rate: Decimal, time_period: Decimal) -> Dict[str, Any]:
         """Check arbitrage relationship between spot/forward rates and interest rates"""
         spot = self.to_decimal(spot_rate)
         forward = self.to_decimal(forward_rate)
@@ -128,10 +112,7 @@ class ExchangeCalculator(EconomicsBase):
         t = self.to_decimal(time_period)
 
         # Theoretical forward rate based on interest rate parity
-        theoretical_forward = spot * (
-                (self.to_decimal(1) + r_domestic * t) /
-                (self.to_decimal(1) + r_foreign * t)
-        )
+        theoretical_forward = spot * ((self.to_decimal(1) + r_domestic * t) / (self.to_decimal(1) + r_foreign * t))
 
         deviation = forward - theoretical_forward
         deviation_percentage = (deviation / theoretical_forward) * self.to_decimal(100)
@@ -140,57 +121,24 @@ class ExchangeCalculator(EconomicsBase):
         arbitrage_threshold = self.to_decimal(0.1)  # 0.1%
         arbitrage_exists = abs(deviation_percentage) > arbitrage_threshold
 
-        arbitrage_strategy = self._determine_arbitrage_strategy(
-            deviation, spot, forward, r_domestic, r_foreign, t
-        ) if arbitrage_exists else None
+        arbitrage_strategy = self._determine_arbitrage_strategy(deviation, spot, forward, r_domestic, r_foreign, t) if arbitrage_exists else None
 
-        return {
-            'spot_rate': spot,
-            'forward_rate': forward,
-            'theoretical_forward': theoretical_forward,
-            'deviation': deviation,
-            'deviation_percentage': deviation_percentage,
-            'arbitrage_exists': arbitrage_exists,
-            'arbitrage_strategy': arbitrage_strategy,
-            'domestic_rate': r_domestic,
-            'foreign_rate': r_foreign,
-            'time_period': t,
-            'relationship_holds': not arbitrage_exists
-        }
+        return {"spot_rate": spot, "forward_rate": forward, "theoretical_forward": theoretical_forward, "deviation": deviation, "deviation_percentage": deviation_percentage, "arbitrage_exists": arbitrage_exists, "arbitrage_strategy": arbitrage_strategy, "domestic_rate": r_domestic, "foreign_rate": r_foreign, "time_period": t, "relationship_holds": not arbitrage_exists}
 
-    def _determine_arbitrage_strategy(self, deviation: Decimal, spot: Decimal,
-                                      forward: Decimal, r_dom: Decimal, r_for: Decimal,
-                                      t: Decimal) -> Dict[str, str]:
+    def _determine_arbitrage_strategy(self, deviation: Decimal, spot: Decimal, forward: Decimal, r_dom: Decimal, r_for: Decimal, t: Decimal) -> Dict[str, str]:
         """Determine arbitrage strategy when opportunity exists"""
         if deviation > 0:  # Forward overpriced
-            return {
-                'action': 'Sell forward, buy spot',
-                'step1': 'Borrow domestic currency',
-                'step2': 'Convert to foreign currency at spot rate',
-                'step3': 'Invest foreign currency at foreign rate',
-                'step4': 'Sell foreign currency forward',
-                'step5': 'At maturity: collect foreign investment, deliver to forward contract',
-                'profit_source': 'Forward rate higher than theoretical rate'
-            }
+            return {"action": "Sell forward, buy spot", "step1": "Borrow domestic currency", "step2": "Convert to foreign currency at spot rate", "step3": "Invest foreign currency at foreign rate", "step4": "Sell foreign currency forward", "step5": "At maturity: collect foreign investment, deliver to forward contract", "profit_source": "Forward rate higher than theoretical rate"}
         else:  # Forward underpriced
-            return {
-                'action': 'Buy forward, sell spot',
-                'step1': 'Borrow foreign currency',
-                'step2': 'Convert to domestic currency at spot rate',
-                'step3': 'Invest domestic currency at domestic rate',
-                'step4': 'Buy foreign currency forward',
-                'step5': 'At maturity: collect domestic investment, buy foreign currency via forward',
-                'profit_source': 'Forward rate lower than theoretical rate'
-            }
+            return {"action": "Buy forward, sell spot", "step1": "Borrow foreign currency", "step2": "Convert to domestic currency at spot rate", "step3": "Invest domestic currency at domestic rate", "step4": "Buy foreign currency forward", "step5": "At maturity: collect domestic investment, buy foreign currency via forward", "profit_source": "Forward rate lower than theoretical rate"}
 
 
 class CrossRateCalculator(EconomicsBase):
     """Currency cross-rate calculations and interpretations"""
 
-    def calculate_cross_rate(self, base_quote_rates: Dict[str, Decimal],
-                             currency_pair: str) -> Dict[str, Any]:
+    def calculate_cross_rate(self, base_quote_rates: Dict[str, Decimal], currency_pair: str) -> Dict[str, Any]:
         """Calculate cross-rate between two currencies using base currency"""
-        pair_parts = currency_pair.split('/')
+        pair_parts = currency_pair.split("/")
         if len(pair_parts) != 2:
             raise ValidationError("Currency pair must be in format 'CUR1/CUR2'")
 
@@ -215,15 +163,15 @@ class CrossRateCalculator(EconomicsBase):
         inverse_pair = f"{quote_currency}/{base_currency}"
 
         return {
-            'currency_pair': currency_pair,
-            'cross_rate': cross_rate,
-            'inverse_pair': inverse_pair,
-            'inverse_rate': inverse_rate,
-            'base_currency_rate': base_vs_reference,
-            'quote_currency_rate': quote_vs_reference,
-            'reference_currency': self.base_currency,
-            'calculation_method': f"{quote_currency}/{self.base_currency} ÷ {base_currency}/{self.base_currency}",
-            'interpretation': f"1 {base_currency} = {cross_rate:.6f} {quote_currency}"
+            "currency_pair": currency_pair,
+            "cross_rate": cross_rate,
+            "inverse_pair": inverse_pair,
+            "inverse_rate": inverse_rate,
+            "base_currency_rate": base_vs_reference,
+            "quote_currency_rate": quote_vs_reference,
+            "reference_currency": self.base_currency,
+            "calculation_method": f"{quote_currency}/{self.base_currency} ÷ {base_currency}/{self.base_currency}",
+            "interpretation": f"1 {base_currency} = {cross_rate:.6f} {quote_currency}",
         }
 
     def calculate_triangular_cross_rates(self, currency_rates: Dict[str, Decimal]) -> Dict[str, Any]:
@@ -237,20 +185,11 @@ class CrossRateCalculator(EconomicsBase):
                     pair = f"{base_curr}/{quote_curr}"
                     try:
                         result = self.calculate_cross_rate(currency_rates, pair)
-                        cross_rates[pair] = {
-                            'rate': result['cross_rate'],
-                            'calculation': result['calculation_method']
-                        }
+                        cross_rates[pair] = {"rate": result["cross_rate"], "calculation": result["calculation_method"]}
                     except Exception as e:
-                        cross_rates[pair] = {'error': str(e)}
+                        cross_rates[pair] = {"error": str(e)}
 
-        return {
-            'cross_rates': cross_rates,
-            'total_pairs': len(cross_rates),
-            'input_currencies': currencies,
-            'reference_currency': self.base_currency,
-            'timestamp': datetime.now().isoformat()
-        }
+        return {"cross_rates": cross_rates, "total_pairs": len(cross_rates), "input_currencies": currencies, "reference_currency": self.base_currency, "timestamp": datetime.now().isoformat()}
 
     def verify_cross_rate_consistency(self, rates: Dict[str, Decimal]) -> Dict[str, Any]:
         """Verify cross-rate consistency (no arbitrage condition)"""
@@ -273,32 +212,18 @@ class CrossRateCalculator(EconomicsBase):
                     deviation = abs(product - self.to_decimal(1))
 
                     if deviation > self.to_decimal(0.0001):  # 0.01% tolerance
-                        inconsistencies.append({
-                            'currencies': [curr1, curr2, curr3],
-                            'rates': [rate_12, rate_23, rate_31],
-                            'product': product,
-                            'deviation': deviation,
-                            'deviation_percentage': deviation * self.to_decimal(100)
-                        })
+                        inconsistencies.append({"currencies": [curr1, curr2, curr3], "rates": [rate_12, rate_23, rate_31], "product": product, "deviation": deviation, "deviation_percentage": deviation * self.to_decimal(100)})
 
-        return {
-            'consistent': len(inconsistencies) == 0,
-            'inconsistencies': inconsistencies,
-            'total_combinations_checked': len(currencies) * (len(currencies) - 1) * (len(currencies) - 2) // 6,
-            'currencies_analyzed': currencies
-        }
+        return {"consistent": len(inconsistencies) == 0, "inconsistencies": inconsistencies, "total_combinations_checked": len(currencies) * (len(currencies) - 1) * (len(currencies) - 2) // 6, "currencies_analyzed": currencies}
 
-    def calculate(self, calculation_type: str = 'single', **kwargs) -> Dict[str, Any]:
+    def calculate(self, calculation_type: str = "single", **kwargs) -> Dict[str, Any]:
         """Main cross-rate calculation dispatcher"""
-        if calculation_type == 'single':
-            return self.calculate_cross_rate(
-                kwargs['base_quote_rates'],
-                kwargs['currency_pair']
-            )
-        elif calculation_type == 'all_pairs':
-            return self.calculate_triangular_cross_rates(kwargs['currency_rates'])
-        elif calculation_type == 'consistency_check':
-            return self.verify_cross_rate_consistency(kwargs['rates'])
+        if calculation_type == "single":
+            return self.calculate_cross_rate(kwargs["base_quote_rates"], kwargs["currency_pair"])
+        elif calculation_type == "all_pairs":
+            return self.calculate_triangular_cross_rates(kwargs["currency_rates"])
+        elif calculation_type == "consistency_check":
+            return self.verify_cross_rate_consistency(kwargs["rates"])
         else:
             raise ValidationError(f"Unknown calculation type: {calculation_type}")
 
@@ -306,18 +231,17 @@ class CrossRateCalculator(EconomicsBase):
 class ForwardCalculator(EconomicsBase):
     """Forward rate calculations using points and percentage terms"""
 
-    def calculate_forward_rate_from_points(self, spot_rate: Decimal, forward_points: Decimal,
-                                           point_convention: str = 'standard') -> Dict[str, Any]:
+    def calculate_forward_rate_from_points(self, spot_rate: Decimal, forward_points: Decimal, point_convention: str = "standard") -> Dict[str, Any]:
         """Calculate forward rate from forward points"""
         spot = self.to_decimal(spot_rate)
         points = self.to_decimal(forward_points)
 
         self.validator.validate_exchange_rate(spot)
 
-        if point_convention == 'standard':
+        if point_convention == "standard":
             # Standard: points are in the last decimal place (typically 4th for major pairs)
             divisor = self.to_decimal(10000)  # Standard 4 decimal places
-        elif point_convention == 'big_figure':
+        elif point_convention == "big_figure":
             # Big figure: points are in pips (5th decimal place)
             divisor = self.to_decimal(100000)
         else:
@@ -331,20 +255,9 @@ class ForwardCalculator(EconomicsBase):
         premium_discount = forward_rate - spot
         premium_discount_percentage = (premium_discount / spot) * self.to_decimal(100)
 
-        return {
-            'spot_rate': spot,
-            'forward_points': points,
-            'forward_rate': forward_rate,
-            'point_convention': point_convention,
-            'divisor': divisor,
-            'premium_discount': premium_discount,
-            'premium_discount_percentage': premium_discount_percentage,
-            'is_premium': is_premium,
-            'calculation': f"{spot} + ({points}/{divisor}) = {forward_rate}"
-        }
+        return {"spot_rate": spot, "forward_points": points, "forward_rate": forward_rate, "point_convention": point_convention, "divisor": divisor, "premium_discount": premium_discount, "premium_discount_percentage": premium_discount_percentage, "is_premium": is_premium, "calculation": f"{spot} + ({points}/{divisor}) = {forward_rate}"}
 
-    def calculate_forward_points_from_rate(self, spot_rate: Decimal, forward_rate: Decimal,
-                                           point_convention: str = 'standard') -> Dict[str, Any]:
+    def calculate_forward_points_from_rate(self, spot_rate: Decimal, forward_rate: Decimal, point_convention: str = "standard") -> Dict[str, Any]:
         """Calculate forward points from spot and forward rates"""
         spot = self.to_decimal(spot_rate)
         forward = self.to_decimal(forward_rate)
@@ -352,9 +265,9 @@ class ForwardCalculator(EconomicsBase):
         self.validator.validate_exchange_rate(spot)
         self.validator.validate_exchange_rate(forward)
 
-        if point_convention == 'standard':
+        if point_convention == "standard":
             multiplier = self.to_decimal(10000)
-        elif point_convention == 'big_figure':
+        elif point_convention == "big_figure":
             multiplier = self.to_decimal(100000)
         else:
             raise ValidationError(f"Unknown point convention: {point_convention}")
@@ -362,19 +275,9 @@ class ForwardCalculator(EconomicsBase):
         # Calculate forward points
         forward_points = (forward - spot) * multiplier
 
-        return {
-            'spot_rate': spot,
-            'forward_rate': forward,
-            'forward_points': forward_points,
-            'point_convention': point_convention,
-            'multiplier': multiplier,
-            'is_premium': forward > spot,
-            'calculation': f"({forward} - {spot}) × {multiplier} = {forward_points} points"
-        }
+        return {"spot_rate": spot, "forward_rate": forward, "forward_points": forward_points, "point_convention": point_convention, "multiplier": multiplier, "is_premium": forward > spot, "calculation": f"({forward} - {spot}) × {multiplier} = {forward_points} points"}
 
-    def calculate_forward_rate_percentage(self, spot_rate: Decimal, premium_discount_percent: Decimal,
-                                          time_to_maturity: Decimal,
-                                          annualized: bool = True) -> Dict[str, Any]:
+    def calculate_forward_rate_percentage(self, spot_rate: Decimal, premium_discount_percent: Decimal, time_to_maturity: Decimal, annualized: bool = True) -> Dict[str, Any]:
         """Calculate forward rate from percentage premium/discount"""
         spot = self.to_decimal(spot_rate)
         premium_percent = self.to_decimal(premium_discount_percent)
@@ -399,20 +302,9 @@ class ForwardCalculator(EconomicsBase):
         else:
             annualized_premium = premium_percent
 
-        return {
-            'spot_rate': spot,
-            'forward_rate': forward_rate,
-            'premium_discount_percent': premium_percent,
-            'time_to_maturity': time_period,
-            'period_premium': period_premium,
-            'annualized_premium': annualized_premium,
-            'is_annualized_input': annualized,
-            'is_premium': premium_percent > 0,
-            'calculation': f"{spot} × (1 + {period_premium}%) = {forward_rate}"
-        }
+        return {"spot_rate": spot, "forward_rate": forward_rate, "premium_discount_percent": premium_percent, "time_to_maturity": time_period, "period_premium": period_premium, "annualized_premium": annualized_premium, "is_annualized_input": annualized, "is_premium": premium_percent > 0, "calculation": f"{spot} × (1 + {period_premium}%) = {forward_rate}"}
 
-    def interpret_forward_discount_premium(self, spot_rate: Decimal, forward_rate: Decimal,
-                                           time_to_maturity: Decimal) -> Dict[str, Any]:
+    def interpret_forward_discount_premium(self, spot_rate: Decimal, forward_rate: Decimal, time_to_maturity: Decimal) -> Dict[str, Any]:
         """Interpret forward discount or premium"""
         spot = self.to_decimal(spot_rate)
         forward = self.to_decimal(forward_rate)
@@ -438,50 +330,33 @@ class ForwardCalculator(EconomicsBase):
             interest_rate_implication = "Interest rates likely equal between currencies"
 
         return {
-            'spot_rate': spot,
-            'forward_rate': forward,
-            'absolute_difference': absolute_difference,
-            'percentage_difference': percentage_difference,
-            'annualized_percentage': annualized_percentage,
-            'time_to_maturity': time_period,
-            'interpretation': interpretation,
-            'market_expectation': market_expectation,
-            'interest_rate_implication': interest_rate_implication,
-            'is_premium': forward > spot,
-            'is_discount': forward < spot
+            "spot_rate": spot,
+            "forward_rate": forward,
+            "absolute_difference": absolute_difference,
+            "percentage_difference": percentage_difference,
+            "annualized_percentage": annualized_percentage,
+            "time_to_maturity": time_period,
+            "interpretation": interpretation,
+            "market_expectation": market_expectation,
+            "interest_rate_implication": interest_rate_implication,
+            "is_premium": forward > spot,
+            "is_discount": forward < spot,
         }
 
     def calculate(self, calculation_type: str, **kwargs) -> Dict[str, Any]:
         """Main forward calculation dispatcher"""
         calculations = {
-            'from_points': lambda: self.calculate_forward_rate_from_points(
-                self.to_decimal(kwargs['spot_rate']),
-                self.to_decimal(kwargs['forward_points']),
-                kwargs.get('point_convention', 'standard')
-            ),
-            'to_points': lambda: self.calculate_forward_points_from_rate(
-                self.to_decimal(kwargs['spot_rate']),
-                self.to_decimal(kwargs['forward_rate']),
-                kwargs.get('point_convention', 'standard')
-            ),
-            'from_percentage': lambda: self.calculate_forward_rate_percentage(
-                self.to_decimal(kwargs['spot_rate']),
-                self.to_decimal(kwargs['premium_discount_percent']),
-                self.to_decimal(kwargs['time_to_maturity']),
-                kwargs.get('annualized', True)
-            ),
-            'interpret_premium_discount': lambda: self.interpret_forward_discount_premium(
-                self.to_decimal(kwargs['spot_rate']),
-                self.to_decimal(kwargs['forward_rate']),
-                self.to_decimal(kwargs['time_to_maturity'])
-            )
+            "from_points": lambda: self.calculate_forward_rate_from_points(self.to_decimal(kwargs["spot_rate"]), self.to_decimal(kwargs["forward_points"]), kwargs.get("point_convention", "standard")),
+            "to_points": lambda: self.calculate_forward_points_from_rate(self.to_decimal(kwargs["spot_rate"]), self.to_decimal(kwargs["forward_rate"]), kwargs.get("point_convention", "standard")),
+            "from_percentage": lambda: self.calculate_forward_rate_percentage(self.to_decimal(kwargs["spot_rate"]), self.to_decimal(kwargs["premium_discount_percent"]), self.to_decimal(kwargs["time_to_maturity"]), kwargs.get("annualized", True)),
+            "interpret_premium_discount": lambda: self.interpret_forward_discount_premium(self.to_decimal(kwargs["spot_rate"]), self.to_decimal(kwargs["forward_rate"]), self.to_decimal(kwargs["time_to_maturity"])),
         }
 
         if calculation_type not in calculations:
             raise ValidationError(f"Unknown calculation type: {calculation_type}")
 
         result = calculations[calculation_type]()
-        result['metadata'] = self.get_metadata()
-        result['calculation_type'] = calculation_type
+        result["metadata"] = self.get_metadata()
+        result["calculation_type"] = calculation_type
 
         return result

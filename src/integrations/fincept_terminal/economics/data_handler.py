@@ -58,23 +58,17 @@ class DataProvider(ABC):
         self.rate_limit_delay = 1.0  # seconds between requests
 
     @abstractmethod
-    def get_exchange_rates(self, base_currency: str, target_currencies: List[str],
-                           start_date: Optional[datetime] = None,
-                           end_date: Optional[datetime] = None) -> pd.DataFrame:
+    def get_exchange_rates(self, base_currency: str, target_currencies: List[str], start_date: Optional[datetime] = None, end_date: Optional[datetime] = None) -> pd.DataFrame:
         """Get exchange rate data"""
         pass
 
     @abstractmethod
-    def get_economic_indicators(self, country: str, indicators: List[str],
-                                start_date: Optional[datetime] = None,
-                                end_date: Optional[datetime] = None) -> pd.DataFrame:
+    def get_economic_indicators(self, country: str, indicators: List[str], start_date: Optional[datetime] = None, end_date: Optional[datetime] = None) -> pd.DataFrame:
         """Get economic indicator data"""
         pass
 
     @abstractmethod
-    def get_interest_rates(self, country: str, rate_types: List[str],
-                           start_date: Optional[datetime] = None,
-                           end_date: Optional[datetime] = None) -> pd.DataFrame:
+    def get_interest_rates(self, country: str, rate_types: List[str], start_date: Optional[datetime] = None, end_date: Optional[datetime] = None) -> pd.DataFrame:
         """Get interest rate data"""
         pass
 
@@ -84,6 +78,7 @@ class DataProvider(ABC):
             time_since_last = datetime.now() - self.last_request_time
             if time_since_last.total_seconds() < self.rate_limit_delay:
                 import time
+
                 time.sleep(self.rate_limit_delay - time_since_last.total_seconds())
         self.last_request_time = datetime.now()
 
@@ -105,22 +100,11 @@ class FREDConnector(DataProvider):
         self.base_url = "https://api.stlouisfed.org/fred"
         self.rate_limit_delay = 0.5  # FRED allows 120 requests per minute
 
-    def get_exchange_rates(self, base_currency: str, target_currencies: List[str],
-                           start_date: Optional[datetime] = None,
-                           end_date: Optional[datetime] = None) -> pd.DataFrame:
+    def get_exchange_rates(self, base_currency: str, target_currencies: List[str], start_date: Optional[datetime] = None, end_date: Optional[datetime] = None) -> pd.DataFrame:
         """Get exchange rates from FRED"""
 
         # FRED exchange rate series mapping
-        fx_series_map = {
-            'USD': {
-                'EUR': 'DEXUSEU',
-                'GBP': 'DEXUSUK',
-                'JPY': 'DEXJPUS',
-                'CAD': 'DEXCAUS',
-                'CHF': 'DEXSZUS',
-                'AUD': 'DEXUSAL'
-            }
-        }
+        fx_series_map = {"USD": {"EUR": "DEXUSEU", "GBP": "DEXUSUK", "JPY": "DEXJPUS", "CAD": "DEXCAUS", "CHF": "DEXSZUS", "AUD": "DEXUSAL"}}
 
         if base_currency not in fx_series_map:
             raise DataError(f"Base currency {base_currency} not supported by FRED")
@@ -140,25 +124,13 @@ class FREDConnector(DataProvider):
 
         return pd.DataFrame(fx_data)
 
-    def get_economic_indicators(self, country: str, indicators: List[str],
-                                start_date: Optional[datetime] = None,
-                                end_date: Optional[datetime] = None) -> pd.DataFrame:
+    def get_economic_indicators(self, country: str, indicators: List[str], start_date: Optional[datetime] = None, end_date: Optional[datetime] = None) -> pd.DataFrame:
         """Get economic indicators from FRED"""
 
         # FRED economic indicator series mapping
-        us_indicators_map = {
-            'gdp': 'GDP',
-            'gdp_growth': 'A191RL1Q225SBEA',
-            'inflation': 'CPIAUCSL',
-            'unemployment': 'UNRATE',
-            'interest_rate': 'FEDFUNDS',
-            'industrial_production': 'INDPRO',
-            'consumer_confidence': 'UMCSENT',
-            'trade_balance': 'BOPGSTB',
-            'government_debt': 'GFDEBTN'
-        }
+        us_indicators_map = {"gdp": "GDP", "gdp_growth": "A191RL1Q225SBEA", "inflation": "CPIAUCSL", "unemployment": "UNRATE", "interest_rate": "FEDFUNDS", "industrial_production": "INDPRO", "consumer_confidence": "UMCSENT", "trade_balance": "BOPGSTB", "government_debt": "GFDEBTN"}
 
-        if country.upper() != 'US':
+        if country.upper() != "US":
             raise DataError(f"FRED primarily supports US data, country {country} not available")
 
         indicator_data = {}
@@ -176,22 +148,12 @@ class FREDConnector(DataProvider):
 
         return pd.DataFrame(indicator_data)
 
-    def get_interest_rates(self, country: str, rate_types: List[str],
-                           start_date: Optional[datetime] = None,
-                           end_date: Optional[datetime] = None) -> pd.DataFrame:
+    def get_interest_rates(self, country: str, rate_types: List[str], start_date: Optional[datetime] = None, end_date: Optional[datetime] = None) -> pd.DataFrame:
         """Get interest rates from FRED"""
 
-        us_rates_map = {
-            'federal_funds': 'FEDFUNDS',
-            '10_year_treasury': 'GS10',
-            '2_year_treasury': 'GS2',
-            '3_month_treasury': 'GS3M',
-            'prime_rate': 'PRIME',
-            'corporate_aaa': 'AAA',
-            'corporate_baa': 'BAA'
-        }
+        us_rates_map = {"federal_funds": "FEDFUNDS", "10_year_treasury": "GS10", "2_year_treasury": "GS2", "3_month_treasury": "GS3M", "prime_rate": "PRIME", "corporate_aaa": "AAA", "corporate_baa": "BAA"}
 
-        if country.upper() != 'US':
+        if country.upper() != "US":
             raise DataError(f"FRED primarily supports US data, country {country} not available")
 
         rate_data = {}
@@ -209,22 +171,17 @@ class FREDConnector(DataProvider):
 
         return pd.DataFrame(rate_data)
 
-    def _get_fred_series(self, series_id: str, start_date: Optional[datetime] = None,
-                         end_date: Optional[datetime] = None) -> pd.Series:
+    def _get_fred_series(self, series_id: str, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None) -> pd.Series:
         """Get individual FRED series data"""
 
         self._rate_limit()
 
-        params = {
-            'series_id': series_id,
-            'api_key': self.api_key,
-            'file_type': 'json'
-        }
+        params = {"series_id": series_id, "api_key": self.api_key, "file_type": "json"}
 
         if start_date:
-            params['observation_start'] = start_date.strftime('%Y-%m-%d')
+            params["observation_start"] = start_date.strftime("%Y-%m-%d")
         if end_date:
-            params['observation_end'] = end_date.strftime('%Y-%m-%d')
+            params["observation_end"] = end_date.strftime("%Y-%m-%d")
 
         url = f"{self.base_url}/series/observations"
 
@@ -233,7 +190,7 @@ class FREDConnector(DataProvider):
             self._handle_api_error(response, f"series {series_id}")
 
             data = response.json()
-            observations = data.get('observations', [])
+            observations = data.get("observations", [])
 
             if not observations:
                 raise DataError(f"No data returned for series {series_id}")
@@ -243,10 +200,10 @@ class FREDConnector(DataProvider):
             values = []
 
             for obs in observations:
-                if obs['value'] != '.':  # FRED uses '.' for missing values
+                if obs["value"] != ".":  # FRED uses '.' for missing values
                     try:
-                        dates.append(pd.to_datetime(obs['date']))
-                        values.append(float(obs['value']))
+                        dates.append(pd.to_datetime(obs["date"]))
+                        values.append(float(obs["value"]))
                     except (ValueError, KeyError):
                         continue
 
@@ -269,9 +226,7 @@ class AlphaVantageConnector(DataProvider):
         self.base_url = "https://www.alphavantage.co/query"
         self.rate_limit_delay = 12.0  # Free tier: 5 requests per minute
 
-    def get_exchange_rates(self, base_currency: str, target_currencies: List[str],
-                           start_date: Optional[datetime] = None,
-                           end_date: Optional[datetime] = None) -> pd.DataFrame:
+    def get_exchange_rates(self, base_currency: str, target_currencies: List[str], start_date: Optional[datetime] = None, end_date: Optional[datetime] = None) -> pd.DataFrame:
         """Get exchange rates from Alpha Vantage"""
 
         fx_data = {}
@@ -279,13 +234,7 @@ class AlphaVantageConnector(DataProvider):
         for target_currency in target_currencies:
             self._rate_limit()
 
-            params = {
-                'function': 'FX_DAILY',
-                'from_symbol': base_currency,
-                'to_symbol': target_currency,
-                'apikey': self.api_key,
-                'outputsize': 'full'
-            }
+            params = {"function": "FX_DAILY", "from_symbol": base_currency, "to_symbol": target_currency, "apikey": self.api_key, "outputsize": "full"}
 
             try:
                 response = requests.get(self.base_url, params=params)
@@ -293,15 +242,14 @@ class AlphaVantageConnector(DataProvider):
 
                 data = response.json()
 
-                if 'Error Message' in data:
-                    logger.warning(
-                        f"Alpha Vantage error for {base_currency}/{target_currency}: {data['Error Message']}")
+                if "Error Message" in data:
+                    logger.warning(f"Alpha Vantage error for {base_currency}/{target_currency}: {data['Error Message']}")
                     continue
 
-                if 'Note' in data:
+                if "Note" in data:
                     raise DataError(f"Alpha Vantage rate limit exceeded: {data['Note']}")
 
-                time_series = data.get('Time Series FX (Daily)', {})
+                time_series = data.get("Time Series FX (Daily)", {})
 
                 if not time_series:
                     logger.warning(f"No FX data returned for {base_currency}/{target_currency}")
@@ -321,12 +269,10 @@ class AlphaVantageConnector(DataProvider):
                         continue
 
                     dates.append(date)
-                    values.append(float(daily_data['4. close']))
+                    values.append(float(daily_data["4. close"]))
 
                 if dates:
-                    fx_data[f"{base_currency}/{target_currency}"] = pd.Series(
-                        values, index=dates, name=f"{base_currency}/{target_currency}"
-                    ).sort_index()
+                    fx_data[f"{base_currency}/{target_currency}"] = pd.Series(values, index=dates, name=f"{base_currency}/{target_currency}").sort_index()
 
             except requests.exceptions.RequestException as e:
                 raise DataError(f"Network error accessing Alpha Vantage API: {e}")
@@ -338,22 +284,13 @@ class AlphaVantageConnector(DataProvider):
 
         return pd.DataFrame(fx_data)
 
-    def get_economic_indicators(self, country: str, indicators: List[str],
-                                start_date: Optional[datetime] = None,
-                                end_date: Optional[datetime] = None) -> pd.DataFrame:
+    def get_economic_indicators(self, country: str, indicators: List[str], start_date: Optional[datetime] = None, end_date: Optional[datetime] = None) -> pd.DataFrame:
         """Get economic indicators from Alpha Vantage"""
 
         # Alpha Vantage economic indicators mapping
-        indicators_map = {
-            'gdp': 'REAL_GDP',
-            'gdp_quarterly': 'REAL_GDP_PER_CAPITA',
-            'unemployment': 'UNEMPLOYMENT',
-            'inflation': 'INFLATION',
-            'interest_rate': 'FEDERAL_FUNDS_RATE',
-            'consumer_confidence': 'CONSUMER_SENTIMENT'
-        }
+        indicators_map = {"gdp": "REAL_GDP", "gdp_quarterly": "REAL_GDP_PER_CAPITA", "unemployment": "UNEMPLOYMENT", "inflation": "INFLATION", "interest_rate": "FEDERAL_FUNDS_RATE", "consumer_confidence": "CONSUMER_SENTIMENT"}
 
-        if country.upper() != 'US':
+        if country.upper() != "US":
             raise DataError(f"Alpha Vantage economic indicators only available for US")
 
         indicator_data = {}
@@ -365,10 +302,7 @@ class AlphaVantageConnector(DataProvider):
 
             self._rate_limit()
 
-            params = {
-                'function': indicators_map[indicator.lower()],
-                'apikey': self.api_key
-            }
+            params = {"function": indicators_map[indicator.lower()], "apikey": self.api_key}
 
             try:
                 response = requests.get(self.base_url, params=params)
@@ -376,14 +310,14 @@ class AlphaVantageConnector(DataProvider):
 
                 data = response.json()
 
-                if 'Error Message' in data:
+                if "Error Message" in data:
                     logger.warning(f"Alpha Vantage error for {indicator}: {data['Error Message']}")
                     continue
 
                 # Extract time series data (structure varies by indicator)
                 time_series_key = None
                 for key in data.keys():
-                    if 'data' in key.lower() or 'time series' in key.lower():
+                    if "data" in key.lower() or "time series" in key.lower():
                         time_series_key = key
                         break
 
@@ -397,7 +331,7 @@ class AlphaVantageConnector(DataProvider):
                 values = []
 
                 for item in time_series:
-                    date = pd.to_datetime(item['date'])
+                    date = pd.to_datetime(item["date"])
 
                     # Filter by date range if specified
                     if start_date and date < start_date:
@@ -406,12 +340,10 @@ class AlphaVantageConnector(DataProvider):
                         continue
 
                     dates.append(date)
-                    values.append(float(item['value']))
+                    values.append(float(item["value"]))
 
                 if dates:
-                    indicator_data[indicator] = pd.Series(
-                        values, index=dates, name=indicator
-                    ).sort_index()
+                    indicator_data[indicator] = pd.Series(values, index=dates, name=indicator).sort_index()
 
             except requests.exceptions.RequestException as e:
                 raise DataError(f"Network error accessing Alpha Vantage API: {e}")
@@ -423,18 +355,12 @@ class AlphaVantageConnector(DataProvider):
 
         return pd.DataFrame(indicator_data)
 
-    def get_interest_rates(self, country: str, rate_types: List[str],
-                           start_date: Optional[datetime] = None,
-                           end_date: Optional[datetime] = None) -> pd.DataFrame:
+    def get_interest_rates(self, country: str, rate_types: List[str], start_date: Optional[datetime] = None, end_date: Optional[datetime] = None) -> pd.DataFrame:
         """Get interest rates from Alpha Vantage"""
 
-        rate_functions = {
-            'federal_funds': 'FEDERAL_FUNDS_RATE',
-            '10_year_treasury': 'TREASURY_YIELD',
-            '3_month_treasury': 'TREASURY_YIELD'
-        }
+        rate_functions = {"federal_funds": "FEDERAL_FUNDS_RATE", "10_year_treasury": "TREASURY_YIELD", "3_month_treasury": "TREASURY_YIELD"}
 
-        if country.upper() != 'US':
+        if country.upper() != "US":
             raise DataError(f"Alpha Vantage interest rates only available for US")
 
         rate_data = {}
@@ -446,17 +372,14 @@ class AlphaVantageConnector(DataProvider):
 
             self._rate_limit()
 
-            params = {
-                'function': rate_functions[rate_type.lower()],
-                'apikey': self.api_key
-            }
+            params = {"function": rate_functions[rate_type.lower()], "apikey": self.api_key}
 
             # Add maturity parameter for treasury yields
-            if 'treasury' in rate_type.lower():
-                if '10_year' in rate_type.lower():
-                    params['maturity'] = '10year'
-                elif '3_month' in rate_type.lower():
-                    params['maturity'] = '3month'
+            if "treasury" in rate_type.lower():
+                if "10_year" in rate_type.lower():
+                    params["maturity"] = "10year"
+                elif "3_month" in rate_type.lower():
+                    params["maturity"] = "3month"
 
             try:
                 response = requests.get(self.base_url, params=params)
@@ -464,14 +387,14 @@ class AlphaVantageConnector(DataProvider):
 
                 data = response.json()
 
-                if 'Error Message' in data:
+                if "Error Message" in data:
                     logger.warning(f"Alpha Vantage error for {rate_type}: {data['Error Message']}")
                     continue
 
                 # Extract and process data similar to economic indicators
                 time_series_key = None
                 for key in data.keys():
-                    if 'data' in key.lower():
+                    if "data" in key.lower():
                         time_series_key = key
                         break
 
@@ -482,7 +405,7 @@ class AlphaVantageConnector(DataProvider):
                     values = []
 
                     for item in time_series:
-                        date = pd.to_datetime(item['date'])
+                        date = pd.to_datetime(item["date"])
 
                         if start_date and date < start_date:
                             continue
@@ -490,12 +413,10 @@ class AlphaVantageConnector(DataProvider):
                             continue
 
                         dates.append(date)
-                        values.append(float(item['value']))
+                        values.append(float(item["value"]))
 
                     if dates:
-                        rate_data[rate_type] = pd.Series(
-                            values, index=dates, name=rate_type
-                        ).sort_index()
+                        rate_data[rate_type] = pd.Series(values, index=dates, name=rate_type).sort_index()
 
             except requests.exceptions.RequestException as e:
                 raise DataError(f"Network error accessing Alpha Vantage API: {e}")
@@ -515,68 +436,56 @@ class ManualDataInput(DataProvider):
         super().__init__("Manual Input")
         self.data_store = {}
 
-    def add_exchange_rate_data(self, currency_pair: str, dates: List[datetime],
-                               rates: List[float]):
+    def add_exchange_rate_data(self, currency_pair: str, dates: List[datetime], rates: List[float]):
         """Add manual exchange rate data"""
         if len(dates) != len(rates):
             raise ValidationError("Dates and rates lists must have same length")
 
-        df = pd.DataFrame({
-            'date': dates,
-            'rate': rates
-        }).set_index('date')
+        df = pd.DataFrame({"date": dates, "rate": rates}).set_index("date")
 
-        if 'exchange_rates' not in self.data_store:
-            self.data_store['exchange_rates'] = {}
+        if "exchange_rates" not in self.data_store:
+            self.data_store["exchange_rates"] = {}
 
-        self.data_store['exchange_rates'][currency_pair] = df['rate']
+        self.data_store["exchange_rates"][currency_pair] = df["rate"]
 
-    def add_economic_indicator_data(self, country: str, indicator: str,
-                                    dates: List[datetime], values: List[float]):
+    def add_economic_indicator_data(self, country: str, indicator: str, dates: List[datetime], values: List[float]):
         """Add manual economic indicator data"""
         if len(dates) != len(values):
             raise ValidationError("Dates and values lists must have same length")
 
-        df = pd.DataFrame({
-            'date': dates,
-            'value': values
-        }).set_index('date')
+        df = pd.DataFrame({"date": dates, "value": values}).set_index("date")
 
-        if 'economic_indicators' not in self.data_store:
-            self.data_store['economic_indicators'] = {}
-        if country not in self.data_store['economic_indicators']:
-            self.data_store['economic_indicators'][country] = {}
+        if "economic_indicators" not in self.data_store:
+            self.data_store["economic_indicators"] = {}
+        if country not in self.data_store["economic_indicators"]:
+            self.data_store["economic_indicators"][country] = {}
 
-        self.data_store['economic_indicators'][country][indicator] = df['value']
+        self.data_store["economic_indicators"][country][indicator] = df["value"]
 
-    def add_interest_rate_data(self, country: str, rate_type: str,
-                               dates: List[datetime], rates: List[float]):
+    def add_interest_rate_data(self, country: str, rate_type: str, dates: List[datetime], rates: List[float]):
         """Add manual interest rate data"""
         if len(dates) != len(rates):
             raise ValidationError("Dates and rates lists must have same length")
 
-        df = pd.DataFrame({
-            'date': dates,
-            'rate': rates
-        }).set_index('date')
+        df = pd.DataFrame({"date": dates, "rate": rates}).set_index("date")
 
-        if 'interest_rates' not in self.data_store:
-            self.data_store['interest_rates'] = {}
-        if country not in self.data_store['interest_rates']:
-            self.data_store['interest_rates'][country] = {}
+        if "interest_rates" not in self.data_store:
+            self.data_store["interest_rates"] = {}
+        if country not in self.data_store["interest_rates"]:
+            self.data_store["interest_rates"][country] = {}
 
-        self.data_store['interest_rates'][country][rate_type] = df['rate']
+        self.data_store["interest_rates"][country][rate_type] = df["rate"]
 
     def load_from_csv(self, file_path: str, data_type: str, **kwargs):
         """Load data from CSV file"""
         try:
             df = pd.read_csv(file_path)
 
-            if data_type == 'exchange_rates':
+            if data_type == "exchange_rates":
                 self._load_fx_from_csv(df, **kwargs)
-            elif data_type == 'economic_indicators':
+            elif data_type == "economic_indicators":
                 self._load_indicators_from_csv(df, **kwargs)
-            elif data_type == 'interest_rates':
+            elif data_type == "interest_rates":
                 self._load_rates_from_csv(df, **kwargs)
             else:
                 raise ValidationError(f"Unknown data type: {data_type}")
@@ -584,7 +493,7 @@ class ManualDataInput(DataProvider):
         except Exception as e:
             raise DataError(f"Error loading CSV file {file_path}: {e}")
 
-    def _load_fx_from_csv(self, df: pd.DataFrame, date_column: str = 'date', **kwargs):
+    def _load_fx_from_csv(self, df: pd.DataFrame, date_column: str = "date", **kwargs):
         """Load FX data from CSV"""
         if date_column not in df.columns:
             raise ValidationError(f"Date column '{date_column}' not found in CSV")
@@ -592,15 +501,14 @@ class ManualDataInput(DataProvider):
         df[date_column] = pd.to_datetime(df[date_column])
         df.set_index(date_column, inplace=True)
 
-        if 'exchange_rates' not in self.data_store:
-            self.data_store['exchange_rates'] = {}
+        if "exchange_rates" not in self.data_store:
+            self.data_store["exchange_rates"] = {}
 
         for column in df.columns:
             if column != date_column:
-                self.data_store['exchange_rates'][column] = df[column]
+                self.data_store["exchange_rates"][column] = df[column]
 
-    def _load_indicators_from_csv(self, df: pd.DataFrame, country: str,
-                                  date_column: str = 'date', **kwargs):
+    def _load_indicators_from_csv(self, df: pd.DataFrame, country: str, date_column: str = "date", **kwargs):
         """Load economic indicators from CSV"""
         if date_column not in df.columns:
             raise ValidationError(f"Date column '{date_column}' not found in CSV")
@@ -608,17 +516,16 @@ class ManualDataInput(DataProvider):
         df[date_column] = pd.to_datetime(df[date_column])
         df.set_index(date_column, inplace=True)
 
-        if 'economic_indicators' not in self.data_store:
-            self.data_store['economic_indicators'] = {}
-        if country not in self.data_store['economic_indicators']:
-            self.data_store['economic_indicators'][country] = {}
+        if "economic_indicators" not in self.data_store:
+            self.data_store["economic_indicators"] = {}
+        if country not in self.data_store["economic_indicators"]:
+            self.data_store["economic_indicators"][country] = {}
 
         for column in df.columns:
             if column != date_column:
-                self.data_store['economic_indicators'][country][column] = df[column]
+                self.data_store["economic_indicators"][country][column] = df[column]
 
-    def _load_rates_from_csv(self, df: pd.DataFrame, country: str,
-                             date_column: str = 'date', **kwargs):
+    def _load_rates_from_csv(self, df: pd.DataFrame, country: str, date_column: str = "date", **kwargs):
         """Load interest rates from CSV"""
         if date_column not in df.columns:
             raise ValidationError(f"Date column '{date_column}' not found in CSV")
@@ -626,21 +533,19 @@ class ManualDataInput(DataProvider):
         df[date_column] = pd.to_datetime(df[date_column])
         df.set_index(date_column, inplace=True)
 
-        if 'interest_rates' not in self.data_store:
-            self.data_store['interest_rates'] = {}
-        if country not in self.data_store['interest_rates']:
-            self.data_store['interest_rates'][country] = {}
+        if "interest_rates" not in self.data_store:
+            self.data_store["interest_rates"] = {}
+        if country not in self.data_store["interest_rates"]:
+            self.data_store["interest_rates"][country] = {}
 
         for column in df.columns:
             if column != date_column:
-                self.data_store['interest_rates'][country][column] = df[column]
+                self.data_store["interest_rates"][country][column] = df[column]
 
-    def get_exchange_rates(self, base_currency: str, target_currencies: List[str],
-                           start_date: Optional[datetime] = None,
-                           end_date: Optional[datetime] = None) -> pd.DataFrame:
+    def get_exchange_rates(self, base_currency: str, target_currencies: List[str], start_date: Optional[datetime] = None, end_date: Optional[datetime] = None) -> pd.DataFrame:
         """Get exchange rates from manual data store"""
 
-        if 'exchange_rates' not in self.data_store:
+        if "exchange_rates" not in self.data_store:
             raise DataError("No exchange rate data available")
 
         fx_data = {}
@@ -648,8 +553,8 @@ class ManualDataInput(DataProvider):
         for target_currency in target_currencies:
             pair = f"{base_currency}/{target_currency}"
 
-            if pair in self.data_store['exchange_rates']:
-                series = self.data_store['exchange_rates'][pair]
+            if pair in self.data_store["exchange_rates"]:
+                series = self.data_store["exchange_rates"][pair]
 
                 # Filter by date range if specified
                 if start_date or end_date:
@@ -669,19 +574,17 @@ class ManualDataInput(DataProvider):
 
         return pd.DataFrame(fx_data)
 
-    def get_economic_indicators(self, country: str, indicators: List[str],
-                                start_date: Optional[datetime] = None,
-                                end_date: Optional[datetime] = None) -> pd.DataFrame:
+    def get_economic_indicators(self, country: str, indicators: List[str], start_date: Optional[datetime] = None, end_date: Optional[datetime] = None) -> pd.DataFrame:
         """Get economic indicators from manual data store"""
 
-        if 'economic_indicators' not in self.data_store:
+        if "economic_indicators" not in self.data_store:
             raise DataError("No economic indicator data available")
 
-        if country not in self.data_store['economic_indicators']:
+        if country not in self.data_store["economic_indicators"]:
             raise DataError(f"No data available for country {country}")
 
         indicator_data = {}
-        country_data = self.data_store['economic_indicators'][country]
+        country_data = self.data_store["economic_indicators"][country]
 
         for indicator in indicators:
             if indicator in country_data:
@@ -705,19 +608,17 @@ class ManualDataInput(DataProvider):
 
         return pd.DataFrame(indicator_data)
 
-    def get_interest_rates(self, country: str, rate_types: List[str],
-                           start_date: Optional[datetime] = None,
-                           end_date: Optional[datetime] = None) -> pd.DataFrame:
+    def get_interest_rates(self, country: str, rate_types: List[str], start_date: Optional[datetime] = None, end_date: Optional[datetime] = None) -> pd.DataFrame:
         """Get interest rates from manual data store"""
 
-        if 'interest_rates' not in self.data_store:
+        if "interest_rates" not in self.data_store:
             raise DataError("No interest rate data available")
 
-        if country not in self.data_store['interest_rates']:
+        if country not in self.data_store["interest_rates"]:
             raise DataError(f"No interest rate data available for country {country}")
 
         rate_data = {}
-        country_data = self.data_store['interest_rates'][country]
+        country_data = self.data_store["interest_rates"][country]
 
         for rate_type in rate_types:
             if rate_type in country_data:
@@ -748,8 +649,7 @@ class DataStandardizer(EconomicsBase):
     def __init__(self, precision: int = 8):
         super().__init__(precision)
 
-    def standardize_exchange_rates(self, fx_data: pd.DataFrame,
-                                   target_frequency: str = 'D') -> pd.DataFrame:
+    def standardize_exchange_rates(self, fx_data: pd.DataFrame, target_frequency: str = "D") -> pd.DataFrame:
         """Standardize exchange rate data format and frequency"""
 
         if fx_data.empty:
@@ -763,11 +663,11 @@ class DataStandardizer(EconomicsBase):
         fx_data = fx_data.select_dtypes(include=[np.number])
 
         # Resample to target frequency
-        if target_frequency != 'D':
+        if target_frequency != "D":
             fx_data = fx_data.resample(target_frequency).last()
 
         # Forward fill missing values (carry forward last observation)
-        fx_data = fx_data.fillna(method='ffill')
+        fx_data = fx_data.fillna(method="ffill")
 
         # Drop any remaining NaN values
         fx_data = fx_data.dropna()
@@ -778,8 +678,7 @@ class DataStandardizer(EconomicsBase):
 
         return fx_data
 
-    def standardize_economic_indicators(self, indicator_data: pd.DataFrame,
-                                        target_frequency: str = 'M') -> pd.DataFrame:
+    def standardize_economic_indicators(self, indicator_data: pd.DataFrame, target_frequency: str = "M") -> pd.DataFrame:
         """Standardize economic indicator data format and frequency"""
 
         if indicator_data.empty:
@@ -793,23 +692,20 @@ class DataStandardizer(EconomicsBase):
         indicator_data = indicator_data.select_dtypes(include=[np.number])
 
         # Resample to target frequency (typically monthly for economic data)
-        if target_frequency != 'M':
+        if target_frequency != "M":
             # Use appropriate aggregation method based on data type
             indicator_data = indicator_data.resample(target_frequency).mean()
 
         # Handle missing values more carefully for economic data
-        indicator_data = indicator_data.fillna(method='ffill', limit=3)  # Max 3 forward fills
+        indicator_data = indicator_data.fillna(method="ffill", limit=3)  # Max 3 forward fills
 
         # Convert to high precision decimals
         for column in indicator_data.columns:
-            indicator_data[column] = indicator_data[column].apply(
-                lambda x: self.to_decimal(x) if pd.notna(x) else None
-            )
+            indicator_data[column] = indicator_data[column].apply(lambda x: self.to_decimal(x) if pd.notna(x) else None)
 
         return indicator_data
 
-    def calculate_returns(self, price_data: pd.DataFrame,
-                          return_type: str = 'simple') -> pd.DataFrame:
+    def calculate_returns(self, price_data: pd.DataFrame, return_type: str = "simple") -> pd.DataFrame:
         """Calculate returns from price data"""
 
         if price_data.empty:
@@ -818,10 +714,10 @@ class DataStandardizer(EconomicsBase):
         returns_data = pd.DataFrame(index=price_data.index)
 
         for column in price_data.columns:
-            if return_type.lower() == 'simple':
+            if return_type.lower() == "simple":
                 # Simple returns: (P_t - P_t-1) / P_t-1
                 returns_data[f"{column}_return"] = price_data[column].pct_change()
-            elif return_type.lower() == 'log':
+            elif return_type.lower() == "log":
                 # Log returns: ln(P_t / P_t-1)
                 returns_data[f"{column}_return"] = np.log(price_data[column] / price_data[column].shift(1))
             else:
@@ -832,20 +728,19 @@ class DataStandardizer(EconomicsBase):
 
         return returns_data
 
-    def align_time_series(self, *dataframes: pd.DataFrame,
-                          join_method: str = 'inner') -> List[pd.DataFrame]:
+    def align_time_series(self, *dataframes: pd.DataFrame, join_method: str = "inner") -> List[pd.DataFrame]:
         """Align multiple time series to common dates"""
 
         if not dataframes:
             raise ValidationError("No dataframes provided for alignment")
 
         # Find common date range
-        if join_method == 'inner':
+        if join_method == "inner":
             # Use intersection of all date ranges
             common_dates = dataframes[0].index
             for df in dataframes[1:]:
                 common_dates = common_dates.intersection(df.index)
-        elif join_method == 'outer':
+        elif join_method == "outer":
             # Use union of all date ranges
             common_dates = dataframes[0].index
             for df in dataframes[1:]:
@@ -860,15 +755,14 @@ class DataStandardizer(EconomicsBase):
         aligned_dfs = []
         for df in dataframes:
             aligned_df = df.reindex(common_dates)
-            if join_method == 'outer':
+            if join_method == "outer":
                 # Forward fill missing values for outer join
-                aligned_df = aligned_df.fillna(method='ffill')
+                aligned_df = aligned_df.fillna(method="ffill")
             aligned_dfs.append(aligned_df)
 
         return aligned_dfs
 
-    def detect_outliers(self, data: pd.Series, method: str = 'iqr',
-                        threshold: float = 1.5) -> pd.Series:
+    def detect_outliers(self, data: pd.Series, method: str = "iqr", threshold: float = 1.5) -> pd.Series:
         """Detect outliers in time series data"""
 
         if data.empty:
@@ -876,7 +770,7 @@ class DataStandardizer(EconomicsBase):
 
         outliers = pd.Series(False, index=data.index)
 
-        if method.lower() == 'iqr':
+        if method.lower() == "iqr":
             # Interquartile range method
             Q1 = data.quantile(0.25)
             Q3 = data.quantile(0.75)
@@ -885,12 +779,12 @@ class DataStandardizer(EconomicsBase):
             upper_bound = Q3 + threshold * IQR
             outliers = (data < lower_bound) | (data > upper_bound)
 
-        elif method.lower() == 'zscore':
+        elif method.lower() == "zscore":
             # Z-score method
             z_scores = np.abs((data - data.mean()) / data.std())
             outliers = z_scores > threshold
 
-        elif method.lower() == 'modified_zscore':
+        elif method.lower() == "modified_zscore":
             # Modified Z-score using median
             median = data.median()
             mad = np.median(np.abs(data - median))
@@ -902,11 +796,7 @@ class DataStandardizer(EconomicsBase):
 
         return outliers
 
-    def clean_data(self, data: pd.DataFrame,
-                   remove_outliers: bool = True,
-                   outlier_method: str = 'iqr',
-                   fill_missing: bool = True,
-                   fill_method: str = 'ffill') -> pd.DataFrame:
+    def clean_data(self, data: pd.DataFrame, remove_outliers: bool = True, outlier_method: str = "iqr", fill_missing: bool = True, fill_method: str = "ffill") -> pd.DataFrame:
         """Comprehensive data cleaning"""
 
         cleaned_data = data.copy()
@@ -919,13 +809,13 @@ class DataStandardizer(EconomicsBase):
 
         # Fill missing values if requested
         if fill_missing:
-            if fill_method == 'ffill':
-                cleaned_data = cleaned_data.fillna(method='ffill')
-            elif fill_method == 'bfill':
-                cleaned_data = cleaned_data.fillna(method='bfill')
-            elif fill_method == 'interpolate':
+            if fill_method == "ffill":
+                cleaned_data = cleaned_data.fillna(method="ffill")
+            elif fill_method == "bfill":
+                cleaned_data = cleaned_data.fillna(method="bfill")
+            elif fill_method == "interpolate":
                 cleaned_data = cleaned_data.interpolate()
-            elif fill_method == 'mean':
+            elif fill_method == "mean":
                 cleaned_data = cleaned_data.fillna(cleaned_data.mean())
             else:
                 raise ValidationError(f"Unknown fill method: {fill_method}")
@@ -936,7 +826,7 @@ class DataStandardizer(EconomicsBase):
 class DataHandler(EconomicsBase):
     """Main data handler coordinating multiple data sources"""
 
-    def __init__(self, precision: int = 8, base_currency: str = 'USD'):
+    def __init__(self, precision: int = 8, base_currency: str = "USD"):
         super().__init__(precision, base_currency)
         self.providers = {}
         self.standardizer = DataStandardizer(precision)
@@ -958,11 +848,7 @@ class DataHandler(EconomicsBase):
         """List available data providers"""
         return list(self.providers.keys())
 
-    def get_exchange_rates(self, base_currency: str, target_currencies: List[str],
-                           start_date: Optional[datetime] = None,
-                           end_date: Optional[datetime] = None,
-                           providers: Optional[List[str]] = None,
-                           standardize: bool = True) -> pd.DataFrame:
+    def get_exchange_rates(self, base_currency: str, target_currencies: List[str], start_date: Optional[datetime] = None, end_date: Optional[datetime] = None, providers: Optional[List[str]] = None, standardize: bool = True) -> pd.DataFrame:
         """Get exchange rates from specified providers"""
 
         # Use all providers if none specified
@@ -973,9 +859,9 @@ class DataHandler(EconomicsBase):
         cache_key = f"fx_{base_currency}_{'_'.join(target_currencies)}_{start_date}_{end_date}"
         if cache_key in self.cache:
             cache_entry = self.cache[cache_key]
-            if datetime.now() - cache_entry['timestamp'] < timedelta(seconds=self.cache_ttl):
+            if datetime.now() - cache_entry["timestamp"] < timedelta(seconds=self.cache_ttl):
                 logger.info(f"Returning cached exchange rate data")
-                return cache_entry['data']
+                return cache_entry["data"]
 
         all_data = []
 
@@ -986,9 +872,7 @@ class DataHandler(EconomicsBase):
 
             try:
                 provider = self.providers[provider_name]
-                data = provider.get_exchange_rates(
-                    base_currency, target_currencies, start_date, end_date
-                )
+                data = provider.get_exchange_rates(base_currency, target_currencies, start_date, end_date)
 
                 if not data.empty:
                     # Add provider suffix to column names
@@ -1011,18 +895,11 @@ class DataHandler(EconomicsBase):
             combined_data = self.standardizer.standardize_exchange_rates(combined_data)
 
         # Cache the result
-        self.cache[cache_key] = {
-            'data': combined_data,
-            'timestamp': datetime.now()
-        }
+        self.cache[cache_key] = {"data": combined_data, "timestamp": datetime.now()}
 
         return combined_data
 
-    def get_economic_indicators(self, country: str, indicators: List[str],
-                                start_date: Optional[datetime] = None,
-                                end_date: Optional[datetime] = None,
-                                providers: Optional[List[str]] = None,
-                                standardize: bool = True) -> pd.DataFrame:
+    def get_economic_indicators(self, country: str, indicators: List[str], start_date: Optional[datetime] = None, end_date: Optional[datetime] = None, providers: Optional[List[str]] = None, standardize: bool = True) -> pd.DataFrame:
         """Get economic indicators from specified providers"""
 
         # Use all providers if none specified
@@ -1033,9 +910,9 @@ class DataHandler(EconomicsBase):
         cache_key = f"indicators_{country}_{'_'.join(indicators)}_{start_date}_{end_date}"
         if cache_key in self.cache:
             cache_entry = self.cache[cache_key]
-            if datetime.now() - cache_entry['timestamp'] < timedelta(seconds=self.cache_ttl):
+            if datetime.now() - cache_entry["timestamp"] < timedelta(seconds=self.cache_ttl):
                 logger.info(f"Returning cached economic indicator data")
-                return cache_entry['data']
+                return cache_entry["data"]
 
         all_data = []
 
@@ -1046,9 +923,7 @@ class DataHandler(EconomicsBase):
 
             try:
                 provider = self.providers[provider_name]
-                data = provider.get_economic_indicators(
-                    country, indicators, start_date, end_date
-                )
+                data = provider.get_economic_indicators(country, indicators, start_date, end_date)
 
                 if not data.empty:
                     # Add provider suffix to column names
@@ -1071,18 +946,11 @@ class DataHandler(EconomicsBase):
             combined_data = self.standardizer.standardize_economic_indicators(combined_data)
 
         # Cache the result
-        self.cache[cache_key] = {
-            'data': combined_data,
-            'timestamp': datetime.now()
-        }
+        self.cache[cache_key] = {"data": combined_data, "timestamp": datetime.now()}
 
         return combined_data
 
-    def get_interest_rates(self, country: str, rate_types: List[str],
-                           start_date: Optional[datetime] = None,
-                           end_date: Optional[datetime] = None,
-                           providers: Optional[List[str]] = None,
-                           standardize: bool = True) -> pd.DataFrame:
+    def get_interest_rates(self, country: str, rate_types: List[str], start_date: Optional[datetime] = None, end_date: Optional[datetime] = None, providers: Optional[List[str]] = None, standardize: bool = True) -> pd.DataFrame:
         """Get interest rates from specified providers"""
 
         # Use all providers if none specified
@@ -1093,9 +961,9 @@ class DataHandler(EconomicsBase):
         cache_key = f"rates_{country}_{'_'.join(rate_types)}_{start_date}_{end_date}"
         if cache_key in self.cache:
             cache_entry = self.cache[cache_key]
-            if datetime.now() - cache_entry['timestamp'] < timedelta(seconds=self.cache_ttl):
+            if datetime.now() - cache_entry["timestamp"] < timedelta(seconds=self.cache_ttl):
                 logger.info(f"Returning cached interest rate data")
-                return cache_entry['data']
+                return cache_entry["data"]
 
         all_data = []
 
@@ -1106,9 +974,7 @@ class DataHandler(EconomicsBase):
 
             try:
                 provider = self.providers[provider_name]
-                data = provider.get_interest_rates(
-                    country, rate_types, start_date, end_date
-                )
+                data = provider.get_interest_rates(country, rate_types, start_date, end_date)
 
                 if not data.empty:
                     # Add provider suffix to column names
@@ -1131,10 +997,7 @@ class DataHandler(EconomicsBase):
             combined_data = self.standardizer.standardize_economic_indicators(combined_data)
 
         # Cache the result
-        self.cache[cache_key] = {
-            'data': combined_data,
-            'timestamp': datetime.now()
-        }
+        self.cache[cache_key] = {"data": combined_data, "timestamp": datetime.now()}
 
         return combined_data
 
@@ -1150,38 +1013,20 @@ class DataHandler(EconomicsBase):
         expired_entries = 0
 
         for cache_entry in self.cache.values():
-            if now - cache_entry['timestamp'] < timedelta(seconds=self.cache_ttl):
+            if now - cache_entry["timestamp"] < timedelta(seconds=self.cache_ttl):
                 active_entries += 1
             else:
                 expired_entries += 1
 
-        return {
-            'total_entries': len(self.cache),
-            'active_entries': active_entries,
-            'expired_entries': expired_entries,
-            'cache_ttl_seconds': self.cache_ttl
-        }
+        return {"total_entries": len(self.cache), "active_entries": active_entries, "expired_entries": expired_entries, "cache_ttl_seconds": self.cache_ttl}
 
-    def validate_data_quality(self, data: pd.DataFrame,
-                              data_type: str = 'unknown') -> Dict[str, Any]:
+    def validate_data_quality(self, data: pd.DataFrame, data_type: str = "unknown") -> Dict[str, Any]:
         """Validate data quality and provide quality metrics"""
 
         if data.empty:
-            return {
-                'quality_score': 0,
-                'issues': ['Empty dataset'],
-                'recommendations': ['Obtain data from reliable sources']
-            }
+            return {"quality_score": 0, "issues": ["Empty dataset"], "recommendations": ["Obtain data from reliable sources"]}
 
-        quality_metrics = {
-            'total_observations': len(data),
-            'total_variables': len(data.columns),
-            'missing_values': data.isnull().sum().sum(),
-            'missing_percentage': (data.isnull().sum().sum() / (len(data) * len(data.columns))) * 100,
-            'duplicate_rows': data.duplicated().sum(),
-            'date_range': f"{data.index.min()} to {data.index.max()}" if isinstance(data.index,
-                                                                                    pd.DatetimeIndex) else "Not time series"
-        }
+        quality_metrics = {"total_observations": len(data), "total_variables": len(data.columns), "missing_values": data.isnull().sum().sum(), "missing_percentage": (data.isnull().sum().sum() / (len(data) * len(data.columns))) * 100, "duplicate_rows": data.duplicated().sum(), "date_range": f"{data.index.min()} to {data.index.max()}" if isinstance(data.index, pd.DatetimeIndex) else "Not time series"}
 
         # Detect outliers for numeric columns
         outlier_info = {}
@@ -1189,23 +1034,23 @@ class DataHandler(EconomicsBase):
             outliers = self.standardizer.detect_outliers(data[column])
             outlier_info[column] = outliers.sum()
 
-        quality_metrics['outliers_by_column'] = outlier_info
-        quality_metrics['total_outliers'] = sum(outlier_info.values())
+        quality_metrics["outliers_by_column"] = outlier_info
+        quality_metrics["total_outliers"] = sum(outlier_info.values())
 
         # Calculate quality score (0-100)
         quality_score = 100
 
         # Deduct for missing values
-        missing_penalty = min(quality_metrics['missing_percentage'] * 2, 50)
+        missing_penalty = min(quality_metrics["missing_percentage"] * 2, 50)
         quality_score -= missing_penalty
 
         # Deduct for outliers
-        outlier_percentage = (quality_metrics['total_outliers'] / quality_metrics['total_observations']) * 100
+        outlier_percentage = (quality_metrics["total_outliers"] / quality_metrics["total_observations"]) * 100
         outlier_penalty = min(outlier_percentage * 1.5, 30)
         quality_score -= outlier_penalty
 
         # Deduct for duplicates
-        duplicate_percentage = (quality_metrics['duplicate_rows'] / quality_metrics['total_observations']) * 100
+        duplicate_percentage = (quality_metrics["duplicate_rows"] / quality_metrics["total_observations"]) * 100
         duplicate_penalty = min(duplicate_percentage * 3, 20)
         quality_score -= duplicate_penalty
 
@@ -1215,7 +1060,7 @@ class DataHandler(EconomicsBase):
         issues = []
         recommendations = []
 
-        if quality_metrics['missing_percentage'] > 10:
+        if quality_metrics["missing_percentage"] > 10:
             issues.append(f"High missing data rate: {quality_metrics['missing_percentage']:.1f}%")
             recommendations.append("Consider data imputation or alternative data sources")
 
@@ -1223,7 +1068,7 @@ class DataHandler(EconomicsBase):
             issues.append(f"High outlier rate: {outlier_percentage:.1f}%")
             recommendations.append("Review outliers for data errors or consider robust analysis methods")
 
-        if quality_metrics['duplicate_rows'] > 0:
+        if quality_metrics["duplicate_rows"] > 0:
             issues.append(f"Found {quality_metrics['duplicate_rows']} duplicate rows")
             recommendations.append("Remove duplicate observations")
 
@@ -1231,63 +1076,27 @@ class DataHandler(EconomicsBase):
             # Check for gaps in time series
             expected_freq = pd.infer_freq(data.index)
             if expected_freq:
-                expected_range = pd.date_range(start=data.index.min(),
-                                               end=data.index.max(),
-                                               freq=expected_freq)
+                expected_range = pd.date_range(start=data.index.min(), end=data.index.max(), freq=expected_freq)
                 missing_dates = len(expected_range) - len(data.index)
                 if missing_dates > 0:
                     issues.append(f"Missing {missing_dates} time periods in series")
                     recommendations.append("Fill missing time periods or adjust analysis for irregular data")
 
-        return {
-            'quality_score': quality_score,
-            'quality_metrics': quality_metrics,
-            'issues': issues,
-            'recommendations': recommendations,
-            'data_type': data_type
-        }
+        return {"quality_score": quality_score, "quality_metrics": quality_metrics, "issues": issues, "recommendations": recommendations, "data_type": data_type}
 
     def generate_data_summary(self, data: pd.DataFrame) -> Dict[str, Any]:
         """Generate comprehensive data summary"""
 
-        summary = {
-            'basic_info': {
-                'shape': data.shape,
-                'data_types': data.dtypes.to_dict(),
-                'memory_usage': data.memory_usage(deep=True).sum(),
-                'index_type': type(data.index).__name__
-            },
-            'statistical_summary': {},
-            'missing_data': {
-                'total_missing': data.isnull().sum().sum(),
-                'missing_by_column': data.isnull().sum().to_dict(),
-                'missing_percentage_by_column': (data.isnull().sum() / len(data) * 100).to_dict()
-            }
-        }
+        summary = {"basic_info": {"shape": data.shape, "data_types": data.dtypes.to_dict(), "memory_usage": data.memory_usage(deep=True).sum(), "index_type": type(data.index).__name__}, "statistical_summary": {}, "missing_data": {"total_missing": data.isnull().sum().sum(), "missing_by_column": data.isnull().sum().to_dict(), "missing_percentage_by_column": (data.isnull().sum() / len(data) * 100).to_dict()}}
 
         # Statistical summary for numeric columns
         numeric_data = data.select_dtypes(include=[np.number])
         if not numeric_data.empty:
-            summary['statistical_summary'] = {
-                'count': numeric_data.count().to_dict(),
-                'mean': numeric_data.mean().to_dict(),
-                'std': numeric_data.std().to_dict(),
-                'min': numeric_data.min().to_dict(),
-                'max': numeric_data.max().to_dict(),
-                'median': numeric_data.median().to_dict(),
-                'skewness': numeric_data.skew().to_dict(),
-                'kurtosis': numeric_data.kurtosis().to_dict()
-            }
+            summary["statistical_summary"] = {"count": numeric_data.count().to_dict(), "mean": numeric_data.mean().to_dict(), "std": numeric_data.std().to_dict(), "min": numeric_data.min().to_dict(), "max": numeric_data.max().to_dict(), "median": numeric_data.median().to_dict(), "skewness": numeric_data.skew().to_dict(), "kurtosis": numeric_data.kurtosis().to_dict()}
 
         # Time series specific information
         if isinstance(data.index, pd.DatetimeIndex):
-            summary['time_series_info'] = {
-                'start_date': data.index.min(),
-                'end_date': data.index.max(),
-                'frequency': pd.infer_freq(data.index),
-                'total_periods': len(data.index),
-                'business_days_only': data.index.freq == 'B' if hasattr(data.index, 'freq') else False
-            }
+            summary["time_series_info"] = {"start_date": data.index.min(), "end_date": data.index.max(), "frequency": pd.infer_freq(data.index), "total_periods": len(data.index), "business_days_only": data.index.freq == "B" if hasattr(data.index, "freq") else False}
 
         return summary
 
@@ -1295,28 +1104,14 @@ class DataHandler(EconomicsBase):
         """Main data handler operation dispatcher"""
 
         operations = {
-            'validate_quality': lambda: self.validate_data_quality(
-                kwargs['data'], kwargs.get('data_type', 'unknown')
-            ),
-            'generate_summary': lambda: self.generate_data_summary(kwargs['data']),
-            'standardize_fx': lambda: self.standardizer.standardize_exchange_rates(kwargs['data']),
-            'standardize_indicators': lambda: self.standardizer.standardize_economic_indicators(kwargs['data']),
-            'calculate_returns': lambda: self.standardizer.calculate_returns(
-                kwargs['data'], kwargs.get('return_type', 'simple')
-            ),
-            'align_series': lambda: self.standardizer.align_time_series(
-                *kwargs['dataframes'], join_method=kwargs.get('join_method', 'inner')
-            ),
-            'detect_outliers': lambda: self.standardizer.detect_outliers(
-                kwargs['data'], kwargs.get('method', 'iqr'), kwargs.get('threshold', 1.5)
-            ),
-            'clean_data': lambda: self.standardizer.clean_data(
-                kwargs['data'],
-                kwargs.get('remove_outliers', True),
-                kwargs.get('outlier_method', 'iqr'),
-                kwargs.get('fill_missing', True),
-                kwargs.get('fill_method', 'ffill')
-            )
+            "validate_quality": lambda: self.validate_data_quality(kwargs["data"], kwargs.get("data_type", "unknown")),
+            "generate_summary": lambda: self.generate_data_summary(kwargs["data"]),
+            "standardize_fx": lambda: self.standardizer.standardize_exchange_rates(kwargs["data"]),
+            "standardize_indicators": lambda: self.standardizer.standardize_economic_indicators(kwargs["data"]),
+            "calculate_returns": lambda: self.standardizer.calculate_returns(kwargs["data"], kwargs.get("return_type", "simple")),
+            "align_series": lambda: self.standardizer.align_time_series(*kwargs["dataframes"], join_method=kwargs.get("join_method", "inner")),
+            "detect_outliers": lambda: self.standardizer.detect_outliers(kwargs["data"], kwargs.get("method", "iqr"), kwargs.get("threshold", 1.5)),
+            "clean_data": lambda: self.standardizer.clean_data(kwargs["data"], kwargs.get("remove_outliers", True), kwargs.get("outlier_method", "iqr"), kwargs.get("fill_missing", True), kwargs.get("fill_method", "ffill")),
         }
 
         if operation not in operations:
@@ -1325,9 +1120,9 @@ class DataHandler(EconomicsBase):
         result = operations[operation]()
 
         # Add metadata for certain operations
-        if operation in ['validate_quality', 'generate_summary']:
+        if operation in ["validate_quality", "generate_summary"]:
             if isinstance(result, dict):
-                result['metadata'] = self.get_metadata()
-                result['operation'] = operation
+                result["metadata"] = self.get_metadata()
+                result["operation"] = operation
 
         return result

@@ -119,9 +119,7 @@ class TelegramBot(TelegramBotBase):
             return True
 
         except ImportError:
-            logger.error(
-                "python-telegram-bot not installed. Install with: pip install python-telegram-bot"
-            )
+            logger.error("python-telegram-bot not installed. Install with: pip install python-telegram-bot")
             return False
 
     def send_message(self, text: str, chat_id: Optional[str] = None) -> bool:
@@ -156,12 +154,7 @@ class TelegramBot(TelegramBotBase):
             "STRONG_SELL": "🔴🔴",
         }.get(signal.signal_type, "⚪")
 
-        tp_text = "\n".join(
-            [
-                f"  🎯 TP{i + 1}: ${tp:,.5f}"
-                for i, tp in enumerate(signal.take_profit[:3])
-            ]
-        )
+        tp_text = "\n".join([f"  🎯 TP{i + 1}: ${tp:,.5f}" for i, tp in enumerate(signal.take_profit[:3])])
 
         text = f"""<b>{emoji} AI HEDGE FUND SIGNAL</b>
 
@@ -179,9 +172,7 @@ class TelegramBot(TelegramBotBase):
 
         return self.send_message(text, chat_id)
 
-    def send_portfolio_update(
-        self, portfolio: Dict, chat_id: Optional[str] = None
-    ) -> bool:
+    def send_portfolio_update(self, portfolio: Dict, chat_id: Optional[str] = None) -> bool:
         """Send portfolio update"""
         balance = portfolio.get("balance", 0)
         equity = portfolio.get("equity", 0)
@@ -202,9 +193,7 @@ class TelegramBot(TelegramBotBase):
 
         return self.send_message(text, chat_id)
 
-    def send_trade_notification(
-        self, trade: Dict, chat_id: Optional[str] = None
-    ) -> bool:
+    def send_trade_notification(self, trade: Dict, chat_id: Optional[str] = None) -> bool:
         """Send trade notification"""
         action = trade.get("action", "UNKNOWN")
         symbol = trade.get("symbol", "Unknown")
@@ -268,14 +257,10 @@ class MockTelegramBot(TelegramBotBase):
                 "timestamp": signal.timestamp.isoformat(),
             }
         )
-        logger.info(
-            f"[MOCK TELEGRAM] Signal queued: {signal.signal_type} {signal.symbol}"
-        )
+        logger.info(f"[MOCK TELEGRAM] Signal queued: {signal.signal_type} {signal.symbol}")
         return True
 
-    def send_portfolio_update(
-        self, portfolio: Dict, chat_id: Optional[str] = None
-    ) -> bool:
+    def send_portfolio_update(self, portfolio: Dict, chat_id: Optional[str] = None) -> bool:
         """Store portfolio update"""
         self.messages.append(
             {
@@ -287,9 +272,7 @@ class MockTelegramBot(TelegramBotBase):
         logger.info(f"[MOCK TELEGRAM] Portfolio update queued")
         return True
 
-    def send_trade_notification(
-        self, trade: Dict, chat_id: Optional[str] = None
-    ) -> bool:
+    def send_trade_notification(self, trade: Dict, chat_id: Optional[str] = None) -> bool:
         """Store trade notification"""
         self.messages.append(
             {
@@ -458,9 +441,7 @@ def main():
     if isinstance(bot, MockTelegramBot):
         messages = bot.get_messages()
         for msg in messages:
-            print(
-                f"   - {msg['type']}: {msg.get('symbol', msg.get('action', 'update'))}"
-            )
+            print(f"   - {msg['type']}: {msg.get('symbol', msg.get('action', 'update'))}")
 
     print("\n=== Test Complete ===")
 

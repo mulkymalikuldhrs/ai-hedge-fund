@@ -15,9 +15,11 @@ import json
 # Data Classes (Python equivalents of TypeScript interfaces)
 # ============================================================================
 
+
 @dataclass
 class PerformanceMetrics:
     """Performance metrics for backtest results"""
+
     total_return: float
     annualized_return: float
     sharpe_ratio: float
@@ -47,6 +49,7 @@ class PerformanceMetrics:
 @dataclass
 class BacktestStatistics:
     """General statistics about the backtest"""
+
     start_date: str
     end_date: str
     initial_capital: float
@@ -68,6 +71,7 @@ class BacktestStatistics:
 @dataclass
 class Trade:
     """Single trade record"""
+
     id: str
     symbol: str
     entry_date: str
@@ -87,6 +91,7 @@ class Trade:
 @dataclass
 class EquityPoint:
     """Single point on equity curve"""
+
     date: str
     equity: float
     returns: float
@@ -97,6 +102,7 @@ class EquityPoint:
 @dataclass
 class BacktestResult:
     """Complete backtest result"""
+
     id: str
     status: str  # 'completed', 'failed', 'running', 'cancelled'
     performance: PerformanceMetrics
@@ -112,25 +118,13 @@ class BacktestResult:
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization"""
-        return {
-            'id': self.id,
-            'status': self.status,
-            'performance': asdict(self.performance),
-            'trades': [asdict(t) for t in self.trades],
-            'equity': [asdict(e) for e in self.equity],
-            'statistics': asdict(self.statistics),
-            'logs': self.logs,
-            'error': self.error,
-            'start_time': self.start_time,
-            'end_time': self.end_time,
-            'duration': self.duration,
-            'charts': self.charts or []
-        }
+        return {"id": self.id, "status": self.status, "performance": asdict(self.performance), "trades": [asdict(t) for t in self.trades], "equity": [asdict(e) for e in self.equity], "statistics": asdict(self.statistics), "logs": self.logs, "error": self.error, "start_time": self.start_time, "end_time": self.end_time, "duration": self.duration, "charts": self.charts or []}
 
 
 @dataclass
 class OptimizationResult:
     """Optimization run result"""
+
     id: str
     status: str
     best_parameters: Dict[str, Any]
@@ -142,21 +136,13 @@ class OptimizationResult:
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization"""
-        return {
-            'id': self.id,
-            'status': self.status,
-            'best_parameters': self.best_parameters,
-            'best_result': self.best_result.to_dict(),
-            'all_results': self.all_results,
-            'iterations': self.iterations,
-            'duration': self.duration,
-            'error': self.error
-        }
+        return {"id": self.id, "status": self.status, "best_parameters": self.best_parameters, "best_result": self.best_result.to_dict(), "all_results": self.all_results, "iterations": self.iterations, "duration": self.duration, "error": self.error}
 
 
 @dataclass
 class HistoricalData:
     """Historical price data"""
+
     symbol: str
     timeframe: str
     data: List[Dict[str, Any]]  # List of price bars
@@ -165,6 +151,7 @@ class HistoricalData:
 @dataclass
 class IndicatorResult:
     """Technical indicator calculation result"""
+
     indicator: str
     symbol: str
     values: List[Dict[str, Any]]
@@ -173,6 +160,7 @@ class IndicatorResult:
 # ============================================================================
 # Base Provider Class
 # ============================================================================
+
 
 class BacktestingProviderBase(ABC):
     """
@@ -340,17 +328,13 @@ class BacktestingProviderBase(ABC):
         errors = []
         warnings = []
 
-        if not strategy.get('name'):
-            errors.append('Strategy name is required')
+        if not strategy.get("name"):
+            errors.append("Strategy name is required")
 
-        if not strategy.get('type'):
-            errors.append('Strategy type is required')
+        if not strategy.get("type"):
+            errors.append("Strategy type is required")
 
-        return {
-            'valid': len(errors) == 0,
-            'errors': errors,
-            'warnings': warnings
-        }
+        return {"valid": len(errors) == 0, "errors": errors, "warnings": warnings}
 
     # ========================================================================
     # Helper Methods
@@ -359,11 +343,12 @@ class BacktestingProviderBase(ABC):
     def _generate_id(self) -> str:
         """Generate unique ID for backtest/optimization runs"""
         import uuid
+
         return str(uuid.uuid4())
 
     def _current_timestamp(self) -> str:
         """Get current timestamp as ISO string"""
-        return datetime.utcnow().isoformat() + 'Z'
+        return datetime.utcnow().isoformat() + "Z"
 
     def _ensure_initialized(self) -> None:
         """Check if provider is initialized, raise error if not"""
@@ -378,18 +363,11 @@ class BacktestingProviderBase(ABC):
 
     def _create_success_result(self, message: str) -> Dict[str, Any]:
         """Create success result dictionary"""
-        return {
-            'success': True,
-            'message': message
-        }
+        return {"success": True, "message": message}
 
     def _create_error_result(self, error: str) -> Dict[str, Any]:
         """Create error result dictionary"""
-        return {
-            'success': False,
-            'message': 'Operation failed',
-            'error': error
-        }
+        return {"success": False, "message": "Operation failed", "error": error}
 
     def _log(self, message: str) -> None:
         """Log message"""
@@ -400,17 +378,18 @@ class BacktestingProviderBase(ABC):
         error_msg = f"[{self.name}] ERROR: {message}"
         if exception:
             error_msg += f"\n{str(exception)}"
-        print(error_msg, file=__import__('sys').stderr)
+        print(error_msg, file=__import__("sys").stderr)
 
 
 # ============================================================================
 # Utility Functions
 # ============================================================================
 
+
 def snake_to_camel(snake_str: str) -> str:
     """Convert snake_case to camelCase"""
-    components = snake_str.split('_')
-    return components[0] + ''.join(x.title() for x in components[1:])
+    components = snake_str.split("_")
+    return components[0] + "".join(x.title() for x in components[1:])
 
 
 def convert_keys_to_camel(data: Any) -> Any:

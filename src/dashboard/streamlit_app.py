@@ -188,9 +188,7 @@ class DashboardState:
                 if trade.get("status") == "closed":
                     date = trade.get("exit_time", "")[:10]
                     if date:
-                        daily_pnl[date] = daily_pnl.get(date, 0.0) + trade.get(
-                            "pnl", 0.0
-                        )
+                        daily_pnl[date] = daily_pnl.get(date, 0.0) + trade.get("pnl", 0.0)
             return [{"date": k, "pnl": v} for k, v in sorted(daily_pnl.items())]
         except Exception:
             return []
@@ -205,29 +203,17 @@ def get_dashboard_state() -> DashboardState:
 
 def render_header():
     """Render dashboard header"""
-    st.markdown(
-        '<div class="main-header">🤖 AI HEDGE FUND v2.2</div>', unsafe_allow_html=True
-    )
+    st.markdown('<div class="main-header">🤖 AI HEDGE FUND v2.2</div>', unsafe_allow_html=True)
     col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
     with col1:
-        st.markdown(
-            f"**Mode:** {st.session_state.get('trading_mode', 'manual').upper()}"
-        )
+        st.markdown(f"**Mode:** {st.session_state.get('trading_mode', 'manual').upper()}")
     with col2:
         st.markdown(f"**Time:** {datetime.now().strftime('%H:%M:%S')}")
     with col3:
-        mt_status = (
-            "🟢 Connected"
-            if st.session_state.get("mt_connected", False)
-            else "🔴 Disconnected"
-        )
+        mt_status = "🟢 Connected" if st.session_state.get("mt_connected", False) else "🔴 Disconnected"
         st.markdown(f"**MT:** {mt_status}")
     with col4:
-        auto_status = (
-            "🔄 Auto-refresh"
-            if st.session_state.get("auto_refresh", False)
-            else "⏸️ Manual"
-        )
+        auto_status = "🔄 Auto-refresh" if st.session_state.get("auto_refresh", False) else "⏸️ Manual"
         st.markdown(f"**Status:** {auto_status}")
 
 
@@ -241,9 +227,7 @@ def render_portfolio_metrics(state: DashboardState):
         st.metric(
             "Balance",
             f"${portfolio['balance']:,.2f}",
-            delta=f"${portfolio['equity'] - portfolio['balance']:,.2f}"
-            if portfolio["equity"] != portfolio["balance"]
-            else None,
+            delta=f"${portfolio['equity'] - portfolio['balance']:,.2f}" if portfolio["equity"] != portfolio["balance"] else None,
         )
 
     with col2:
@@ -309,9 +293,7 @@ def render_positions(state: DashboardState):
             )
 
         for pos in positions:
-            with st.expander(
-                f"📍 {pos.get('symbol', 'Unknown')} - {pos.get('direction', '').upper()}"
-            ):
+            with st.expander(f"📍 {pos.get('symbol', 'Unknown')} - {pos.get('direction', '').upper()}"):
                 col1, col2, col3, col4 = st.columns(4)
                 with col1:
                     st.write(f"**Entry:** ${pos.get('entry_price', 0):,.5f}")
@@ -325,9 +307,7 @@ def render_positions(state: DashboardState):
                 if pos.get("stop_loss"):
                     st.write(f"**Stop Loss:** ${pos.get('stop_loss'):,.5f}")
                 if pos.get("take_profit"):
-                    tp_str = ", ".join(
-                        [f"${tp:,.5f}" for tp in pos.get("take_profit", [])]
-                    )
+                    tp_str = ", ".join([f"${tp:,.5f}" for tp in pos.get("take_profit", [])])
                     st.write(f"**Take Profit:** {tp_str}")
 
 
@@ -398,11 +378,7 @@ def render_performance_metrics(state: DashboardState):
     with col7:
         st.metric("Total P&L", f"${metrics['total_pnl']:,.2f}")
     with col8:
-        rr = (
-            metrics["avg_win"] / abs(metrics["avg_loss"])
-            if metrics["avg_loss"] != 0
-            else 0
-        )
+        rr = metrics["avg_win"] / abs(metrics["avg_loss"]) if metrics["avg_loss"] != 0 else 0
         st.metric("Avg Win/Loss", f"{rr:.2f}")
 
     if daily_pnl:
@@ -427,9 +403,7 @@ def render_performance_metrics(state: DashboardState):
             go.Bar(
                 x=pnl_df["date"],
                 y=pnl_df["pnl"],
-                marker_color=pnl_df["pnl"].apply(
-                    lambda x: "#00C853" if x >= 0 else "#FF1744"
-                ),
+                marker_color=pnl_df["pnl"].apply(lambda x: "#00C853" if x >= 0 else "#FF1744"),
             ),
             row=1,
             col=1,
@@ -482,9 +456,7 @@ def render_trading_controls(state: DashboardState):
         mode = st.selectbox(
             "Select Mode",
             ["manual", "semi-auto", "full-auto"],
-            index=["manual", "semi-auto", "full-auto"].index(
-                st.session_state.get("trading_mode", "manual")
-            ),
+            index=["manual", "semi-auto", "full-auto"].index(st.session_state.get("trading_mode", "manual")),
         )
         st.session_state["trading_mode"] = mode
 
@@ -500,9 +472,7 @@ def render_trading_controls(state: DashboardState):
 
     with col3:
         st.markdown("### Auto Refresh")
-        auto_refresh = st.checkbox(
-            "Enable Auto Refresh", value=st.session_state.get("auto_refresh", False)
-        )
+        auto_refresh = st.checkbox("Enable Auto Refresh", value=st.session_state.get("auto_refresh", False))
         st.session_state["auto_refresh"] = auto_refresh
         if auto_refresh:
             interval = st.slider(
@@ -521,9 +491,7 @@ def render_symbol_analyzer():
     col1, col2 = st.columns([2, 1])
 
     with col1:
-        symbol = st.text_input(
-            "Enter Symbol", value="EURUSD", help="e.g., AAPL, BTC/USD, EURUSD"
-        )
+        symbol = st.text_input("Enter Symbol", value="EURUSD", help="e.g., AAPL, BTC/USD, EURUSD")
 
     with col2:
         timeframe = st.selectbox("Timeframe", ["H1", "M15", "M5", "D1", "W1"], index=0)
@@ -603,13 +571,7 @@ def render_sidebar(state: DashboardState):
                 symbol = signal.get("symbol", "Unknown")
                 signal_type = signal.get("signal", "HOLD")
                 confidence = signal.get("confidence", 0) * 100
-                emoji = (
-                    "🟢"
-                    if signal_type in ["BUY", "STRONG_BUY"]
-                    else "🔴"
-                    if signal_type in ["SELL", "STRONG_SELL"]
-                    else "🟡"
-                )
+                emoji = "🟢" if signal_type in ["BUY", "STRONG_BUY"] else "🔴" if signal_type in ["SELL", "STRONG_SELL"] else "🟡"
                 st.markdown(f"{emoji} {symbol}: {signal_type} ({confidence:.0f}%)")
         except Exception:
             st.markdown("No signals available")
@@ -628,9 +590,7 @@ def main():
 
     render_header()
 
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(
-        ["📊 Portfolio", "📈 Analysis", "📜 History", "⚙️ Settings", "📝 Trade"]
-    )
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Portfolio", "📈 Analysis", "📜 History", "⚙️ Settings", "📝 Trade"])
 
     with tab1:
         render_portfolio_metrics(state)
@@ -659,9 +619,7 @@ def main():
             direction = st.selectbox("Direction", ["BUY", "SELL"])
 
         with col2:
-            lot_size = st.number_input(
-                "Lot Size", min_value=0.01, max_value=100.0, value=0.1
-            )
+            lot_size = st.number_input("Lot Size", min_value=0.01, max_value=100.0, value=0.1)
             st.write(f"Position Size: {lot_size} lots")
 
         with col3:
@@ -672,9 +630,7 @@ def main():
                 st.info("Setting TP at 1R and 2R...")
 
         if st.button("Execute Trade"):
-            st.success(
-                f"Trade would be executed: {direction} {lot_size} lots of {symbol}"
-            )
+            st.success(f"Trade would be executed: {direction} {lot_size} lots of {symbol}")
 
 
 if __name__ == "__main__":

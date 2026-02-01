@@ -40,10 +40,7 @@ import logging
 from scipy import stats
 from scipy.optimize import minimize
 
-from .core import (
-    DerivativeInstrument, MarketData, PricingResult,
-    ValidationError, ModelValidator, Constants
-)
+from .core import DerivativeInstrument, MarketData, PricingResult, ValidationError, ModelValidator, Constants
 from .options import VanillaOption, OptionGreeks, BlackScholesPricingEngine
 from .forward_commitments import ForwardCommitmentPricingEngine
 
@@ -52,6 +49,7 @@ logger = logging.getLogger(__name__)
 
 class RiskMeasure(Enum):
     """Types of risk measures"""
+
     VALUE_AT_RISK = "var"
     CONDITIONAL_VAR = "cvar"
     EXPECTED_SHORTFALL = "expected_shortfall"
@@ -63,6 +61,7 @@ class RiskMeasure(Enum):
 
 class ScenarioType(Enum):
     """Types of scenario analysis"""
+
     STRESS_TEST = "stress_test"
     MONTE_CARLO = "monte_carlo"
     HISTORICAL_SIMULATION = "historical_simulation"
@@ -72,6 +71,7 @@ class ScenarioType(Enum):
 @dataclass
 class PortfolioPosition:
     """Individual position in derivatives portfolio"""
+
     instrument: DerivativeInstrument
     quantity: float
     entry_price: float
@@ -87,6 +87,7 @@ class PortfolioPosition:
 @dataclass
 class RiskMetrics:
     """Container for portfolio risk metrics"""
+
     portfolio_value: float
     var_95: float = 0.0
     var_99: float = 0.0
@@ -110,6 +111,7 @@ class RiskMetrics:
 @dataclass
 class ScenarioResult:
     """Results from scenario analysis"""
+
     scenario_name: str
     scenario_type: ScenarioType
     base_portfolio_value: float
@@ -123,6 +125,7 @@ class ScenarioResult:
 @dataclass
 class SensitivityResult:
     """Results from sensitivity analysis"""
+
     parameter_name: str
     base_value: float
     shock_size: float
@@ -144,18 +147,12 @@ class DerivativesPortfolio:
         self.options_engine = BlackScholesPricingEngine()
         self.forwards_engine = ForwardCommitmentPricingEngine()
 
-    def add_position(self, instrument: DerivativeInstrument, quantity: float,
-                     entry_price: float, entry_date: datetime = None):
+    def add_position(self, instrument: DerivativeInstrument, quantity: float, entry_price: float, entry_date: datetime = None):
         """Add position to portfolio"""
         if entry_date is None:
             entry_date = datetime.now()
 
-        position = PortfolioPosition(
-            instrument=instrument,
-            quantity=quantity,
-            entry_price=entry_price,
-            entry_date=entry_date
-        )
+        position = PortfolioPosition(instrument=instrument, quantity=quantity, entry_price=entry_price, entry_date=entry_date)
 
         self.positions.append(position)
         self.last_update = datetime.now()
@@ -177,7 +174,7 @@ class DerivativesPortfolio:
         for position in self.positions:
             try:
                 # Price the instrument
-                if hasattr(position.instrument, 'option_type'):  # Options
+                if hasattr(position.instrument, "option_type"):  # Options
                     pricing_result = self.options_engine.price(position.instrument, market_data)
                 else:  # Forward commitments
                     pricing_result = self.forwards_engine.price(position.instrument, market_data)
@@ -199,21 +196,18 @@ class DerivativesPortfolio:
 
     def get_portfolio_greeks(self, market_data: MarketData) -> Dict[str, float]:
         """Calculate aggregated portfolio Greeks"""
-        total_greeks = {
-            'delta': 0.0, 'gamma': 0.0, 'theta': 0.0,
-            'vega': 0.0, 'rho': 0.0
-        }
+        total_greeks = {"delta": 0.0, "gamma": 0.0, "theta": 0.0, "vega": 0.0, "rho": 0.0}
 
         for position in self.positions:
-            if hasattr(position.instrument, 'option_type'):  # Options only
+            if hasattr(position.instrument, "option_type"):  # Options only
                 try:
                     greeks = self.options_engine.calculate_greeks(position.instrument, market_data)
 
-                    total_greeks['delta'] += greeks.delta * position.quantity
-                    total_greeks['gamma'] += greeks.gamma * position.quantity
-                    total_greeks['theta'] += greeks.theta * position.quantity
-                    total_greeks['vega'] += greeks.vega * position.quantity
-                    total_greeks['rho'] += greeks.rho * position.quantity
+                    total_greeks["delta"] += greeks.delta * position.quantity
+                    total_greeks["gamma"] += greeks.gamma * position.quantity
+                    total_greeks["theta"] += greeks.theta * position.quantity
+                    total_greeks["vega"] += greeks.vega * position.quantity
+                    total_greeks["rho"] += greeks.rho * position.quantity
 
                 except Exception as e:
                     logger.warning(f"Could not calculate Greeks for {position.instrument}: {e}")
@@ -228,22 +222,13 @@ class DerivativesPortfolio:
         total_pnl = sum(pos.unrealized_pnl for pos in self.positions)
 
         return {
-            'portfolio_id': self.portfolio_id,
-            'portfolio_value': portfolio_value,
-            'total_unrealized_pnl': total_pnl,
-            'number_of_positions': len(self.positions),
-            'last_update': self.last_update,
-            'greeks': greeks,
-            'positions_summary': [
-                {
-                    'instrument_type': pos.instrument.derivative_type.value,
-                    'quantity': pos.quantity,
-                    'current_value': pos.current_value,
-                    'unrealized_pnl': pos.unrealized_pnl,
-                    'entry_date': pos.entry_date
-                }
-                for pos in self.positions
-            ]
+            "portfolio_id": self.portfolio_id,
+            "portfolio_value": portfolio_value,
+            "total_unrealized_pnl": total_pnl,
+            "number_of_positions": len(self.positions),
+            "last_update": self.last_update,
+            "greeks": greeks,
+            "positions_summary": [{"instrument_type": pos.instrument.derivative_type.value, "quantity": pos.quantity, "current_value": pos.current_value, "unrealized_pnl": pos.unrealized_pnl, "entry_date": pos.entry_date} for pos in self.positions],
         }
 
 
@@ -284,10 +269,7 @@ class RiskAnalyzer:
 
         return np.min(drawdowns)
 
-    def calculate_portfolio_risk_metrics(self, portfolio: DerivativesPortfolio,
-                                         historical_returns: np.ndarray = None,
-                                         benchmark_returns: np.ndarray = None,
-                                         risk_free_rate: float = 0.02) -> RiskMetrics:
+    def calculate_portfolio_risk_metrics(self, portfolio: DerivativesPortfolio, historical_returns: np.ndarray = None, benchmark_returns: np.ndarray = None, risk_free_rate: float = 0.02) -> RiskMetrics:
         """Calculate comprehensive risk metrics"""
 
         if historical_returns is None:
@@ -309,8 +291,7 @@ class RiskAnalyzer:
 
         # Performance ratios
         excess_returns = historical_returns - risk_free_rate / 252
-        sharpe_ratio = np.mean(excess_returns) / np.std(historical_returns) * np.sqrt(252) if np.std(
-            historical_returns) > 0 else 0
+        sharpe_ratio = np.mean(excess_returns) / np.std(historical_returns) * np.sqrt(252) if np.std(historical_returns) > 0 else 0
 
         # Sortino ratio (using downside deviation)
         downside_returns = historical_returns[historical_returns < 0]
@@ -327,19 +308,7 @@ class RiskAnalyzer:
             benchmark_variance = np.var(benchmark_returns)
             beta = covariance / benchmark_variance if benchmark_variance > 0 else 0
 
-        return RiskMetrics(
-            portfolio_value=portfolio_value,
-            var_95=var_95 * portfolio_value,
-            var_99=var_99 * portfolio_value,
-            cvar_95=cvar_95 * portfolio_value,
-            cvar_99=cvar_99 * portfolio_value,
-            volatility=volatility,
-            maximum_drawdown=max_drawdown,
-            sharpe_ratio=sharpe_ratio,
-            sortino_ratio=sortino_ratio,
-            calmar_ratio=calmar_ratio,
-            beta=beta
-        )
+        return RiskMetrics(portfolio_value=portfolio_value, var_95=var_95 * portfolio_value, var_99=var_99 * portfolio_value, cvar_95=cvar_95 * portfolio_value, cvar_99=cvar_99 * portfolio_value, volatility=volatility, maximum_drawdown=max_drawdown, sharpe_ratio=sharpe_ratio, sortino_ratio=sortino_ratio, calmar_ratio=calmar_ratio, beta=beta)
 
 
 class ScenarioAnalyzer:
@@ -352,9 +321,7 @@ class ScenarioAnalyzer:
         """Add predefined scenario"""
         self.scenarios[name] = market_shocks
 
-    def stress_test(self, portfolio: DerivativesPortfolio,
-                    base_market_data: MarketData,
-                    stress_scenarios: Dict[str, Dict[str, float]] = None) -> List[ScenarioResult]:
+    def stress_test(self, portfolio: DerivativesPortfolio, base_market_data: MarketData, stress_scenarios: Dict[str, Dict[str, float]] = None) -> List[ScenarioResult]:
         """Perform stress testing on portfolio"""
 
         if stress_scenarios is None:
@@ -376,15 +343,7 @@ class ScenarioAnalyzer:
                 pnl_change = stressed_value - base_value
                 percentage_change = (pnl_change / base_value * 100) if base_value != 0 else 0
 
-                result = ScenarioResult(
-                    scenario_name=scenario_name,
-                    scenario_type=ScenarioType.STRESS_TEST,
-                    base_portfolio_value=base_value,
-                    scenario_portfolio_value=stressed_value,
-                    pnl_change=pnl_change,
-                    percentage_change=percentage_change,
-                    scenario_parameters=shocks
-                )
+                result = ScenarioResult(scenario_name=scenario_name, scenario_type=ScenarioType.STRESS_TEST, base_portfolio_value=base_value, scenario_portfolio_value=stressed_value, pnl_change=pnl_change, percentage_change=percentage_change, scenario_parameters=shocks)
 
                 results.append(result)
 
@@ -393,10 +352,7 @@ class ScenarioAnalyzer:
 
         return results
 
-    def monte_carlo_simulation(self, portfolio: DerivativesPortfolio,
-                               base_market_data: MarketData,
-                               num_simulations: int = 10000,
-                               time_horizon: int = 30) -> List[ScenarioResult]:
+    def monte_carlo_simulation(self, portfolio: DerivativesPortfolio, base_market_data: MarketData, num_simulations: int = 10000, time_horizon: int = 30) -> List[ScenarioResult]:
         """Monte Carlo simulation for portfolio"""
 
         base_value = portfolio.update_positions(base_market_data)
@@ -413,35 +369,15 @@ class ScenarioAnalyzer:
                 random_shocks = np.random.normal(0, 1, time_horizon)
 
                 # Simulate final market conditions
-                final_spot_multiplier = np.exp(np.sum(
-                    (drift - 0.5 * volatility ** 2) * dt + volatility * np.sqrt(dt) * random_shocks
-                ))
+                final_spot_multiplier = np.exp(np.sum((drift - 0.5 * volatility**2) * dt + volatility * np.sqrt(dt) * random_shocks))
 
-                simulated_market_data = MarketData(
-                    spot_price=base_market_data.spot_price * final_spot_multiplier,
-                    risk_free_rate=base_market_data.risk_free_rate,
-                    dividend_yield=base_market_data.dividend_yield,
-                    volatility=base_market_data.volatility,
-                    time_to_expiry=max(0, base_market_data.time_to_expiry - time_horizon / 252)
-                )
+                simulated_market_data = MarketData(spot_price=base_market_data.spot_price * final_spot_multiplier, risk_free_rate=base_market_data.risk_free_rate, dividend_yield=base_market_data.dividend_yield, volatility=base_market_data.volatility, time_to_expiry=max(0, base_market_data.time_to_expiry - time_horizon / 252))
 
                 simulated_value = portfolio.update_positions(simulated_market_data)
                 pnl_change = simulated_value - base_value
                 percentage_change = (pnl_change / base_value * 100) if base_value != 0 else 0
 
-                result = ScenarioResult(
-                    scenario_name=f"MC_Simulation_{i + 1}",
-                    scenario_type=ScenarioType.MONTE_CARLO,
-                    base_portfolio_value=base_value,
-                    scenario_portfolio_value=simulated_value,
-                    pnl_change=pnl_change,
-                    percentage_change=percentage_change,
-                    probability=1 / num_simulations,
-                    scenario_parameters={
-                        "final_spot_multiplier": final_spot_multiplier,
-                        "time_horizon_days": time_horizon
-                    }
-                )
+                result = ScenarioResult(scenario_name=f"MC_Simulation_{i + 1}", scenario_type=ScenarioType.MONTE_CARLO, base_portfolio_value=base_value, scenario_portfolio_value=simulated_value, pnl_change=pnl_change, percentage_change=percentage_change, probability=1 / num_simulations, scenario_parameters={"final_spot_multiplier": final_spot_multiplier, "time_horizon_days": time_horizon})
 
                 results.append(result)
 
@@ -450,22 +386,14 @@ class ScenarioAnalyzer:
 
         return results
 
-    def sensitivity_analysis(self, portfolio: DerivativesPortfolio,
-                             base_market_data: MarketData,
-                             parameters: List[str] = None,
-                             shock_sizes: Dict[str, float] = None) -> List[SensitivityResult]:
+    def sensitivity_analysis(self, portfolio: DerivativesPortfolio, base_market_data: MarketData, parameters: List[str] = None, shock_sizes: Dict[str, float] = None) -> List[SensitivityResult]:
         """Perform sensitivity analysis on key parameters"""
 
         if parameters is None:
-            parameters = ['spot_price', 'volatility', 'risk_free_rate', 'time_to_expiry']
+            parameters = ["spot_price", "volatility", "risk_free_rate", "time_to_expiry"]
 
         if shock_sizes is None:
-            shock_sizes = {
-                'spot_price': 0.01,  # 1%
-                'volatility': 0.01,  # 1 percentage point
-                'risk_free_rate': 0.0025,  # 25 basis points
-                'time_to_expiry': -1 / 365  # 1 day
-            }
+            shock_sizes = {"spot_price": 0.01, "volatility": 0.01, "risk_free_rate": 0.0025, "time_to_expiry": -1 / 365}  # 1%  # 1 percentage point  # 25 basis points  # 1 day
 
         base_value = portfolio.update_positions(base_market_data)
         results = []
@@ -494,14 +422,7 @@ class ScenarioAnalyzer:
                 else:
                     elasticity = 0
 
-                result = SensitivityResult(
-                    parameter_name=param,
-                    base_value=base_param_value,
-                    shock_size=shock_sizes[param],
-                    portfolio_value_change=pnl_change,
-                    sensitivity=sensitivity,
-                    elasticity=elasticity
-                )
+                result = SensitivityResult(parameter_name=param, base_value=base_param_value, shock_size=shock_sizes[param], portfolio_value_change=pnl_change, sensitivity=sensitivity, elasticity=elasticity)
 
                 results.append(result)
 
@@ -513,52 +434,24 @@ class ScenarioAnalyzer:
     def _get_default_stress_scenarios(self) -> Dict[str, Dict[str, float]]:
         """Get default stress test scenarios"""
         return {
-            "Market_Crash": {
-                "spot_price": -0.20,  # 20% stock drop
-                "volatility": 0.15,  # Vol spike to 15%
-                "risk_free_rate": -0.01  # Rate cut
-            },
-            "Vol_Spike": {
-                "volatility": 0.20,  # Extreme volatility
-                "spot_price": -0.05  # 5% stock drop
-            },
-            "Interest_Rate_Shock": {
-                "risk_free_rate": 0.02,  # 200 bps rate increase
-                "spot_price": -0.10  # 10% stock drop
-            },
-            "Time_Decay": {
-                "time_to_expiry": -0.1,  # 10% time decay
-                "volatility": -0.05  # Vol compression
-            },
-            "Bull_Market": {
-                "spot_price": 0.15,  # 15% stock rally
-                "volatility": -0.05  # Vol compression
-            }
+            "Market_Crash": {"spot_price": -0.20, "volatility": 0.15, "risk_free_rate": -0.01},  # 20% stock drop  # Vol spike to 15%  # Rate cut
+            "Vol_Spike": {"volatility": 0.20, "spot_price": -0.05},  # Extreme volatility  # 5% stock drop
+            "Interest_Rate_Shock": {"risk_free_rate": 0.02, "spot_price": -0.10},  # 200 bps rate increase  # 10% stock drop
+            "Time_Decay": {"time_to_expiry": -0.1, "volatility": -0.05},  # 10% time decay  # Vol compression
+            "Bull_Market": {"spot_price": 0.15, "volatility": -0.05},  # 15% stock rally  # Vol compression
         }
 
     def _apply_market_shocks(self, base_data: MarketData, shocks: Dict[str, float]) -> MarketData:
         """Apply market shocks to create stressed market data"""
-        return MarketData(
-            spot_price=base_data.spot_price * (1 + shocks.get('spot_price', 0)),
-            risk_free_rate=base_data.risk_free_rate + shocks.get('risk_free_rate', 0),
-            dividend_yield=base_data.dividend_yield + shocks.get('dividend_yield', 0),
-            volatility=max(0.001, base_data.volatility + shocks.get('volatility', 0)),
-            time_to_expiry=max(0, base_data.time_to_expiry + shocks.get('time_to_expiry', 0))
-        )
+        return MarketData(spot_price=base_data.spot_price * (1 + shocks.get("spot_price", 0)), risk_free_rate=base_data.risk_free_rate + shocks.get("risk_free_rate", 0), dividend_yield=base_data.dividend_yield + shocks.get("dividend_yield", 0), volatility=max(0.001, base_data.volatility + shocks.get("volatility", 0)), time_to_expiry=max(0, base_data.time_to_expiry + shocks.get("time_to_expiry", 0)))
 
     def _shock_parameter(self, base_data: MarketData, parameter: str, shock: float) -> MarketData:
         """Apply shock to specific parameter"""
-        data_dict = {
-            'spot_price': base_data.spot_price,
-            'risk_free_rate': base_data.risk_free_rate,
-            'dividend_yield': base_data.dividend_yield,
-            'volatility': base_data.volatility,
-            'time_to_expiry': base_data.time_to_expiry
-        }
+        data_dict = {"spot_price": base_data.spot_price, "risk_free_rate": base_data.risk_free_rate, "dividend_yield": base_data.dividend_yield, "volatility": base_data.volatility, "time_to_expiry": base_data.time_to_expiry}
 
         if parameter in data_dict:
-            if parameter == 'spot_price':
-                data_dict[parameter] *= (1 + shock)  # Percentage shock
+            if parameter == "spot_price":
+                data_dict[parameter] *= 1 + shock  # Percentage shock
             else:
                 data_dict[parameter] += shock  # Absolute shock
 
@@ -569,11 +462,9 @@ class PerformanceAttribution:
     """Performance attribution analysis"""
 
     def __init__(self):
-        self.attribution_factors = ['delta', 'gamma', 'theta', 'vega', 'rho']
+        self.attribution_factors = ["delta", "gamma", "theta", "vega", "rho"]
 
-    def attribute_pnl(self, portfolio: DerivativesPortfolio,
-                      initial_market_data: MarketData,
-                      final_market_data: MarketData) -> Dict[str, float]:
+    def attribute_pnl(self, portfolio: DerivativesPortfolio, initial_market_data: MarketData, final_market_data: MarketData) -> Dict[str, float]:
         """Attribute P&L to different risk factors"""
 
         # Calculate initial portfolio value and Greeks
@@ -591,27 +482,17 @@ class PerformanceAttribution:
         time_move = final_market_data.time_to_expiry - initial_market_data.time_to_expiry
 
         # Attribute P&L to Greeks
-        delta_pnl = initial_greeks.get('delta', 0) * spot_move
-        gamma_pnl = 0.5 * initial_greeks.get('gamma', 0) * (spot_move ** 2)
-        theta_pnl = initial_greeks.get('theta', 0) * (-time_move * 365)  # Convert to days
-        vega_pnl = initial_greeks.get('vega', 0) * vol_move * 100  # Vega per 1% vol
-        rho_pnl = initial_greeks.get('rho', 0) * rate_move * 100  # Rho per 1% rate
+        delta_pnl = initial_greeks.get("delta", 0) * spot_move
+        gamma_pnl = 0.5 * initial_greeks.get("gamma", 0) * (spot_move**2)
+        theta_pnl = initial_greeks.get("theta", 0) * (-time_move * 365)  # Convert to days
+        vega_pnl = initial_greeks.get("vega", 0) * vol_move * 100  # Vega per 1% vol
+        rho_pnl = initial_greeks.get("rho", 0) * rate_move * 100  # Rho per 1% rate
 
         # Calculate unexplained P&L
         explained_pnl = delta_pnl + gamma_pnl + theta_pnl + vega_pnl + rho_pnl
         unexplained_pnl = total_pnl - explained_pnl
 
-        return {
-            'total_pnl': total_pnl,
-            'delta_pnl': delta_pnl,
-            'gamma_pnl': gamma_pnl,
-            'theta_pnl': theta_pnl,
-            'vega_pnl': vega_pnl,
-            'rho_pnl': rho_pnl,
-            'explained_pnl': explained_pnl,
-            'unexplained_pnl': unexplained_pnl,
-            'explanation_ratio': abs(explained_pnl / total_pnl) if total_pnl != 0 else 0
-        }
+        return {"total_pnl": total_pnl, "delta_pnl": delta_pnl, "gamma_pnl": gamma_pnl, "theta_pnl": theta_pnl, "vega_pnl": vega_pnl, "rho_pnl": rho_pnl, "explained_pnl": explained_pnl, "unexplained_pnl": unexplained_pnl, "explanation_ratio": abs(explained_pnl / total_pnl) if total_pnl != 0 else 0}
 
 
 class PortfolioOptimizer:
@@ -620,20 +501,14 @@ class PortfolioOptimizer:
     def __init__(self, objective: str = "sharpe_ratio"):
         self.objective = objective  # "sharpe_ratio", "min_variance", "max_return"
 
-    def optimize_weights(self, expected_returns: np.ndarray,
-                         covariance_matrix: np.ndarray,
-                         constraints: Dict = None) -> Dict[str, Any]:
+    def optimize_weights(self, expected_returns: np.ndarray, covariance_matrix: np.ndarray, constraints: Dict = None) -> Dict[str, Any]:
         """Optimize portfolio weights"""
 
         n_assets = len(expected_returns)
 
         # Default constraints
         if constraints is None:
-            constraints = {
-                'max_weight': 0.4,  # Max 40% in any single asset
-                'min_weight': -0.2,  # Allow 20% short positions
-                'target_return': None
-            }
+            constraints = {"max_weight": 0.4, "min_weight": -0.2, "target_return": None}  # Max 40% in any single asset  # Allow 20% short positions
 
         # Objective function
         def objective_function(weights):
@@ -651,33 +526,19 @@ class PortfolioOptimizer:
                 return portfolio_variance
 
         # Constraints
-        constraint_list = [
-            {'type': 'eq', 'fun': lambda w: np.sum(w) - 1}  # Weights sum to 1
-        ]
+        constraint_list = [{"type": "eq", "fun": lambda w: np.sum(w) - 1}]  # Weights sum to 1
 
-        if constraints.get('target_return'):
-            constraint_list.append({
-                'type': 'eq',
-                'fun': lambda w: np.dot(w, expected_returns) - constraints['target_return']
-            })
+        if constraints.get("target_return"):
+            constraint_list.append({"type": "eq", "fun": lambda w: np.dot(w, expected_returns) - constraints["target_return"]})
 
         # Bounds for individual weights
-        bounds = [
-            (constraints.get('min_weight', -1), constraints.get('max_weight', 1))
-            for _ in range(n_assets)
-        ]
+        bounds = [(constraints.get("min_weight", -1), constraints.get("max_weight", 1)) for _ in range(n_assets)]
 
         # Initial guess (equal weights)
         initial_weights = np.array([1 / n_assets] * n_assets)
 
         try:
-            result = minimize(
-                objective_function,
-                initial_weights,
-                method='SLSQP',
-                bounds=bounds,
-                constraints=constraint_list
-            )
+            result = minimize(objective_function, initial_weights, method="SLSQP", bounds=bounds, constraints=constraint_list)
 
             if result.success:
                 optimal_weights = result.x
@@ -686,25 +547,14 @@ class PortfolioOptimizer:
                 optimal_std = np.sqrt(optimal_variance)
                 sharpe_ratio = optimal_return / optimal_std if optimal_std > 0 else 0
 
-                return {
-                    'success': True,
-                    'optimal_weights': optimal_weights,
-                    'expected_return': optimal_return,
-                    'volatility': optimal_std,
-                    'sharpe_ratio': sharpe_ratio,
-                    'optimization_result': result
-                }
+                return {"success": True, "optimal_weights": optimal_weights, "expected_return": optimal_return, "volatility": optimal_std, "sharpe_ratio": sharpe_ratio, "optimization_result": result}
             else:
-                return {'success': False, 'message': result.message}
+                return {"success": False, "message": result.message}
 
         except Exception as e:
             logger.error(f"Portfolio optimization failed: {e}")
-            return {'success': False, 'message': str(e)}
+            return {"success": False, "message": str(e)}
 
 
 # Export main classes
-__all__ = [
-    'RiskMeasure', 'ScenarioType', 'PortfolioPosition', 'RiskMetrics',
-    'ScenarioResult', 'SensitivityResult', 'DerivativesPortfolio',
-    'RiskAnalyzer', 'ScenarioAnalyzer', 'PerformanceAttribution', 'PortfolioOptimizer'
-]
+__all__ = ["RiskMeasure", "ScenarioType", "PortfolioPosition", "RiskMetrics", "ScenarioResult", "SensitivityResult", "DerivativesPortfolio", "RiskAnalyzer", "ScenarioAnalyzer", "PerformanceAttribution", "PortfolioOptimizer"]

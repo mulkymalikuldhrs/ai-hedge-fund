@@ -34,15 +34,13 @@ from dataclasses import dataclass
 import statistics
 from scipy import stats
 
-from ..base.base_models import (
-    BaseValuationModel, CompanyData, MarketData, ValuationResult,
-    ValuationMethod, CalculationEngine, ModelValidator, ValidationError
-)
+from ..base.base_models import BaseValuationModel, CompanyData, MarketData, ValuationResult, ValuationMethod, CalculationEngine, ModelValidator, ValidationError
 
 
 @dataclass
 class ComparableCompany:
     """Data structure for comparable company"""
+
     symbol: str
     name: str
     sector: str
@@ -120,8 +118,7 @@ class PriceMultiplesModel(BaseValuationModel):
         else:
             raise ValidationError(f"Unknown normalization method: {method}")
 
-    def calculate_justified_pe_from_fundamentals(self, payout_ratio: float, required_return: float,
-                                                 growth_rate: float, is_leading: bool = True) -> float:
+    def calculate_justified_pe_from_fundamentals(self, payout_ratio: float, required_return: float, growth_rate: float, is_leading: bool = True) -> float:
         """Calculate justified P/E ratio from fundamentals"""
         justified_pe = CalculationEngine.pe_ratio_from_fundamentals(payout_ratio, required_return, growth_rate)
 
@@ -131,16 +128,14 @@ class PriceMultiplesModel(BaseValuationModel):
 
         return justified_pe
 
-    def calculate_justified_pb_from_fundamentals(self, roe: float, required_return: float,
-                                                 growth_rate: float) -> float:
+    def calculate_justified_pb_from_fundamentals(self, roe: float, required_return: float, growth_rate: float) -> float:
         """Calculate justified P/B ratio from fundamentals"""
         if required_return <= growth_rate:
             raise ValidationError("Required return must be greater than growth rate")
 
         return (roe - growth_rate) / (required_return - growth_rate)
 
-    def calculate_justified_ps_from_fundamentals(self, profit_margin: float, payout_ratio: float,
-                                                 required_return: float, growth_rate: float) -> float:
+    def calculate_justified_ps_from_fundamentals(self, profit_margin: float, payout_ratio: float, required_return: float, growth_rate: float) -> float:
         """Calculate justified P/S ratio from fundamentals"""
         justified_pe = self.calculate_justified_pe_from_fundamentals(payout_ratio, required_return, growth_rate)
         return justified_pe * profit_margin
@@ -165,8 +160,7 @@ class EnterpriseValueMultiplesModel(BaseValuationModel):
         super().__init__("EV Multiples", "Enterprise value multiple valuation")
         self.valuation_method = ValuationMethod.MULTIPLES_EV_EBITDA
 
-    def calculate_enterprise_value(self, market_cap: float, total_debt: float,
-                                   cash: float, preferred_stock: float = 0) -> float:
+    def calculate_enterprise_value(self, market_cap: float, total_debt: float, cash: float, preferred_stock: float = 0) -> float:
         """Calculate Enterprise Value"""
         return market_cap + total_debt - cash + preferred_stock
 
@@ -194,9 +188,7 @@ class EnterpriseValueMultiplesModel(BaseValuationModel):
             raise ValidationError("Free cash flow must be positive for EV/FCF calculation")
         return enterprise_value / free_cash_flow
 
-    def value_using_ev_multiple(self, comparable_ev_multiple: float, target_metric: float,
-                                target_debt: float, target_cash: float,
-                                target_shares: float, preferred_stock: float = 0) -> float:
+    def value_using_ev_multiple(self, comparable_ev_multiple: float, target_metric: float, target_debt: float, target_cash: float, target_shares: float, preferred_stock: float = 0) -> float:
         """Value company using EV multiple and convert to per-share value"""
         # Calculate implied enterprise value
         implied_ev = comparable_ev_multiple * target_metric
@@ -223,57 +215,52 @@ class ComparablesAnalyzer:
             # Price multiples
             if company_data.net_income > 0:
                 eps = company_data.net_income / (company_data.market_cap / company_data.current_price)
-                multiples['pe_ratio'] = self.price_model.calculate_pe_ratio(company_data.current_price, eps)
-                multiples['earnings_yield'] = self.price_model.calculate_earnings_yield(eps, company_data.current_price)
+                multiples["pe_ratio"] = self.price_model.calculate_pe_ratio(company_data.current_price, eps)
+                multiples["earnings_yield"] = self.price_model.calculate_earnings_yield(eps, company_data.current_price)
 
             if company_data.book_value > 0:
                 bvps = company_data.book_value / (company_data.market_cap / company_data.current_price)
-                multiples['pb_ratio'] = self.price_model.calculate_pb_ratio(company_data.current_price, bvps)
+                multiples["pb_ratio"] = self.price_model.calculate_pb_ratio(company_data.current_price, bvps)
 
             if company_data.revenue > 0:
                 sps = company_data.revenue / (company_data.market_cap / company_data.current_price)
-                multiples['ps_ratio'] = self.price_model.calculate_ps_ratio(company_data.current_price, sps)
+                multiples["ps_ratio"] = self.price_model.calculate_ps_ratio(company_data.current_price, sps)
 
             # Enterprise value multiples
             if company_data.ebitda > 0:
-                multiples['ev_ebitda'] = self.ev_model.calculate_ev_ebitda(company_data.enterprise_value,
-                                                                           company_data.ebitda)
+                multiples["ev_ebitda"] = self.ev_model.calculate_ev_ebitda(company_data.enterprise_value, company_data.ebitda)
 
             if company_data.revenue > 0:
-                multiples['ev_sales'] = self.ev_model.calculate_ev_sales(company_data.enterprise_value,
-                                                                         company_data.revenue)
+                multiples["ev_sales"] = self.ev_model.calculate_ev_sales(company_data.enterprise_value, company_data.revenue)
 
         except ValidationError:
             pass  # Skip ratios that can't be calculated
 
         return multiples
 
-    def screen_comparables(self, comparables: List[ComparableCompany],
-                           target_company: ComparableCompany,
-                           screening_criteria: Dict[str, Any]) -> List[ComparableCompany]:
+    def screen_comparables(self, comparables: List[ComparableCompany], target_company: ComparableCompany, screening_criteria: Dict[str, Any]) -> List[ComparableCompany]:
         """Screen comparable companies based on criteria"""
         screened = []
 
         for comp in comparables:
             # Sector screening
-            if screening_criteria.get('same_sector', True) and comp.sector != target_company.sector:
+            if screening_criteria.get("same_sector", True) and comp.sector != target_company.sector:
                 continue
 
             # Size screening
-            size_ratio_limit = screening_criteria.get('max_size_ratio', 10)
-            size_ratio = max(comp.market_cap, target_company.market_cap) / min(comp.market_cap,
-                                                                               target_company.market_cap)
+            size_ratio_limit = screening_criteria.get("max_size_ratio", 10)
+            size_ratio = max(comp.market_cap, target_company.market_cap) / min(comp.market_cap, target_company.market_cap)
             if size_ratio > size_ratio_limit:
                 continue
 
             # Profitability screening
-            min_roe = screening_criteria.get('min_roe', -0.5)
+            min_roe = screening_criteria.get("min_roe", -0.5)
             comp_roe = comp.net_income / comp.book_value if comp.book_value > 0 else -1
             if comp_roe < min_roe:
                 continue
 
             # Growth screening
-            if 'min_growth' in screening_criteria:
+            if "min_growth" in screening_criteria:
                 # Would need historical data for growth calculation
                 pass
 
@@ -281,8 +268,7 @@ class ComparablesAnalyzer:
 
         return screened
 
-    def calculate_multiple_statistics(self, comparables: List[ComparableCompany],
-                                      multiple_type: str) -> Dict[str, float]:
+    def calculate_multiple_statistics(self, comparables: List[ComparableCompany], multiple_type: str) -> Dict[str, float]:
         """Calculate statistics for a specific multiple across comparables"""
 
         multiples_values = []
@@ -295,22 +281,21 @@ class ComparablesAnalyzer:
             raise ValidationError(f"No valid {multiple_type} values found in comparables")
 
         return {
-            'mean': statistics.mean(multiples_values),
-            'median': statistics.median(multiples_values),
-            'harmonic_mean': statistics.harmonic_mean(multiples_values),
-            'weighted_harmonic_mean': self._calculate_weighted_harmonic_mean(multiples_values, comparables),
-            'min': min(multiples_values),
-            'max': max(multiples_values),
-            'std_dev': statistics.stdev(multiples_values) if len(multiples_values) > 1 else 0,
-            'count': len(multiples_values),
-            'values': multiples_values
+            "mean": statistics.mean(multiples_values),
+            "median": statistics.median(multiples_values),
+            "harmonic_mean": statistics.harmonic_mean(multiples_values),
+            "weighted_harmonic_mean": self._calculate_weighted_harmonic_mean(multiples_values, comparables),
+            "min": min(multiples_values),
+            "max": max(multiples_values),
+            "std_dev": statistics.stdev(multiples_values) if len(multiples_values) > 1 else 0,
+            "count": len(multiples_values),
+            "values": multiples_values,
         }
 
-    def _calculate_weighted_harmonic_mean(self, multiples: List[float],
-                                          comparables: List[ComparableCompany]) -> float:
+    def _calculate_weighted_harmonic_mean(self, multiples: List[float], comparables: List[ComparableCompany]) -> float:
         """Calculate weighted harmonic mean using market cap as weights"""
         # Simplified - would need proper weights based on the specific multiple
-        weights = [comp.market_cap for comp in comparables[:len(multiples)]]
+        weights = [comp.market_cap for comp in comparables[: len(multiples)]]
         total_weight = sum(weights)
 
         weighted_sum = sum(w / m for w, m in zip(weights, multiples))
@@ -320,13 +305,12 @@ class ComparablesAnalyzer:
 class CrossSectionalRegressionAnalyzer:
     """Cross-sectional regression analysis for multiples"""
 
-    def predict_pe_ratio(self, fundamentals_data: pd.DataFrame,
-                         target_fundamentals: Dict[str, float]) -> Dict[str, Any]:
+    def predict_pe_ratio(self, fundamentals_data: pd.DataFrame, target_fundamentals: Dict[str, float]) -> Dict[str, Any]:
         """Predict P/E ratio using cross-sectional regression on fundamentals"""
 
         # Prepare regression variables
-        X = fundamentals_data[['growth_rate', 'payout_ratio', 'beta', 'roe']].fillna(0)
-        y = fundamentals_data['pe_ratio'].fillna(0)
+        X = fundamentals_data[["growth_rate", "payout_ratio", "beta", "roe"]].fillna(0)
+        y = fundamentals_data["pe_ratio"].fillna(0)
 
         # Remove outliers (P/E > 50 or < 0)
         mask = (y > 0) & (y < 50)
@@ -344,12 +328,7 @@ class CrossSectionalRegressionAnalyzer:
         model.fit(X, y)
 
         # Predict for target company
-        target_X = np.array([[
-            target_fundamentals.get('growth_rate', 0),
-            target_fundamentals.get('payout_ratio', 0),
-            target_fundamentals.get('beta', 1),
-            target_fundamentals.get('roe', 0)
-        ]])
+        target_X = np.array([[target_fundamentals.get("growth_rate", 0), target_fundamentals.get("payout_ratio", 0), target_fundamentals.get("beta", 1), target_fundamentals.get("roe", 0)]])
 
         predicted_pe = model.predict(target_X)[0]
 
@@ -357,14 +336,7 @@ class CrossSectionalRegressionAnalyzer:
         y_pred = model.predict(X)
         r_squared = r2_score(y, y_pred)
 
-        return {
-            'predicted_pe': predicted_pe,
-            'coefficients': dict(zip(['growth_rate', 'payout_ratio', 'beta', 'roe'], model.coef_)),
-            'intercept': model.intercept_,
-            'r_squared': r_squared,
-            'sample_size': len(X),
-            'target_fundamentals': target_fundamentals
-        }
+        return {"predicted_pe": predicted_pe, "coefficients": dict(zip(["growth_rate", "payout_ratio", "beta", "roe"], model.coef_)), "intercept": model.intercept_, "r_squared": r_squared, "sample_size": len(X), "target_fundamentals": target_fundamentals}
 
 
 class MultiplesValuationSuite:
@@ -376,13 +348,11 @@ class MultiplesValuationSuite:
         self.comparables_analyzer = ComparablesAnalyzer()
         self.regression_analyzer = CrossSectionalRegressionAnalyzer()
 
-    def comprehensive_multiples_valuation(self, target_company: CompanyData,
-                                          comparables: List[ComparableCompany],
-                                          multiples_to_use: List[str] = None) -> Dict[str, ValuationResult]:
+    def comprehensive_multiples_valuation(self, target_company: CompanyData, comparables: List[ComparableCompany], multiples_to_use: List[str] = None) -> Dict[str, ValuationResult]:
         """Perform comprehensive multiples valuation"""
 
         if multiples_to_use is None:
-            multiples_to_use = ['pe_ratio', 'pb_ratio', 'ps_ratio', 'ev_ebitda', 'ev_sales']
+            multiples_to_use = ["pe_ratio", "pb_ratio", "ps_ratio", "ev_ebitda", "ev_sales"]
 
         results = {}
 
@@ -395,48 +365,23 @@ class MultiplesValuationSuite:
                 stats = self.comparables_analyzer.calculate_multiple_statistics(comparables, multiple_type)
 
                 # Use median as the representative multiple (most robust)
-                representative_multiple = stats['median']
+                representative_multiple = stats["median"]
 
                 # Calculate valuation based on multiple type
-                if multiple_type in ['pe_ratio', 'pb_ratio', 'ps_ratio']:
-                    intrinsic_value = self._calculate_price_multiple_value(
-                        target_company, multiple_type, representative_multiple
-                    )
+                if multiple_type in ["pe_ratio", "pb_ratio", "ps_ratio"]:
+                    intrinsic_value = self._calculate_price_multiple_value(target_company, multiple_type, representative_multiple)
                 else:  # EV multiples
-                    intrinsic_value = self._calculate_ev_multiple_value(
-                        target_company, multiple_type, representative_multiple
-                    )
+                    intrinsic_value = self._calculate_ev_multiple_value(target_company, multiple_type, representative_multiple)
 
                 # Create valuation result
-                assumptions = {
-                    'multiple_type': multiple_type,
-                    'representative_multiple': representative_multiple,
-                    'comparables_count': stats['count'],
-                    'multiple_range': f"{stats['min']:.2f} - {stats['max']:.2f}",
-                    'multiple_std_dev': stats['std_dev'],
-                    'method': 'Median of Comparables'
-                }
+                assumptions = {"multiple_type": multiple_type, "representative_multiple": representative_multiple, "comparables_count": stats["count"], "multiple_range": f"{stats['min']:.2f} - {stats['max']:.2f}", "multiple_std_dev": stats["std_dev"], "method": "Median of Comparables"}
 
-                calculation_details = {
-                    'multiple_statistics': stats,
-                    'target_metric': self._get_target_metric(target_company, multiple_type),
-                    'calculation': f"{representative_multiple:.2f} × {self._get_target_metric(target_company, multiple_type):.2f}"
-                }
+                calculation_details = {"multiple_statistics": stats, "target_metric": self._get_target_metric(target_company, multiple_type), "calculation": f"{representative_multiple:.2f} × {self._get_target_metric(target_company, multiple_type):.2f}"}
 
                 recommendation = self.price_model.generate_recommendation(intrinsic_value, target_company.current_price)
-                upside_downside = self.price_model.calculate_upside_downside(intrinsic_value,
-                                                                             target_company.current_price)
+                upside_downside = self.price_model.calculate_upside_downside(intrinsic_value, target_company.current_price)
 
-                results[multiple_type] = ValuationResult(
-                    method=ValuationMethod.MULTIPLES_PE,  # Generic multiples method
-                    intrinsic_value=intrinsic_value,
-                    current_price=target_company.current_price,
-                    recommendation=recommendation,
-                    upside_downside=upside_downside,
-                    confidence_level="MEDIUM",
-                    assumptions=assumptions,
-                    calculation_details=calculation_details
-                )
+                results[multiple_type] = ValuationResult(method=ValuationMethod.MULTIPLES_PE, intrinsic_value=intrinsic_value, current_price=target_company.current_price, recommendation=recommendation, upside_downside=upside_downside, confidence_level="MEDIUM", assumptions=assumptions, calculation_details=calculation_details)  # Generic multiples method
 
             except Exception as e:
                 results[multiple_type] = f"Error: {str(e)}"
@@ -452,75 +397,64 @@ class MultiplesValuationSuite:
             name=company_data.name,
             sector=company_data.sector,
             market_cap=company_data.market_cap,
-            enterprise_value=self.ev_model.calculate_enterprise_value(
-                company_data.market_cap,
-                financial_data.get('total_debt', 0),
-                financial_data.get('cash', 0)
-            ),
-            revenue=financial_data.get('revenue', 0),
-            ebitda=financial_data.get('ebitda', 0),
-            net_income=financial_data.get('net_income', 0),
-            book_value=financial_data.get('book_value', 0) * company_data.shares_outstanding,
+            enterprise_value=self.ev_model.calculate_enterprise_value(company_data.market_cap, financial_data.get("total_debt", 0), financial_data.get("cash", 0)),
+            revenue=financial_data.get("revenue", 0),
+            ebitda=financial_data.get("ebitda", 0),
+            net_income=financial_data.get("net_income", 0),
+            book_value=financial_data.get("book_value", 0) * company_data.shares_outstanding,
             current_price=company_data.current_price,
-            multiples={}
+            multiples={},
         )
 
-    def _calculate_price_multiple_value(self, company_data: CompanyData,
-                                        multiple_type: str, multiple_value: float) -> float:
+    def _calculate_price_multiple_value(self, company_data: CompanyData, multiple_type: str, multiple_value: float) -> float:
         """Calculate value using price multiples"""
         financial_data = company_data.financial_data
         shares = company_data.shares_outstanding
 
-        if multiple_type == 'pe_ratio':
-            eps = financial_data.get('earnings_per_share', 0)
+        if multiple_type == "pe_ratio":
+            eps = financial_data.get("earnings_per_share", 0)
             return self.price_model.value_using_pe_multiple(multiple_value, eps)
 
-        elif multiple_type == 'pb_ratio':
-            book_value_total = financial_data.get('book_value', 0) * shares
+        elif multiple_type == "pb_ratio":
+            book_value_total = financial_data.get("book_value", 0) * shares
             bvps = book_value_total / shares if shares > 0 else 0
             return self.price_model.value_using_pb_multiple(multiple_value, bvps)
 
-        elif multiple_type == 'ps_ratio':
-            revenue = financial_data.get('revenue', 0)
+        elif multiple_type == "ps_ratio":
+            revenue = financial_data.get("revenue", 0)
             sps = revenue / shares if shares > 0 else 0
             return self.price_model.value_using_ps_multiple(multiple_value, sps)
 
         else:
             raise ValidationError(f"Unknown price multiple type: {multiple_type}")
 
-    def _calculate_ev_multiple_value(self, company_data: CompanyData,
-                                     multiple_type: str, multiple_value: float) -> float:
+    def _calculate_ev_multiple_value(self, company_data: CompanyData, multiple_type: str, multiple_value: float) -> float:
         """Calculate value using EV multiples"""
         financial_data = company_data.financial_data
 
-        if multiple_type == 'ev_ebitda':
-            target_metric = financial_data.get('ebitda', 0)
-        elif multiple_type == 'ev_sales':
-            target_metric = financial_data.get('revenue', 0)
+        if multiple_type == "ev_ebitda":
+            target_metric = financial_data.get("ebitda", 0)
+        elif multiple_type == "ev_sales":
+            target_metric = financial_data.get("revenue", 0)
         else:
             raise ValidationError(f"Unknown EV multiple type: {multiple_type}")
 
-        return self.ev_model.value_using_ev_multiple(
-            multiple_value, target_metric,
-            financial_data.get('total_debt', 0),
-            financial_data.get('cash', 0),
-            company_data.shares_outstanding
-        )
+        return self.ev_model.value_using_ev_multiple(multiple_value, target_metric, financial_data.get("total_debt", 0), financial_data.get("cash", 0), company_data.shares_outstanding)
 
     def _get_target_metric(self, company_data: CompanyData, multiple_type: str) -> float:
         """Get the target metric value for multiple calculation"""
         financial_data = company_data.financial_data
 
-        if multiple_type == 'pe_ratio':
-            return financial_data.get('earnings_per_share', 0)
-        elif multiple_type == 'pb_ratio':
-            return financial_data.get('book_value', 0)
-        elif multiple_type == 'ps_ratio':
-            return financial_data.get('revenue', 0) / company_data.shares_outstanding
-        elif multiple_type == 'ev_ebitda':
-            return financial_data.get('ebitda', 0)
-        elif multiple_type == 'ev_sales':
-            return financial_data.get('revenue', 0)
+        if multiple_type == "pe_ratio":
+            return financial_data.get("earnings_per_share", 0)
+        elif multiple_type == "pb_ratio":
+            return financial_data.get("book_value", 0)
+        elif multiple_type == "ps_ratio":
+            return financial_data.get("revenue", 0) / company_data.shares_outstanding
+        elif multiple_type == "ev_ebitda":
+            return financial_data.get("ebitda", 0)
+        elif multiple_type == "ev_sales":
+            return financial_data.get("revenue", 0)
         else:
             return 0
 
@@ -532,8 +466,7 @@ def pe_multiple_valuation(target_eps: float, comparable_pe: float) -> float:
     return model.value_using_pe_multiple(comparable_pe, target_eps)
 
 
-def ev_ebitda_valuation(target_ebitda: float, comparable_ev_ebitda: float,
-                        debt: float, cash: float, shares: float) -> float:
+def ev_ebitda_valuation(target_ebitda: float, comparable_ev_ebitda: float, debt: float, cash: float, shares: float) -> float:
     """Quick EV/EBITDA valuation"""
     model = EnterpriseValueMultiplesModel()
     return model.value_using_ev_multiple(comparable_ev_ebitda, target_ebitda, debt, cash, shares)

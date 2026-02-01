@@ -14,16 +14,17 @@ Usage:
     df = data.get_historical_data("AAPL", days=365)
 """
 
-import sys
-import os
-from pathlib import Path
-from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, field, asdict
-from enum import Enum
-from abc import ABC, abstractmethod
-import time
 import logging
+import sys
+import time
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from enum import Enum
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
+import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -115,9 +116,7 @@ class BaseDataProvider(ABC):
     """Abstract base class for data providers"""
 
     @abstractmethod
-    def get_historical_data(
-        self, symbol: str, days: int = 365, interval: str = "1d"
-    ) -> List[OHLCV]:
+    def get_historical_data(self, symbol: str, days: int = 365, interval: str = "1d") -> List[OHLCV]:
         pass
 
     @abstractmethod
@@ -142,9 +141,7 @@ class YahooFinanceProvider(BaseDataProvider):
             logger.error("yfinance not installed. Install with: pip install yfinance")
             raise ImportError("yfinance required for Yahoo Finance provider")
 
-    def get_historical_data(
-        self, symbol: str, days: int = 365, interval: str = "1d"
-    ) -> List[OHLCV]:
+    def get_historical_data(self, symbol: str, days: int = 365, interval: str = "1d") -> List[OHLCV]:
         """Get historical OHLCV data from Yahoo Finance"""
         try:
             ticker = self.yf.Ticker(symbol)
@@ -165,7 +162,7 @@ class YahooFinanceProvider(BaseDataProvider):
                     high=float(row["High"]),
                     low=float(row["Low"]),
                     close=float(row["Close"]),
-                    volume=float(row["Volume"]) if pd.notna(row["Volume"]) else 0.0,
+                    volume=float(row["Volume"]) if not pd.isna(row["Volume"]) else 0.0,
                 )
                 ohlcv_list.append(ohlcv)
 
@@ -182,14 +179,8 @@ class YahooFinanceProvider(BaseDataProvider):
             ticker = self.yf.Ticker(symbol)
             info = ticker.info
 
-            current_price = (
-                info.get("currentPrice") or info.get("regularMarketPrice") or 0
-            )
-            prev_close = (
-                info.get("previousClose")
-                or info.get("regularMarketPreviousClose")
-                or current_price
-            )
+            current_price = info.get("currentPrice") or info.get("regularMarketPrice") or 0
+            prev_close = info.get("previousClose") or info.get("regularMarketPreviousClose") or current_price
             daily_change = current_price - prev_close
             daily_change_pct = (daily_change / prev_close * 100) if prev_close else 0
 
@@ -219,11 +210,7 @@ class YahooFinanceProvider(BaseDataProvider):
                 low_24h=0,
                 volume_24h=0,
             )
-            prev_close = (
-                info.get("previousClose")
-                or info.get("regularMarketPreviousClose")
-                or current_price
-            )
+            prev_close = info.get("previousClose") or info.get("regularMarketPreviousClose") or current_price
             daily_change = current_price - prev_close
             daily_change_pct = (daily_change / prev_close * 100) if prev_close else 0
 
@@ -319,9 +306,7 @@ class CoinGeckoProvider(BaseDataProvider):
     def __init__(self):
         logger.info("CoinGecko provider initialized")
 
-    def get_historical_data(
-        self, symbol: str, days: int = 365, interval: str = "1d"
-    ) -> List[OHLCV]:
+    def get_historical_data(self, symbol: str, days: int = 365, interval: str = "1d") -> List[OHLCV]:
         """Get historical OHLCV data from CoinGecko"""
         coin_id = self._symbol_to_coin_id(symbol)
         if not coin_id:
@@ -342,16 +327,8 @@ class CoinGeckoProvider(BaseDataProvider):
 
             ohlcv_list = []
             for i, (timestamp, price) in enumerate(data["prices"]):
-                market_caps = data.get("market_caps", [])
                 volumes = data.get("total_volumes", [])
-
-                open_price = (
-                    data["prices"][0][1]
-                    if i == 0
-                    else data["prices"][i - 1][1]
-                    if i > 0
-                    else price
-                )
+                open_price = data["prices"][0][1] if i == 0 else data["prices"][i - 1][1] if i > 0 else price
                 high = price
                 low = price
                 volume = volumes[i][1] if i < len(volumes) else 0
@@ -547,9 +524,7 @@ class ExchangeRateProvider(BaseDataProvider):
     def __init__(self):
         logger.info("ExchangeRate provider initialized")
 
-    def get_historical_data(
-        self, symbol: str, days: int = 365, interval: str = "1d"
-    ) -> List[OHLCV]:
+    def get_historical_data(self, symbol: str, days: int = 365, interval: str = "1d") -> List[OHLCV]:
         """Get historical exchange rate data"""
         try:
             import requests
@@ -722,17 +697,11 @@ class FreeDataProvider:
         except Exception as e:
             logger.warning(f"ExchangeRate provider not available: {e}")
 
-    def get_historical_data(
-        self, symbol: str, days: int = 365, interval: str = "1d"
-    ) -> List[OHLCV]:
+    def get_historical_data(self, symbol: str, days: int = 365, interval: str = "1d") -> List[OHLCV]:
         """Get historical data using best available provider"""
         symbol_upper = symbol.upper()
 
-        if (
-            symbol_upper.endswith("=X")
-            or "/" in symbol_upper
-            or symbol_upper in ["EURUSD", "GBPUSD", "USDJPY"]
-        ):
+        if symbol_upper.endswith("=X") or "/" in symbol_upper or symbol_upper in ["EURUSD", "GBPUSD", "USDJPY"]:
             provider = self._providers.get(DataSource.EXCHANGERATE)
             if provider:
                 return provider.get_historical_data(symbol, days, interval)
@@ -767,11 +736,7 @@ class FreeDataProvider:
         """Get current price using best available provider"""
         symbol_upper = symbol.upper()
 
-        if (
-            symbol_upper.endswith("=X")
-            or "/" in symbol_upper
-            or symbol_upper in ["EURUSD", "GBPUSD", "USDJPY"]
-        ):
+        if symbol_upper.endswith("=X") or "/" in symbol_upper or symbol_upper in ["EURUSD", "GBPUSD", "USDJPY"]:
             provider = self._providers.get(DataSource.EXCHANGERATE)
             if provider:
                 return provider.get_current_price(symbol)

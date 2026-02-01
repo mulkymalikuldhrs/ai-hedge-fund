@@ -77,9 +77,7 @@ class CLITerminal:
             from src.trading_plan.trading_plan import get_trading_plan_manager
 
             self.trading_plan = get_trading_plan_manager()
-            print(
-                f"{Fore.GREEN}✓ Trading plan loaded: {self.trading_plan.plan.name}{Style.RESET_ALL}"
-            )
+            print(f"{Fore.GREEN}✓ Trading plan loaded: {self.trading_plan.plan.name}{Style.RESET_ALL}")
         except Exception as e:
             print(f"{Fore.RED}✗ Trading plan error: {e}{Style.RESET_ALL}")
 
@@ -95,13 +93,9 @@ class CLITerminal:
             from src.execution.metatrader_bridge import get_metatrader_bridge
 
             self.mt_bridge = get_metatrader_bridge(simulate=True)
-            print(
-                f"{Fore.GREEN}✓ MetaTrader bridge ready (simulator mode){Style.RESET_ALL}"
-            )
+            print(f"{Fore.GREEN}✓ MetaTrader bridge ready (simulator mode){Style.RESET_ALL}")
         except Exception as e:
-            print(
-                f"{Fore.YELLOW}⚠ MetaTrader bridge: {e} (using simulator){Style.RESET_ALL}"
-            )
+            print(f"{Fore.YELLOW}⚠ MetaTrader bridge: {e} (using simulator){Style.RESET_ALL}")
 
     def clear_screen(self):
         os.system("cls" if os.name == "nt" else "clear")
@@ -148,13 +142,7 @@ class CLITerminal:
 
     def print_status_bar(self):
         portfolio = self.get_portfolio_summary()
-        mode_color = (
-            Fore.GREEN
-            if self.trading_mode == "full-auto"
-            else Fore.YELLOW
-            if self.trading_mode == "semi-auto"
-            else Fore.BLUE
-        )
+        mode_color = Fore.GREEN if self.trading_mode == "full-auto" else Fore.YELLOW if self.trading_mode == "semi-auto" else Fore.BLUE
         print(f"{Fore.CYAN}{'─' * 80}{Style.RESET_ALL}")
         print(
             f"  {mode_color}Mode: {self.trading_mode.upper()}{Style.RESET_ALL} | ",
@@ -200,18 +188,12 @@ class CLITerminal:
             self.print_status_bar()
 
             items = [
-                MenuItem(
-                    "1", "📊 Portfolio & Positions", "View portfolio and open positions"
-                ),
-                MenuItem(
-                    "2", "📈 Market Analysis", "Analyze symbols and generate signals"
-                ),
+                MenuItem("1", "📊 Portfolio & Positions", "View portfolio and open positions"),
+                MenuItem("2", "📈 Market Analysis", "Analyze symbols and generate signals"),
                 MenuItem("3", "📝 Trade Management", "Execute and manage trades"),
                 MenuItem("4", "📜 Trade History", "View past trades and performance"),
                 MenuItem("5", "⚙️ Configuration", "System settings and parameters"),
-                MenuItem(
-                    "6", "🎮 Trading Mode", "Change trading mode (Manual/Semi/Full)"
-                ),
+                MenuItem("6", "🎮 Trading Mode", "Change trading mode (Manual/Semi/Full)"),
                 MenuItem("7", "🔄 Auto-Refresh", "Toggle auto-refresh mode"),
             ]
 
@@ -245,41 +227,23 @@ class CLITerminal:
 
             portfolio = self.get_portfolio_summary()
 
-            print(
-                f"{Fore.CYAN}{Style.BRIGHT}═══ PORTFOLIO SUMMARY ═══{Style.RESET_ALL}"
-            )
+            print(f"{Fore.CYAN}{Style.BRIGHT}═══ PORTFOLIO SUMMARY ═══{Style.RESET_ALL}")
             print()
-            print(
-                f"  {Fore.WHITE}Balance:    {Fore.CYAN}${portfolio['balance']:>15,.2f}{Style.RESET_ALL}"
-            )
-            print(
-                f"  {Fore.WHITE}Equity:     {Fore.GREEN}${portfolio['equity']:>15,.2f}{Style.RESET_ALL}"
-            )
-            print(
-                f"  {Fore.WHITE}Floating P&L: {Fore.GREEN if portfolio['floating_pnl'] >= 0 else Fore.RED}${portfolio['floating_pnl']:>14,.2f}{Style.RESET_ALL}"
-            )
-            print(
-                f"  {Fore.WHITE}Positions:  {Fore.CYAN}{portfolio['open_positions']:>15}{Style.RESET_ALL}"
-            )
+            print(f"  {Fore.WHITE}Balance:    {Fore.CYAN}${portfolio['balance']:>15,.2f}{Style.RESET_ALL}")
+            print(f"  {Fore.WHITE}Equity:     {Fore.GREEN}${portfolio['equity']:>15,.2f}{Style.RESET_ALL}")
+            print(f"  {Fore.WHITE}Floating P&L: {Fore.GREEN if portfolio['floating_pnl'] >= 0 else Fore.RED}${portfolio['floating_pnl']:>14,.2f}{Style.RESET_ALL}")
+            print(f"  {Fore.WHITE}Positions:  {Fore.CYAN}{portfolio['open_positions']:>15}{Style.RESET_ALL}")
             print()
 
             positions = self.get_positions()
             if positions:
-                print(
-                    f"{Fore.CYAN}{Style.BRIGHT}═══ OPEN POSITIONS ═══{Style.RESET_ALL}"
-                )
+                print(f"{Fore.CYAN}{Style.BRIGHT}═══ OPEN POSITIONS ═══{Style.RESET_ALL}")
                 for i, pos in enumerate(positions, 1):
                     pnl = pos.get("pnl", 0)
                     pnl_color = Fore.GREEN if pnl >= 0 else Fore.RED
-                    print(
-                        f"  {i}. {Fore.WHITE}{pos.get('symbol', 'Unknown')}{Style.RESET_ALL} - {pos.get('direction', '').upper()}"
-                    )
-                    print(
-                        f"     Entry: ${pos.get('entry_price', 0):.5f} | Current: ${pos.get('current_price', 0):.5f}"
-                    )
-                    print(
-                        f"     Size: {pos.get('position_size', 0):.2f} | P&L: {pnl_color}${pnl:,.2f}{Style.RESET_ALL}"
-                    )
+                    print(f"  {i}. {Fore.WHITE}{pos.get('symbol', 'Unknown')}{Style.RESET_ALL} - {pos.get('direction', '').upper()}")
+                    print(f"     Entry: ${pos.get('entry_price', 0):.5f} | Current: ${pos.get('current_price', 0):.5f}")
+                    print(f"     Size: {pos.get('position_size', 0):.2f} | P&L: {pnl_color}${pnl:,.2f}{Style.RESET_ALL}")
                 print()
             else:
                 print(f"{Fore.YELLOW}  No open positions{Style.RESET_ALL}")
@@ -297,9 +261,7 @@ class CLITerminal:
             if choice == "R":
                 continue
             elif choice == "C":
-                print(
-                    f"\n{Fore.YELLOW}⚠ Closing all positions... (simulator){Style.RESET_ALL}\n"
-                )
+                print(f"\n{Fore.YELLOW}⚠ Closing all positions... (simulator){Style.RESET_ALL}\n")
             elif choice == "B":
                 break
 
@@ -308,13 +270,7 @@ class CLITerminal:
             self.print_header("MARKET ANALYSIS")
             self.print_status_bar()
 
-            symbol = (
-                input(
-                    f"{Fore.GREEN}Enter symbol to analyze (or 'B' to back): {Style.RESET_ALL}"
-                )
-                .strip()
-                .upper()
-            )
+            symbol = input(f"{Fore.GREEN}Enter symbol to analyze (or 'B' to back): {Style.RESET_ALL}").strip().upper()
 
             if symbol == "B":
                 break
@@ -326,21 +282,11 @@ class CLITerminal:
             try:
                 if self.data_provider:
                     price_data = self.data_provider.get_current_price(symbol)
-                    print(
-                        f"  {Fore.WHITE}Current Price: {Fore.CYAN}${price_data.current_price:,.5f}{Style.RESET_ALL}"
-                    )
-                    print(
-                        f"  {Fore.WHITE}Daily Change: {Fore.GREEN if price_data.daily_change_pct >= 0 else Fore.RED}{price_data.daily_change_pct:+.2f}%{Style.RESET_ALL}"
-                    )
-                    print(
-                        f"  {Fore.WHITE}24h High: {Fore.CYAN}${price_data.high_24h:,.5f}{Style.RESET_ALL}"
-                    )
-                    print(
-                        f"  {Fore.WHITE}24h Low: {Fore.CYAN}${price_data.low_24h:,.5f}{Style.RESET_ALL}"
-                    )
-                    print(
-                        f"  {Fore.WHITE}Asset Type: {Fore.CYAN}{price_data.asset_type}{Style.RESET_ALL}\n"
-                    )
+                    print(f"  {Fore.WHITE}Current Price: {Fore.CYAN}${price_data.current_price:,.5f}{Style.RESET_ALL}")
+                    print(f"  {Fore.WHITE}Daily Change: {Fore.GREEN if price_data.daily_change_pct >= 0 else Fore.RED}{price_data.daily_change_pct:+.2f}%{Style.RESET_ALL}")
+                    print(f"  {Fore.WHITE}24h High: {Fore.CYAN}${price_data.high_24h:,.5f}{Style.RESET_ALL}")
+                    print(f"  {Fore.WHITE}24h Low: {Fore.CYAN}${price_data.low_24h:,.5f}{Style.RESET_ALL}")
+                    print(f"  {Fore.WHITE}Asset Type: {Fore.CYAN}{price_data.asset_type}{Style.RESET_ALL}\n")
 
                 historical = []
                 if self.data_provider:
@@ -351,29 +297,17 @@ class CLITerminal:
                     ma_7 = sum(closes[-7:]) / 7 if len(closes) >= 7 else 0
                     ma_14 = sum(closes[-14:]) / 14 if len(closes) >= 14 else 0
 
-                    print(
-                        f"{Fore.CYAN}{Style.BRIGHT}═══ TECHNICAL SUMMARY ═══{Style.RESET_ALL}"
-                    )
-                    print(
-                        f"  {Fore.WHITE}MA(7):  {Fore.CYAN}${ma_7:,.5f}{Style.RESET_ALL}"
-                    )
-                    print(
-                        f"  {Fore.WHITE}MA(14): {Fore.CYAN}${ma_14:,.5f}{Style.RESET_ALL}"
-                    )
-                    print(
-                        f"  {Fore.WHITE}Price:  {Fore.CYAN}${closes[-1] if closes else 0:,.5f}{Style.RESET_ALL}\n"
-                    )
+                    print(f"{Fore.CYAN}{Style.BRIGHT}═══ TECHNICAL SUMMARY ═══{Style.RESET_ALL}")
+                    print(f"  {Fore.WHITE}MA(7):  {Fore.CYAN}${ma_7:,.5f}{Style.RESET_ALL}")
+                    print(f"  {Fore.WHITE}MA(14): {Fore.CYAN}${ma_14:,.5f}{Style.RESET_ALL}")
+                    print(f"  {Fore.WHITE}Price:  {Fore.CYAN}${closes[-1] if closes else 0:,.5f}{Style.RESET_ALL}\n")
 
                     trend = "BULLISH" if closes[-1] > ma_7 else "BEARISH"
                     trend_color = Fore.GREEN if trend == "BULLISH" else Fore.RED
-                    print(
-                        f"  {Fore.WHITE}Trend:  {trend_color}{trend}{Style.RESET_ALL}\n"
-                    )
+                    print(f"  {Fore.WHITE}Trend:  {trend_color}{trend}{Style.RESET_ALL}\n")
 
                 print(f"{Fore.CYAN}{Style.BRIGHT}═══ SIGNAL ═══{Style.RESET_ALL}")
-                print(
-                    f"  {Fore.WHITE}Signal: {Fore.YELLOW}HOLD (Analysis simulation){Style.RESET_ALL}"
-                )
+                print(f"  {Fore.WHITE}Signal: {Fore.YELLOW}HOLD (Analysis simulation){Style.RESET_ALL}")
                 print(f"  {Fore.WHITE}Confidence: {Fore.YELLOW}50%{Style.RESET_ALL}\n")
 
             except Exception as e:
@@ -434,9 +368,7 @@ class CLITerminal:
         confirm = input(f"Execute order? (Y/N): ").strip().upper()
 
         if confirm == "Y":
-            print(
-                f"\n{Fore.GREEN}✓ Order executed (simulator): {direction} {lots} lots {symbol}{Style.RESET_ALL}\n"
-            )
+            print(f"\n{Fore.GREEN}✓ Order executed (simulator): {direction} {lots} lots {symbol}{Style.RESET_ALL}\n")
         else:
             print(f"\n{Fore.YELLOW}Order cancelled{Style.RESET_ALL}\n")
 
@@ -446,15 +378,11 @@ class CLITerminal:
 
     def modify_position(self):
         print(f"\n{Fore.CYAN}{Style.BRIGHT}═══ MODIFY POSITION ═══{Style.RESET_ALL}\n")
-        print(
-            f"{Fore.YELLOW}Position modification feature coming soon...{Style.RESET_ALL}\n"
-        )
+        print(f"{Fore.YELLOW}Position modification feature coming soon...{Style.RESET_ALL}\n")
 
     def close_position(self):
         print(f"\n{Fore.CYAN}{Style.BRIGHT}═══ CLOSE POSITION ═══{Style.RESET_ALL}\n")
-        print(
-            f"{Fore.YELLOW}Position closing feature coming soon...{Style.RESET_ALL}\n"
-        )
+        print(f"{Fore.YELLOW}Position closing feature coming soon...{Style.RESET_ALL}\n")
 
     def history_menu(self):
         while True:
@@ -466,37 +394,21 @@ class CLITerminal:
                     trades = self.memory.get_trade_history(days=30)
                     closed_trades = [t for t in trades if t.get("status") == "closed"]
 
-                    print(
-                        f"{Fore.CYAN}{Style.BRIGHT}═══ PERFORMANCE METRICS ═══{Style.RESET_ALL}\n"
-                    )
+                    print(f"{Fore.CYAN}{Style.BRIGHT}═══ PERFORMANCE METRICS ═══{Style.RESET_ALL}\n")
 
                     if closed_trades:
                         total_pnl = sum(t.get("pnl", 0) for t in closed_trades)
                         wins = sum(1 for t in closed_trades if t.get("pnl", 0) > 0)
                         losses = len(closed_trades) - wins
-                        win_rate = (
-                            (wins / len(closed_trades) * 100) if closed_trades else 0
-                        )
+                        win_rate = (wins / len(closed_trades) * 100) if closed_trades else 0
 
-                        print(
-                            f"  {Fore.WHITE}Total Trades: {Fore.CYAN}{len(closed_trades)}{Style.RESET_ALL}"
-                        )
-                        print(
-                            f"  {Fore.WHITE}Wins: {Fore.GREEN}{wins}{Style.RESET_ALL}"
-                        )
-                        print(
-                            f"  {Fore.WHITE}Losses: {Fore.RED}{losses}{Style.RESET_ALL}"
-                        )
-                        print(
-                            f"  {Fore.WHITE}Win Rate: {Fore.CYAN}{win_rate:.1f}%{Style.RESET_ALL}"
-                        )
-                        print(
-                            f"  {Fore.WHITE}Total P&L: {Fore.GREEN if total_pnl >= 0 else Fore.RED}${total_pnl:,.2f}{Style.RESET_ALL}\n"
-                        )
+                        print(f"  {Fore.WHITE}Total Trades: {Fore.CYAN}{len(closed_trades)}{Style.RESET_ALL}")
+                        print(f"  {Fore.WHITE}Wins: {Fore.GREEN}{wins}{Style.RESET_ALL}")
+                        print(f"  {Fore.WHITE}Losses: {Fore.RED}{losses}{Style.RESET_ALL}")
+                        print(f"  {Fore.WHITE}Win Rate: {Fore.CYAN}{win_rate:.1f}%{Style.RESET_ALL}")
+                        print(f"  {Fore.WHITE}Total P&L: {Fore.GREEN if total_pnl >= 0 else Fore.RED}${total_pnl:,.2f}{Style.RESET_ALL}\n")
 
-                        print(
-                            f"{Fore.CYAN}{Style.BRIGHT}═══ RECENT TRADES ═══{Style.RESET_ALL}\n"
-                        )
+                        print(f"{Fore.CYAN}{Style.BRIGHT}═══ RECENT TRADES ═══{Style.RESET_ALL}\n")
                         for i, trade in enumerate(closed_trades[-10:], 1):
                             pnl = trade.get("pnl", 0)
                             pnl_color = Fore.GREEN if pnl >= 0 else Fore.RED
@@ -504,9 +416,7 @@ class CLITerminal:
                                 f"  {i}. {trade.get('symbol', 'Unknown')} | {trade.get('direction', '').upper()} | ",
                                 end="",
                             )
-                            print(
-                                f"P&L: {pnl_color}${pnl:,.2f}{Style.RESET_ALL} | {trade.get('exit_time', '')[:10]}"
-                            )
+                            print(f"P&L: {pnl_color}${pnl:,.2f}{Style.RESET_ALL} | {trade.get('exit_time', '')[:10]}")
                     else:
                         print(f"  {Fore.YELLOW}No closed trades yet{Style.RESET_ALL}\n")
 
@@ -514,18 +424,14 @@ class CLITerminal:
                 print(f"\n{Fore.RED}Error loading history: {e}{Style.RESET_ALL}\n")
 
             items = [
-                MenuItem(
-                    "E", "Export History", "Export trade history to CSV", "cyan", "📊"
-                ),
+                MenuItem("E", "Export History", "Export trade history to CSV", "cyan", "📊"),
             ]
             self.print_menu("", items, show_back=True, show_exit=False)
 
             choice = self.get_input()
 
             if choice == "E":
-                print(
-                    f"\n{Fore.YELLOW}Export feature coming soon...{Style.RESET_ALL}\n"
-                )
+                print(f"\n{Fore.YELLOW}Export feature coming soon...{Style.RESET_ALL}\n")
             elif choice == "B":
                 break
 
@@ -538,43 +444,23 @@ class CLITerminal:
 
             print(f"{Fore.CYAN}{Style.BRIGHT}═══ TRADING PLAN ═══{Style.RESET_ALL}\n")
             if plan:
-                print(
-                    f"  {Fore.WHITE}Plan Name: {Fore.CYAN}{plan.name}{Style.RESET_ALL}"
-                )
-                print(
-                    f"  {Fore.WHITE}Max Risk/Trade: {Fore.YELLOW}{plan.max_risk_per_trade * 100}%{Style.RESET_ALL}"
-                )
-                print(
-                    f"  {Fore.WHITE}Max Daily Loss: {Fore.RED}{plan.max_daily_loss * 100}%{Style.RESET_ALL}"
-                )
-                print(
-                    f"  {Fore.WHITE}Max Drawdown: {Fore.RED}{plan.max_drawdown_limit * 100}%{Style.RESET_ALL}"
-                )
-                print(
-                    f"  {Fore.WHITE}Min R:R Ratio: {Fore.CYAN}1:{plan.min_risk_reward_ratio}{Style.RESET_ALL}"
-                )
-                print(
-                    f"  {Fore.WHITE}Kelly Fraction: {Fore.YELLOW}{plan.kelly_fraction * 100}%{Style.RESET_ALL}"
-                )
-                print(
-                    f"  {Fore.WHITE}Max Position: {Fore.CYAN}{plan.max_position_size * 100}%{Style.RESET_ALL}\n"
-                )
+                print(f"  {Fore.WHITE}Plan Name: {Fore.CYAN}{plan.name}{Style.RESET_ALL}")
+                print(f"  {Fore.WHITE}Max Risk/Trade: {Fore.YELLOW}{plan.max_risk_per_trade * 100}%{Style.RESET_ALL}")
+                print(f"  {Fore.WHITE}Max Daily Loss: {Fore.RED}{plan.max_daily_loss * 100}%{Style.RESET_ALL}")
+                print(f"  {Fore.WHITE}Max Drawdown: {Fore.RED}{plan.max_drawdown_limit * 100}%{Style.RESET_ALL}")
+                print(f"  {Fore.WHITE}Min R:R Ratio: {Fore.CYAN}1:{plan.min_risk_reward_ratio}{Style.RESET_ALL}")
+                print(f"  {Fore.WHITE}Kelly Fraction: {Fore.YELLOW}{plan.kelly_fraction * 100}%{Style.RESET_ALL}")
+                print(f"  {Fore.WHITE}Max Position: {Fore.CYAN}{plan.max_position_size * 100}%{Style.RESET_ALL}\n")
             else:
                 print(f"  {Fore.RED}Trading plan not loaded{Style.RESET_ALL}\n")
 
             print(f"{Fore.CYAN}{Style.BRIGHT}═══ ACCOUNT INFO ═══{Style.RESET_ALL}\n")
             print(f"  {Fore.WHITE}Account: {Fore.CYAN}DEMO-123456{Style.RESET_ALL}")
-            print(
-                f"  {Fore.WHITE}Broker: {Fore.CYAN}MetaTrader Simulator{Style.RESET_ALL}"
-            )
-            print(
-                f"  {Fore.WHITE}Mode: {Fore.GREEN}{self.trading_mode.upper()}{Style.RESET_ALL}\n"
-            )
+            print(f"  {Fore.WHITE}Broker: {Fore.CYAN}MetaTrader Simulator{Style.RESET_ALL}")
+            print(f"  {Fore.WHITE}Mode: {Fore.GREEN}{self.trading_mode.upper()}{Style.RESET_ALL}\n")
 
             items = [
-                MenuItem(
-                    "1", "Edit Risk Parameters", "Modify risk settings", "yellow", "⚠️"
-                ),
+                MenuItem("1", "Edit Risk Parameters", "Modify risk settings", "yellow", "⚠️"),
                 MenuItem(
                     "2",
                     "Edit Account Settings",
@@ -589,17 +475,11 @@ class CLITerminal:
             choice = self.get_input()
 
             if choice == "1":
-                print(
-                    f"\n{Fore.YELLOW}Risk parameter editing coming soon...{Style.RESET_ALL}\n"
-                )
+                print(f"\n{Fore.YELLOW}Risk parameter editing coming soon...{Style.RESET_ALL}\n")
             elif choice == "2":
-                print(
-                    f"\n{Fore.YELLOW}Account settings coming soon...{Style.RESET_ALL}\n"
-                )
+                print(f"\n{Fore.YELLOW}Account settings coming soon...{Style.RESET_ALL}\n")
             elif choice == "3":
-                print(
-                    f"\n{Fore.RED}⚠ Memory reset feature requires confirmation...{Style.RESET_ALL}\n"
-                )
+                print(f"\n{Fore.RED}⚠ Memory reset feature requires confirmation...{Style.RESET_ALL}\n")
             elif choice == "B":
                 break
 
@@ -609,29 +489,19 @@ class CLITerminal:
             self.print_status_bar()
 
             print(f"{Fore.CYAN}{Style.BRIGHT}═══ SELECT MODE ═══{Style.RESET_ALL}\n")
-            print(
-                f"  {Fore.BLUE}[1] MANUAL{Style.RESET_ALL}     - System analyzes, you execute all trades"
-            )
-            print(
-                f"  {Fore.YELLOW}[2] SEMI-AUTO{Style.RESET_ALL} - Auto position sizing, you confirm entries"
-            )
-            print(
-                f"  {Fore.GREEN}[3] FULL-AUTO{Style.RESET_ALL} - Autonomous trading, auto-execution\n"
-            )
+            print(f"  {Fore.BLUE}[1] MANUAL{Style.RESET_ALL}     - System analyzes, you execute all trades")
+            print(f"  {Fore.YELLOW}[2] SEMI-AUTO{Style.RESET_ALL} - Auto position sizing, you confirm entries")
+            print(f"  {Fore.GREEN}[3] FULL-AUTO{Style.RESET_ALL} - Autonomous trading, auto-execution\n")
 
             current_idx = ["manual", "semi-auto", "full-auto"].index(self.trading_mode)
-            print(
-                f"  {Fore.WHITE}Current: {['MANUAL', 'SEMI-AUTO', 'FULL-AUTO'][current_idx]}{Style.RESET_ALL}\n"
-            )
+            print(f"  {Fore.WHITE}Current: {['MANUAL', 'SEMI-AUTO', 'FULL-AUTO'][current_idx]}{Style.RESET_ALL}\n")
 
             choice = self.get_input("Select mode (1-3): ")
 
             if choice in ["1", "2", "3"]:
                 modes = ["manual", "semi-auto", "full-auto"]
                 self.trading_mode = modes[int(choice) - 1]
-                print(
-                    f"\n{Fore.GREEN}✓ Trading mode set to: {self.trading_mode.upper()}{Style.RESET_ALL}\n"
-                )
+                print(f"\n{Fore.GREEN}✓ Trading mode set to: {self.trading_mode.upper()}{Style.RESET_ALL}\n")
             elif choice == "B":
                 break
 

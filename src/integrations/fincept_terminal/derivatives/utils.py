@@ -1,4 +1,3 @@
-
 """Derivatives Utils Module
 =================================
 
@@ -28,7 +27,6 @@ PARAMETERS:
 """
 
 
-
 import numpy as np
 import pandas as pd
 from typing import List, Tuple, Optional, Callable, Union, Dict, Any
@@ -47,6 +45,7 @@ logger = logging.getLogger(__name__)
 
 class InterpolationMethod(Enum):
     """Interpolation methods for yield curves and surfaces"""
+
     LINEAR = "linear"
     CUBIC_SPLINE = "cubic"
     NATURAL_SPLINE = "natural"
@@ -56,6 +55,7 @@ class InterpolationMethod(Enum):
 
 class OptimizationMethod(Enum):
     """Optimization methods for numerical procedures"""
+
     NEWTON_RAPHSON = "newton_raphson"
     BISECTION = "bisection"
     BRENT = "brent"
@@ -66,6 +66,7 @@ class OptimizationMethod(Enum):
 @dataclass
 class Holiday:
     """Holiday definition for business day calculations"""
+
     name: str
     date: datetime
     country: str = "US"
@@ -134,14 +135,12 @@ class BusinessDayCalculator:
 
         # Check if holiday
         for holiday in self.holidays:
-            if (date_input.date() == holiday.date.date() and
-                    holiday.country == self.country):
+            if date_input.date() == holiday.date.date() and holiday.country == self.country:
                 return False
 
         return True
 
-    def add_business_days(self, start_date: Union[datetime, date],
-                          days: int) -> datetime:
+    def add_business_days(self, start_date: Union[datetime, date], days: int) -> datetime:
         """Add business days to a date"""
         if isinstance(start_date, date):
             start_date = datetime.combine(start_date, datetime.min.time())
@@ -156,8 +155,7 @@ class BusinessDayCalculator:
 
         return current_date
 
-    def business_days_between(self, start_date: Union[datetime, date],
-                              end_date: Union[datetime, date]) -> int:
+    def business_days_between(self, start_date: Union[datetime, date], end_date: Union[datetime, date]) -> int:
         """Count business days between two dates"""
         if isinstance(start_date, date):
             start_date = datetime.combine(start_date, datetime.min.time())
@@ -189,7 +187,7 @@ class MathUtils:
     @staticmethod
     def normal_pdf(x: float) -> float:
         """Probability density function of standard normal"""
-        return np.exp(-0.5 * x ** 2) / np.sqrt(2 * np.pi)
+        return np.exp(-0.5 * x**2) / np.sqrt(2 * np.pi)
 
     @staticmethod
     def inverse_normal_cdf(p: float) -> float:
@@ -204,28 +202,25 @@ class MathUtils:
         return stats.multivariate_normal.cdf([x, y], cov=[[1, rho], [rho, 1]])
 
     @staticmethod
-    def black_scholes_call_delta(S: float, K: float, T: float, r: float,
-                                 sigma: float, q: float = 0) -> float:
+    def black_scholes_call_delta(S: float, K: float, T: float, r: float, sigma: float, q: float = 0) -> float:
         """Black-Scholes call delta (analytical)"""
         if T <= 0:
             return 1.0 if S > K else 0.0
 
-        d1 = (np.log(S / K) + (r - q + 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))
+        d1 = (np.log(S / K) + (r - q + 0.5 * sigma**2) * T) / (sigma * np.sqrt(T))
         return np.exp(-q * T) * MathUtils.normal_cdf(d1)
 
     @staticmethod
-    def black_scholes_gamma(S: float, K: float, T: float, r: float,
-                            sigma: float, q: float = 0) -> float:
+    def black_scholes_gamma(S: float, K: float, T: float, r: float, sigma: float, q: float = 0) -> float:
         """Black-Scholes gamma (analytical)"""
         if T <= 0:
             return 0.0
 
-        d1 = (np.log(S / K) + (r - q + 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))
+        d1 = (np.log(S / K) + (r - q + 0.5 * sigma**2) * T) / (sigma * np.sqrt(T))
         return (np.exp(-q * T) * MathUtils.normal_pdf(d1)) / (S * sigma * np.sqrt(T))
 
     @staticmethod
-    def compound_interest(principal: float, rate: float, time: float,
-                          frequency: int = 1) -> float:
+    def compound_interest(principal: float, rate: float, time: float, frequency: int = 1) -> float:
         """Calculate compound interest"""
         return principal * (1 + rate / frequency) ** (frequency * time)
 
@@ -258,8 +253,7 @@ class InterpolationEngine:
     """Advanced interpolation methods for financial data"""
 
     @staticmethod
-    def linear_interpolation(x_points: np.ndarray, y_points: np.ndarray,
-                             x_new: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    def linear_interpolation(x_points: np.ndarray, y_points: np.ndarray, x_new: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
         """Linear interpolation"""
         if len(x_points) != len(y_points):
             raise ValueError("x_points and y_points must have same length")
@@ -267,8 +261,7 @@ class InterpolationEngine:
         return np.interp(x_new, x_points, y_points)
 
     @staticmethod
-    def cubic_spline_interpolation(x_points: np.ndarray, y_points: np.ndarray,
-                                   x_new: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    def cubic_spline_interpolation(x_points: np.ndarray, y_points: np.ndarray, x_new: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
         """Cubic spline interpolation"""
         if len(x_points) < 4:
             return InterpolationEngine.linear_interpolation(x_points, y_points, x_new)
@@ -277,18 +270,16 @@ class InterpolationEngine:
         return spline(x_new)
 
     @staticmethod
-    def natural_spline_interpolation(x_points: np.ndarray, y_points: np.ndarray,
-                                     x_new: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    def natural_spline_interpolation(x_points: np.ndarray, y_points: np.ndarray, x_new: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
         """Natural cubic spline interpolation"""
         if len(x_points) < 4:
             return InterpolationEngine.linear_interpolation(x_points, y_points, x_new)
 
-        spline = interpolate.CubicSpline(x_points, y_points, bc_type='natural')
+        spline = interpolate.CubicSpline(x_points, y_points, bc_type="natural")
         return spline(x_new)
 
     @staticmethod
-    def akima_interpolation(x_points: np.ndarray, y_points: np.ndarray,
-                            x_new: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    def akima_interpolation(x_points: np.ndarray, y_points: np.ndarray, x_new: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
         """Akima interpolation (good for yield curves)"""
         if len(x_points) < 5:
             return InterpolationEngine.cubic_spline_interpolation(x_points, y_points, x_new)
@@ -297,9 +288,7 @@ class InterpolationEngine:
         return akima(x_new)
 
     @staticmethod
-    def interpolate_yield_curve(maturities: np.ndarray, rates: np.ndarray,
-                                target_maturity: float,
-                                method: InterpolationMethod = InterpolationMethod.CUBIC_SPLINE) -> float:
+    def interpolate_yield_curve(maturities: np.ndarray, rates: np.ndarray, target_maturity: float, method: InterpolationMethod = InterpolationMethod.CUBIC_SPLINE) -> float:
         """Interpolate yield curve for specific maturity"""
         if method == InterpolationMethod.LINEAR:
             return InterpolationEngine.linear_interpolation(maturities, rates, target_maturity)
@@ -317,8 +306,7 @@ class OptimizationSolver:
     """Numerical optimization methods for derivatives pricing"""
 
     @staticmethod
-    def newton_raphson(func: Callable, derivative: Callable, initial_guess: float,
-                       tolerance: float = 1e-8, max_iterations: int = 100) -> Dict[str, Any]:
+    def newton_raphson(func: Callable, derivative: Callable, initial_guess: float, tolerance: float = 1e-8, max_iterations: int = 100) -> Dict[str, Any]:
         """Newton-Raphson root finding method"""
         x = initial_guess
 
@@ -333,12 +321,7 @@ class OptimizationSolver:
                 x_new = x - f_x / f_prime_x
 
                 if abs(x_new - x) < tolerance:
-                    return {
-                        "success": True,
-                        "root": x_new,
-                        "function_value": func(x_new),
-                        "iterations": i + 1
-                    }
+                    return {"success": True, "root": x_new, "function_value": func(x_new), "iterations": i + 1}
 
                 x = x_new
 
@@ -348,8 +331,7 @@ class OptimizationSolver:
         return {"success": False, "message": "Max iterations reached", "iterations": max_iterations}
 
     @staticmethod
-    def bisection_method(func: Callable, a: float, b: float,
-                         tolerance: float = 1e-8, max_iterations: int = 100) -> Dict[str, Any]:
+    def bisection_method(func: Callable, a: float, b: float, tolerance: float = 1e-8, max_iterations: int = 100) -> Dict[str, Any]:
         """Bisection root finding method"""
         if func(a) * func(b) >= 0:
             return {"success": False, "message": "Function must have opposite signs at endpoints"}
@@ -359,12 +341,7 @@ class OptimizationSolver:
             f_c = func(c)
 
             if abs(f_c) < tolerance or (b - a) / 2 < tolerance:
-                return {
-                    "success": True,
-                    "root": c,
-                    "function_value": f_c,
-                    "iterations": i + 1
-                }
+                return {"success": True, "root": c, "function_value": f_c, "iterations": i + 1}
 
             if func(a) * f_c < 0:
                 b = c
@@ -374,26 +351,18 @@ class OptimizationSolver:
         return {"success": False, "message": "Max iterations reached", "iterations": max_iterations}
 
     @staticmethod
-    def brent_method(func: Callable, a: float, b: float,
-                     tolerance: float = 1e-8) -> Dict[str, Any]:
+    def brent_method(func: Callable, a: float, b: float, tolerance: float = 1e-8) -> Dict[str, Any]:
         """Brent's method for root finding (most robust)"""
         try:
             result = optimize.brentq(func, a, b, xtol=tolerance, full_output=True)
             root, result_info = result
 
-            return {
-                "success": True,
-                "root": root,
-                "function_value": func(root),
-                "iterations": result_info.iterations,
-                "function_calls": result_info.function_calls
-            }
+            return {"success": True, "root": root, "function_value": func(root), "iterations": result_info.iterations, "function_calls": result_info.function_calls}
         except Exception as e:
             return {"success": False, "message": str(e)}
 
     @staticmethod
-    def golden_section_search(func: Callable, a: float, b: float,
-                              tolerance: float = 1e-8, maximize: bool = False) -> Dict[str, Any]:
+    def golden_section_search(func: Callable, a: float, b: float, tolerance: float = 1e-8, maximize: bool = False) -> Dict[str, Any]:
         """Golden section search for optimization"""
         golden_ratio = (1 + np.sqrt(5)) / 2
         resphi = 2 - golden_ratio
@@ -430,12 +399,7 @@ class OptimizationSolver:
         optimal_x = (a + b) / 2
         optimal_value = func(optimal_x)
 
-        return {
-            "success": True,
-            "optimal_x": optimal_x,
-            "optimal_value": optimal_value if not maximize else -optimal_value,
-            "iterations": iterations
-        }
+        return {"success": True, "optimal_x": optimal_x, "optimal_value": optimal_value if not maximize else -optimal_value, "iterations": iterations}
 
 
 class StatisticalUtils:
@@ -455,15 +419,14 @@ class StatisticalUtils:
             raise ValueError("Method must be 'log' or 'simple'")
 
     @staticmethod
-    def rolling_volatility(returns: np.ndarray, window: int,
-                           annualize: bool = True) -> np.ndarray:
+    def rolling_volatility(returns: np.ndarray, window: int, annualize: bool = True) -> np.ndarray:
         """Calculate rolling volatility"""
         if len(returns) < window:
             return np.array([])
 
         rolling_vol = []
         for i in range(window - 1, len(returns)):
-            window_returns = returns[i - window + 1:i + 1]
+            window_returns = returns[i - window + 1 : i + 1]
             vol = np.std(window_returns)
             if annualize:
                 vol *= np.sqrt(252)  # Assuming daily returns
@@ -472,8 +435,7 @@ class StatisticalUtils:
         return np.array(rolling_vol)
 
     @staticmethod
-    def ewma_volatility(returns: np.ndarray, lambda_param: float = 0.94,
-                        annualize: bool = True) -> np.ndarray:
+    def ewma_volatility(returns: np.ndarray, lambda_param: float = 0.94, annualize: bool = True) -> np.ndarray:
         """Exponentially weighted moving average volatility"""
         if len(returns) == 0:
             return np.array([])
@@ -510,17 +472,11 @@ class StatisticalUtils:
             conditional_var[0] = np.var(returns)
 
             for i in range(1, n):
-                conditional_var[i] = (omega +
-                                      alpha * returns[i - 1] ** 2 +
-                                      beta * conditional_var[i - 1])
+                conditional_var[i] = omega + alpha * returns[i - 1] ** 2 + beta * conditional_var[i - 1]
 
             conditional_vol = np.sqrt(conditional_var)
 
-            return {
-                "success": True,
-                "conditional_volatility": conditional_vol,
-                "parameters": {"omega": omega, "alpha": alpha, "beta": beta}
-            }
+            return {"success": True, "conditional_volatility": conditional_vol, "parameters": {"omega": omega, "alpha": alpha, "beta": beta}}
 
         return {"success": False, "message": "Only GARCH(1,1) implemented"}
 
@@ -559,27 +515,19 @@ class StatisticalUtils:
         kurtosis = np.mean(((data - mean_data) / std_data) ** 4)
 
         # Jarque-Bera statistic
-        jb_statistic = n * (skewness ** 2 / 6 + (kurtosis - 3) ** 2 / 24)
+        jb_statistic = n * (skewness**2 / 6 + (kurtosis - 3) ** 2 / 24)
 
         # p-value (chi-squared distribution with 2 degrees of freedom)
         p_value = 1 - stats.chi2.cdf(jb_statistic, 2)
 
-        return {
-            "statistic": jb_statistic,
-            "p_value": p_value,
-            "skewness": skewness,
-            "kurtosis": kurtosis,
-            "is_normal": p_value > 0.05  # 5% significance level
-        }
+        return {"statistic": jb_statistic, "p_value": p_value, "skewness": skewness, "kurtosis": kurtosis, "is_normal": p_value > 0.05}  # 5% significance level
 
 
 class DateUtils:
     """Date utility functions for financial calculations"""
 
     @staticmethod
-    def year_fraction(start_date: Union[datetime, date],
-                      end_date: Union[datetime, date],
-                      day_count: DayCountConvention = DayCountConvention.ACT_365) -> float:
+    def year_fraction(start_date: Union[datetime, date], end_date: Union[datetime, date], day_count: DayCountConvention = DayCountConvention.ACT_365) -> float:
         """Calculate year fraction between dates"""
         if isinstance(start_date, date):
             start_date = datetime.combine(start_date, datetime.min.time())
@@ -609,9 +557,7 @@ class DateUtils:
         if start_day == 30 and end_day == 31:
             end_day = 30
 
-        days = (360 * (end_date.year - start_date.year) +
-                30 * (end_date.month - start_date.month) +
-                (end_day - start_day))
+        days = 360 * (end_date.year - start_date.year) + 30 * (end_date.month - start_date.month) + (end_day - start_day)
 
         return days / 360.0
 
@@ -651,13 +597,13 @@ class DateUtils:
 
         tenor = tenor.upper()
 
-        if tenor.endswith('D'):
+        if tenor.endswith("D"):
             days = int(tenor[:-1])
             return start_date + timedelta(days=days)
-        elif tenor.endswith('W'):
+        elif tenor.endswith("W"):
             weeks = int(tenor[:-1])
             return start_date + timedelta(weeks=weeks)
-        elif tenor.endswith('M'):
+        elif tenor.endswith("M"):
             months = int(tenor[:-1])
             new_month = start_date.month + months
             new_year = start_date.year + (new_month - 1) // 12
@@ -670,7 +616,7 @@ class DateUtils:
                 # Handle cases like Jan 31 + 1M = Feb 28/29
                 last_day = calendar.monthrange(new_year, new_month)[1]
                 return start_date.replace(year=new_year, month=new_month, day=last_day)
-        elif tenor.endswith('Y'):
+        elif tenor.endswith("Y"):
             years = int(tenor[:-1])
             try:
                 return start_date.replace(year=start_date.year + years)
@@ -681,10 +627,7 @@ class DateUtils:
             raise ValueError(f"Invalid tenor format: {tenor}")
 
     @staticmethod
-    def generate_schedule(start_date: Union[datetime, date],
-                          end_date: Union[datetime, date],
-                          frequency: str = "3M",
-                          business_day_convention: str = "modified_following") -> List[datetime]:
+    def generate_schedule(start_date: Union[datetime, date], end_date: Union[datetime, date], frequency: str = "3M", business_day_convention: str = "modified_following") -> List[datetime]:
         """Generate payment schedule between dates"""
         if isinstance(start_date, date):
             start_date = datetime.combine(start_date, datetime.min.time())
@@ -727,7 +670,4 @@ class DateUtils:
 
 
 # Export main classes and functions
-__all__ = [
-    'InterpolationMethod', 'OptimizationMethod', 'Holiday', 'BusinessDayCalculator',
-    'MathUtils', 'InterpolationEngine', 'OptimizationSolver', 'StatisticalUtils', 'DateUtils'
-]
+__all__ = ["InterpolationMethod", "OptimizationMethod", "Holiday", "BusinessDayCalculator", "MathUtils", "InterpolationEngine", "OptimizationSolver", "StatisticalUtils", "DateUtils"]

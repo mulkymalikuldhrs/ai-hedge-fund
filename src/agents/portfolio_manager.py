@@ -1,5 +1,6 @@
 import json
 import time
+
 # Temporarily disabled LangChain imports for core functionality testing
 # from langchain_core.messages import HumanMessage
 # from langchain_core.prompts import ChatPromptTemplate
@@ -8,6 +9,7 @@ from src.graph.state import AgentState, show_agent_reasoning
 from pydantic import BaseModel, Field
 from typing_extensions import Literal
 from src.utils.progress import progress
+
 # Temporarily disabled LLM import for core functionality testing
 # from src.utils.llm import call_llm
 
@@ -40,7 +42,7 @@ def portfolio_management_agent(state: AgentState, agent_id: str = "portfolio_man
 
         # Find the corresponding risk manager for this portfolio manager
         if agent_id.startswith("portfolio_manager_"):
-            suffix = agent_id.split('_')[-1]
+            suffix = agent_id.split("_")[-1]
             risk_manager_id = f"risk_management_agent_{suffix}"
         else:
             risk_manager_id = "risk_management_agent"  # Fallback for CLI
@@ -85,15 +87,10 @@ def portfolio_management_agent(state: AgentState, agent_id: str = "portfolio_man
     # )
 
     # Mock message for compatibility
-    message = {
-        "content": json.dumps({ticker: decision.model_dump() for ticker, decision in result.decisions.items()}),
-        "name": agent_id,
-        "type": "mock_human_message"
-    }
+    message = {"content": json.dumps({ticker: decision.model_dump() for ticker, decision in result.decisions.items()}), "name": agent_id, "type": "mock_human_message"}
 
     if state["metadata"]["show_reasoning"]:
-        show_agent_reasoning({ticker: decision.model_dump() for ticker, decision in result.decisions.items()},
-                             "Portfolio Manager")
+        show_agent_reasoning({ticker: decision.model_dump() for ticker, decision in result.decisions.items()}, "Portfolio Manager")
 
     progress.update_status(agent_id, None, "Done")
 
@@ -104,10 +101,10 @@ def portfolio_management_agent(state: AgentState, agent_id: str = "portfolio_man
 
 
 def compute_allowed_actions(
-        tickers: list[str],
-        current_prices: dict[str, float],
-        max_shares: dict[str, int],
-        portfolio: dict[str, float],
+    tickers: list[str],
+    current_prices: dict[str, float],
+    max_shares: dict[str, int],
+    portfolio: dict[str, float],
 ) -> dict[str, dict[str, int]]:
     """Compute allowed actions and max quantities for each ticker deterministically."""
     allowed = {}
@@ -185,13 +182,13 @@ def _compact_signals(signals_by_ticker: dict[str, dict]) -> dict[str, dict]:
 
 
 def generate_trading_decision(
-        tickers: list[str],
-        signals_by_ticker: dict[str, dict],
-        current_prices: dict[str, float],
-        max_shares: dict[str, int],
-        portfolio: dict[str, float],
-        agent_id: str,
-        state: AgentState,
+    tickers: list[str],
+    signals_by_ticker: dict[str, dict],
+    current_prices: dict[str, float],
+    max_shares: dict[str, int],
+    portfolio: dict[str, float],
+    agent_id: str,
+    state: AgentState,
 ) -> PortfolioManagerOutput:
     """MOCK VERSION: Simple rule-based trading decisions without LLM"""
 
@@ -208,18 +205,14 @@ def generate_trading_decision(
 
         # If only 'hold' key exists, there is no trade possible
         if set(aa.keys()) == {"hold"}:
-            decisions[ticker] = PortfolioDecision(
-                action="hold", quantity=0, confidence=100, reasoning="No valid trade available"
-            )
+            decisions[ticker] = PortfolioDecision(action="hold", quantity=0, confidence=100, reasoning="No valid trade available")
             continue
 
         # Simple rule-based decision making (temporary mock)
         signals = signals_by_ticker.get(ticker, {})
         if not signals:
             # No signals - hold
-            decisions[ticker] = PortfolioDecision(
-                action="hold", quantity=0, confidence=50, reasoning="No analyst signals available"
-            )
+            decisions[ticker] = PortfolioDecision(action="hold", quantity=0, confidence=50, reasoning="No analyst signals available")
             continue
 
         # Count buy/sell signals
@@ -229,11 +222,11 @@ def generate_trading_decision(
         signal_count = 0
 
         for agent_signals in signals.values():
-            signal = agent_signals.get('sig')
-            confidence = agent_signals.get('conf', 0)
-            if signal == 'BUY':
+            signal = agent_signals.get("sig")
+            confidence = agent_signals.get("conf", 0)
+            if signal == "BUY":
                 buy_signals += 1
-            elif signal == 'SELL':
+            elif signal == "SELL":
                 sell_signals += 1
             total_confidence += confidence
             signal_count += 1
@@ -241,31 +234,16 @@ def generate_trading_decision(
         avg_confidence = total_confidence / max(signal_count, 1)
 
         # Simple decision logic
-        if buy_signals > sell_signals and 'buy' in aa and aa['buy'] > 0:
+        if buy_signals > sell_signals and "buy" in aa and aa["buy"] > 0:
             # Buy decision
-            quantity = min(aa['buy'], 100)  # Max 100 shares for mock
-            decisions[ticker] = PortfolioDecision(
-                action="buy",
-                quantity=quantity,
-                confidence=int(avg_confidence),
-                reasoning=f"Mock: {buy_signals} buy signals vs {sell_signals} sell"
-            )
-        elif sell_signals > buy_signals and 'sell' in aa and aa['sell'] > 0:
+            quantity = min(aa["buy"], 100)  # Max 100 shares for mock
+            decisions[ticker] = PortfolioDecision(action="buy", quantity=quantity, confidence=int(avg_confidence), reasoning=f"Mock: {buy_signals} buy signals vs {sell_signals} sell")
+        elif sell_signals > buy_signals and "sell" in aa and aa["sell"] > 0:
             # Sell decision
-            quantity = min(aa['sell'], 100)  # Max 100 shares for mock
-            decisions[ticker] = PortfolioDecision(
-                action="sell",
-                quantity=quantity,
-                confidence=int(avg_confidence),
-                reasoning=f"Mock: {sell_signals} sell signals vs {buy_signals} buy"
-            )
+            quantity = min(aa["sell"], 100)  # Max 100 shares for mock
+            decisions[ticker] = PortfolioDecision(action="sell", quantity=quantity, confidence=int(avg_confidence), reasoning=f"Mock: {sell_signals} sell signals vs {buy_signals} buy")
         else:
             # Hold decision
-            decisions[ticker] = PortfolioDecision(
-                action="hold",
-                quantity=0,
-                confidence=50,
-                reasoning=f"Mock: Balanced signals ({buy_signals} buy, {sell_signals} sell)"
-            )
+            decisions[ticker] = PortfolioDecision(action="hold", quantity=0, confidence=50, reasoning=f"Mock: Balanced signals ({buy_signals} buy, {sell_signals} sell)")
 
     return PortfolioManagerOutput(decisions=decisions)

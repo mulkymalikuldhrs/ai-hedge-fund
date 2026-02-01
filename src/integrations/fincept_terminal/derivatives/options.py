@@ -44,11 +44,7 @@ from scipy.stats import norm
 from scipy.optimize import brentq
 import logging
 
-from .core import (
-    ContingentClaim, OptionType, ExerciseStyle, UnderlyingType,
-    MarketData, PricingResult, PricingEngine, ValidationError,
-    ModelValidator, Constants
-)
+from .core import ContingentClaim, OptionType, ExerciseStyle, UnderlyingType, MarketData, PricingResult, PricingEngine, ValidationError, ModelValidator, Constants
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +52,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class OptionGreeks:
     """Container for option Greeks"""
+
     delta: float = 0.0  # Price sensitivity
     gamma: float = 0.0  # Delta sensitivity
     theta: float = 0.0  # Time decay
@@ -72,6 +69,7 @@ class OptionGreeks:
 @dataclass
 class BinomialNode:
     """Single node in binomial tree"""
+
     time_step: int
     stock_price: float
     option_value: float
@@ -82,16 +80,8 @@ class BinomialNode:
 class VanillaOption(ContingentClaim):
     """Standard European/American call and put options"""
 
-    def __init__(self,
-                 option_type: OptionType,
-                 underlying_type: UnderlyingType,
-                 expiry_date: datetime,
-                 strike_price: float,
-                 exercise_style: ExerciseStyle = ExerciseStyle.EUROPEAN,
-                 notional: float = 1.0):
-
-        super().__init__(option_type, underlying_type, expiry_date,
-                         strike_price, exercise_style, notional)
+    def __init__(self, option_type: OptionType, underlying_type: UnderlyingType, expiry_date: datetime, strike_price: float, exercise_style: ExerciseStyle = ExerciseStyle.EUROPEAN, notional: float = 1.0):
+        super().__init__(option_type, underlying_type, expiry_date, strike_price, exercise_style, notional)
 
     def calculate_payoff(self, spot_price: float) -> float:
         """Calculate option payoff at expiration"""
@@ -120,7 +110,7 @@ class VanillaOption(ContingentClaim):
             return PricingResult(fair_value=self.calculate_payoff(S))
 
         # Calculate d1 and d2
-        d1 = (np.log(S / K) + (r - q + 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))
+        d1 = (np.log(S / K) + (r - q + 0.5 * sigma**2) * T) / (sigma * np.sqrt(T))
         d2 = d1 - sigma * np.sqrt(T)
 
         # Calculate option price
@@ -132,18 +122,7 @@ class VanillaOption(ContingentClaim):
         price *= self.notional
         intrinsic = self.intrinsic_value(S)
 
-        return PricingResult(
-            fair_value=price,
-            intrinsic_value=intrinsic,
-            time_value=price - intrinsic,
-            calculation_details={
-                "model": "Black-Scholes-Merton",
-                "d1": d1,
-                "d2": d2,
-                "N_d1": norm.cdf(d1) if self.option_type == OptionType.CALL else norm.cdf(-d1),
-                "N_d2": norm.cdf(d2) if self.option_type == OptionType.CALL else norm.cdf(-d2)
-            }
-        )
+        return PricingResult(fair_value=price, intrinsic_value=intrinsic, time_value=price - intrinsic, calculation_details={"model": "Black-Scholes-Merton", "d1": d1, "d2": d2, "N_d1": norm.cdf(d1) if self.option_type == OptionType.CALL else norm.cdf(-d1), "N_d2": norm.cdf(d2) if self.option_type == OptionType.CALL else norm.cdf(-d2)})
 
     def _binomial_price(self, market_data: MarketData, steps: int = 50) -> PricingResult:
         """Binomial tree pricing for American options"""
@@ -183,19 +162,10 @@ class OnePeriodBinomialModel:
             payoff_down = max(0, strike_price - stock_down)
 
         # Calculate option price using risk-neutral valuation
-        expected_payoff = (self.risk_neutral_prob_up * payoff_up +
-                           self.risk_neutral_prob_down * payoff_down)
+        expected_payoff = self.risk_neutral_prob_up * payoff_up + self.risk_neutral_prob_down * payoff_down
         option_price = expected_payoff * np.exp(-self.r * self.dt)
 
-        return {
-            "option_price": option_price,
-            "stock_up": stock_up,
-            "stock_down": stock_down,
-            "payoff_up": payoff_up,
-            "payoff_down": payoff_down,
-            "risk_neutral_prob_up": self.risk_neutral_prob_up,
-            "risk_neutral_prob_down": self.risk_neutral_prob_down
-        }
+        return {"option_price": option_price, "stock_up": stock_up, "stock_down": stock_down, "payoff_up": payoff_up, "payoff_down": payoff_down, "risk_neutral_prob_up": self.risk_neutral_prob_up, "risk_neutral_prob_down": self.risk_neutral_prob_down}
 
 
 class TwoPeriodBinomialModel:
@@ -241,16 +211,7 @@ class TwoPeriodBinomialModel:
         # Period 0 value (today)
         option_price = (self.q * V_u + (1 - self.q) * V_d) * np.exp(-self.r * self.dt)
 
-        return {
-            "option_price": option_price,
-            "tree_values": {
-                "S_0": spot_price, "S_u": S_u, "S_d": S_d,
-                "S_uu": S_uu, "S_ud": S_ud, "S_dd": S_dd,
-                "V_0": option_price, "V_u": V_u, "V_d": V_d,
-                "payoff_uu": payoff_uu, "payoff_ud": payoff_ud, "payoff_dd": payoff_dd
-            },
-            "risk_neutral_prob": self.q
-        }
+        return {"option_price": option_price, "tree_values": {"S_0": spot_price, "S_u": S_u, "S_d": S_d, "S_uu": S_uu, "S_ud": S_ud, "S_dd": S_dd, "V_0": option_price, "V_u": V_u, "V_d": V_d, "payoff_uu": payoff_uu, "payoff_ud": payoff_ud, "payoff_dd": payoff_dd}, "risk_neutral_prob": self.q}
 
 
 class BinomialPricingEngine(PricingEngine):
@@ -286,7 +247,7 @@ class BinomialPricingEngine(PricingEngine):
 
         # Initialize stock prices at expiration
         for j in range(self.steps + 1):
-            stock_tree[self.steps, j] = S * (u ** (self.steps - j)) * (d ** j)
+            stock_tree[self.steps, j] = S * (u ** (self.steps - j)) * (d**j)
 
         # Calculate option values at expiration
         for j in range(self.steps + 1):
@@ -295,11 +256,10 @@ class BinomialPricingEngine(PricingEngine):
         # Work backwards through tree
         for i in range(self.steps - 1, -1, -1):
             for j in range(i + 1):
-                stock_tree[i, j] = S * (u ** (i - j)) * (d ** j)
+                stock_tree[i, j] = S * (u ** (i - j)) * (d**j)
 
                 # European value
-                european_value = (prob_up * option_tree[i + 1, j] +
-                                  (1 - prob_up) * option_tree[i + 1, j + 1]) * np.exp(-r * dt)
+                european_value = (prob_up * option_tree[i + 1, j] + (1 - prob_up) * option_tree[i + 1, j + 1]) * np.exp(-r * dt)
 
                 # American exercise value
                 if instrument.exercise_style == ExerciseStyle.AMERICAN:
@@ -311,19 +271,7 @@ class BinomialPricingEngine(PricingEngine):
         fair_value = option_tree[0, 0] * instrument.notional
         intrinsic = instrument.intrinsic_value(S)
 
-        return PricingResult(
-            fair_value=fair_value,
-            intrinsic_value=intrinsic,
-            time_value=fair_value - intrinsic,
-            calculation_details={
-                "model": "Binomial Tree",
-                "steps": self.steps,
-                "u": u,
-                "d": d,
-                "prob_up": prob_up,
-                "dt": dt
-            }
-        )
+        return PricingResult(fair_value=fair_value, intrinsic_value=intrinsic, time_value=fair_value - intrinsic, calculation_details={"model": "Binomial Tree", "steps": self.steps, "u": u, "d": d, "prob_up": prob_up, "dt": dt})
 
     def validate_inputs(self, instrument: VanillaOption, market_data: MarketData) -> bool:
         """Validate inputs for binomial pricing"""
@@ -369,7 +317,7 @@ class BlackScholesPricingEngine(PricingEngine):
             return OptionGreeks()
 
         # Calculate d1 and d2
-        d1 = (np.log(S / K) + (r - q + 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))
+        d1 = (np.log(S / K) + (r - q + 0.5 * sigma**2) * T) / (sigma * np.sqrt(T))
         d2 = d1 - sigma * np.sqrt(T)
 
         # Standard normal PDF and CDF
@@ -382,15 +330,11 @@ class BlackScholesPricingEngine(PricingEngine):
         # First-order Greeks
         if instrument.option_type == OptionType.CALL:
             greeks.delta = np.exp(-q * T) * N_d1
-            greeks.theta = (-S * n_d1 * sigma * np.exp(-q * T) / (2 * np.sqrt(T))
-                            - r * K * np.exp(-r * T) * N_d2
-                            + q * S * np.exp(-q * T) * N_d1) / 365
+            greeks.theta = (-S * n_d1 * sigma * np.exp(-q * T) / (2 * np.sqrt(T)) - r * K * np.exp(-r * T) * N_d2 + q * S * np.exp(-q * T) * N_d1) / 365
             greeks.rho = K * T * np.exp(-r * T) * N_d2 / 100
         else:  # PUT
             greeks.delta = -np.exp(-q * T) * norm.cdf(-d1)
-            greeks.theta = (-S * n_d1 * sigma * np.exp(-q * T) / (2 * np.sqrt(T))
-                            + r * K * np.exp(-r * T) * norm.cdf(-d2)
-                            - q * S * np.exp(-q * T) * norm.cdf(-d1)) / 365
+            greeks.theta = (-S * n_d1 * sigma * np.exp(-q * T) / (2 * np.sqrt(T)) + r * K * np.exp(-r * T) * norm.cdf(-d2) - q * S * np.exp(-q * T) * norm.cdf(-d1)) / 365
             greeks.rho = -K * T * np.exp(-r * T) * norm.cdf(-d2) / 100
 
         # Common Greeks
@@ -400,9 +344,7 @@ class BlackScholesPricingEngine(PricingEngine):
         # Second-order Greeks
         greeks.vanna = -greeks.vega * d2 / sigma
         greeks.volga = greeks.vega * d1 * d2 / sigma
-        greeks.charm = (q * np.exp(-q * T) * norm.cdf(d1 if instrument.option_type == OptionType.CALL else -d1)
-                        - np.exp(-q * T) * n_d1 * (2 * (r - q) * T - d2 * sigma * np.sqrt(T)) / (
-                                    2 * T * sigma * np.sqrt(T))) / 365
+        greeks.charm = (q * np.exp(-q * T) * norm.cdf(d1 if instrument.option_type == OptionType.CALL else -d1) - np.exp(-q * T) * n_d1 * (2 * (r - q) * T - d2 * sigma * np.sqrt(T)) / (2 * T * sigma * np.sqrt(T))) / 365
 
         return greeks
 
@@ -441,7 +383,7 @@ class BlackModelPricingEngine(PricingEngine):
             return PricingResult(fair_value=instrument.calculate_payoff(F))
 
         # Black model d1 and d2
-        d1 = (np.log(F / K) + 0.5 * sigma ** 2 * T) / (sigma * np.sqrt(T))
+        d1 = (np.log(F / K) + 0.5 * sigma**2 * T) / (sigma * np.sqrt(T))
         d2 = d1 - sigma * np.sqrt(T)
 
         # Calculate option price
@@ -452,15 +394,7 @@ class BlackModelPricingEngine(PricingEngine):
 
         price *= instrument.notional
 
-        return PricingResult(
-            fair_value=price,
-            calculation_details={
-                "model": "Black Model",
-                "forward_price": F,
-                "d1": d1,
-                "d2": d2
-            }
-        )
+        return PricingResult(fair_value=price, calculation_details={"model": "Black Model", "forward_price": F, "d1": d1, "d2": d2})
 
     def validate_inputs(self, instrument: VanillaOption, market_data: MarketData) -> bool:
         """Validate inputs for Black model"""
@@ -479,9 +413,7 @@ class PutCallParity:
     """Put-call parity relationships"""
 
     @staticmethod
-    def european_parity(call_price: float, put_price: float, spot_price: float,
-                        strike_price: float, risk_free_rate: float, time_to_expiry: float,
-                        dividend_yield: float = 0.0) -> Dict[str, float]:
+    def european_parity(call_price: float, put_price: float, spot_price: float, strike_price: float, risk_free_rate: float, time_to_expiry: float, dividend_yield: float = 0.0) -> Dict[str, float]:
         """Verify European put-call parity: C + K*e^(-rT) = P + S*e^(-qT)"""
 
         pv_strike = strike_price * np.exp(-risk_free_rate * time_to_expiry)
@@ -492,16 +424,10 @@ class PutCallParity:
 
         arbitrage_profit = abs(left_side - right_side)
 
-        return {
-            "call_synthetic": put_price + pv_spot - pv_strike,
-            "put_synthetic": call_price + pv_strike - pv_spot,
-            "arbitrage_profit": arbitrage_profit,
-            "parity_holds": arbitrage_profit < Constants.EPSILON
-        }
+        return {"call_synthetic": put_price + pv_spot - pv_strike, "put_synthetic": call_price + pv_strike - pv_spot, "arbitrage_profit": arbitrage_profit, "parity_holds": arbitrage_profit < Constants.EPSILON}
 
     @staticmethod
-    def forward_parity(call_price: float, put_price: float, forward_price: float,
-                       strike_price: float, risk_free_rate: float, time_to_expiry: float) -> Dict[str, float]:
+    def forward_parity(call_price: float, put_price: float, forward_price: float, strike_price: float, risk_free_rate: float, time_to_expiry: float) -> Dict[str, float]:
         """Put-call forward parity: C - P = (F - K) * e^(-rT)"""
 
         pv_diff = (forward_price - strike_price) * np.exp(-risk_free_rate * time_to_expiry)
@@ -509,39 +435,21 @@ class PutCallParity:
 
         arbitrage_profit = abs(actual_diff - pv_diff)
 
-        return {
-            "theoretical_diff": pv_diff,
-            "actual_diff": actual_diff,
-            "arbitrage_profit": arbitrage_profit,
-            "parity_holds": arbitrage_profit < Constants.EPSILON
-        }
+        return {"theoretical_diff": pv_diff, "actual_diff": actual_diff, "arbitrage_profit": arbitrage_profit, "parity_holds": arbitrage_profit < Constants.EPSILON}
 
 
 class ImpliedVolatilityCalculator:
     """Calculate implied volatility from option prices"""
 
     @staticmethod
-    def calculate_iv(option_price: float, spot_price: float, strike_price: float,
-                     time_to_expiry: float, risk_free_rate: float,
-                     option_type: OptionType, dividend_yield: float = 0.0) -> float:
+    def calculate_iv(option_price: float, spot_price: float, strike_price: float, time_to_expiry: float, risk_free_rate: float, option_type: OptionType, dividend_yield: float = 0.0) -> float:
         """Calculate implied volatility using Brent's method"""
 
         def objective_function(vol):
             """Objective function for root finding"""
-            market_data = MarketData(
-                spot_price=spot_price,
-                risk_free_rate=risk_free_rate,
-                dividend_yield=dividend_yield,
-                volatility=vol,
-                time_to_expiry=time_to_expiry
-            )
+            market_data = MarketData(spot_price=spot_price, risk_free_rate=risk_free_rate, dividend_yield=dividend_yield, volatility=vol, time_to_expiry=time_to_expiry)
 
-            option = VanillaOption(
-                option_type=option_type,
-                underlying_type=UnderlyingType.EQUITY,
-                expiry_date=datetime.now(),
-                strike_price=strike_price
-            )
+            option = VanillaOption(option_type=option_type, underlying_type=UnderlyingType.EQUITY, expiry_date=datetime.now(), strike_price=strike_price)
 
             theoretical_price = option._black_scholes_price(market_data).fair_value
             return theoretical_price - option_price
@@ -580,18 +488,8 @@ class DeltaHedging:
         self.hedge_ratio = new_hedge_ratio
         self.hedge_position = new_hedge_position
 
-        return {
-            "new_hedge_ratio": new_hedge_ratio,
-            "new_hedge_position": new_hedge_position,
-            "hedge_adjustment": hedge_adjustment,
-            "cost_of_adjustment": abs(hedge_adjustment) * market_data.spot_price
-        }
+        return {"new_hedge_ratio": new_hedge_ratio, "new_hedge_position": new_hedge_position, "hedge_adjustment": hedge_adjustment, "cost_of_adjustment": abs(hedge_adjustment) * market_data.spot_price}
 
 
 # Export main classes
-__all__ = [
-    'OptionGreeks', 'BinomialNode', 'VanillaOption', 'OnePeriodBinomialModel',
-    'TwoPeriodBinomialModel', 'BinomialPricingEngine', 'BlackScholesPricingEngine',
-    'BlackModelPricingEngine', 'PutCallParity', 'ImpliedVolatilityCalculator',
-    'DeltaHedging'
-]
+__all__ = ["OptionGreeks", "BinomialNode", "VanillaOption", "OnePeriodBinomialModel", "TwoPeriodBinomialModel", "BinomialPricingEngine", "BlackScholesPricingEngine", "BlackModelPricingEngine", "PutCallParity", "ImpliedVolatilityCalculator", "DeltaHedging"]

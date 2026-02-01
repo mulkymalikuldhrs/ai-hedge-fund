@@ -50,6 +50,7 @@ logger = logging.getLogger(__name__)
 
 class DerivativeType(Enum):
     """Classification of derivative instruments"""
+
     FORWARD = "forward"
     FUTURE = "future"
     SWAP = "swap"
@@ -59,18 +60,21 @@ class DerivativeType(Enum):
 
 class OptionType(Enum):
     """Option contract types"""
+
     CALL = "call"
     PUT = "put"
 
 
 class Position(Enum):
     """Trading position direction"""
+
     LONG = "long"
     SHORT = "short"
 
 
 class ExerciseStyle(Enum):
     """Option exercise styles"""
+
     EUROPEAN = "european"
     AMERICAN = "american"
     BERMUDAN = "bermudan"
@@ -78,6 +82,7 @@ class ExerciseStyle(Enum):
 
 class UnderlyingType(Enum):
     """Types of underlying assets"""
+
     EQUITY = "equity"
     BOND = "bond"
     COMMODITY = "commodity"
@@ -88,6 +93,7 @@ class UnderlyingType(Enum):
 
 class DayCountConvention(Enum):
     """Day count conventions for financial calculations"""
+
     ACT_360 = "ACT/360"
     ACT_365 = "ACT/365"
     THIRTY_360 = "30/360"
@@ -97,6 +103,7 @@ class DayCountConvention(Enum):
 @dataclass
 class MarketData:
     """Market data container for derivative pricing"""
+
     spot_price: float
     risk_free_rate: float
     dividend_yield: float = 0.0
@@ -118,6 +125,7 @@ class MarketData:
 @dataclass
 class PricingResult:
     """Container for derivative pricing results"""
+
     fair_value: float
     intrinsic_value: Optional[float] = None
     time_value: Optional[float] = None
@@ -133,11 +141,13 @@ class PricingResult:
 
 class ValidationError(Exception):
     """Custom exception for validation errors"""
+
     pass
 
 
 class PricingError(Exception):
     """Custom exception for pricing calculation errors"""
+
     pass
 
 
@@ -147,13 +157,7 @@ class DerivativeInstrument(ABC):
     Implements common interface following CFA curriculum structure.
     """
 
-    def __init__(self,
-                 derivative_type: DerivativeType,
-                 underlying_type: UnderlyingType,
-                 expiry_date: Union[datetime, date],
-                 notional: float = 1.0,
-                 day_count: DayCountConvention = DayCountConvention.ACT_365):
-
+    def __init__(self, derivative_type: DerivativeType, underlying_type: UnderlyingType, expiry_date: Union[datetime, date], notional: float = 1.0, day_count: DayCountConvention = DayCountConvention.ACT_365):
         self.derivative_type = derivative_type
         self.underlying_type = underlying_type
         self.expiry_date = expiry_date
@@ -213,13 +217,7 @@ class DerivativeInstrument(ABC):
 class ForwardCommitment(DerivativeInstrument):
     """Base class for forward commitments (forwards, futures, swaps)"""
 
-    def __init__(self,
-                 derivative_type: DerivativeType,
-                 underlying_type: UnderlyingType,
-                 expiry_date: Union[datetime, date],
-                 contract_price: float,
-                 notional: float = 1.0,
-                 day_count: DayCountConvention = DayCountConvention.ACT_365):
+    def __init__(self, derivative_type: DerivativeType, underlying_type: UnderlyingType, expiry_date: Union[datetime, date], contract_price: float, notional: float = 1.0, day_count: DayCountConvention = DayCountConvention.ACT_365):
         super().__init__(derivative_type, underlying_type, expiry_date, notional, day_count)
         self.contract_price = contract_price
 
@@ -230,15 +228,7 @@ class ForwardCommitment(DerivativeInstrument):
 class ContingentClaim(DerivativeInstrument):
     """Base class for contingent claims (options)"""
 
-    def __init__(self,
-                 option_type: OptionType,
-                 underlying_type: UnderlyingType,
-                 expiry_date: Union[datetime, date],
-                 strike_price: float,
-                 exercise_style: ExerciseStyle = ExerciseStyle.EUROPEAN,
-                 notional: float = 1.0,
-                 day_count: DayCountConvention = DayCountConvention.ACT_365):
-
+    def __init__(self, option_type: OptionType, underlying_type: UnderlyingType, expiry_date: Union[datetime, date], strike_price: float, exercise_style: ExerciseStyle = ExerciseStyle.EUROPEAN, notional: float = 1.0, day_count: DayCountConvention = DayCountConvention.ACT_365):
         super().__init__(DerivativeType.OPTION, underlying_type, expiry_date, notional, day_count)
         self.option_type = option_type
         self.strike_price = strike_price
@@ -347,9 +337,7 @@ class Constants:
     TIME_BUMP = 1 / 365  # 1 day for theta calculations
 
 
-def calculate_time_fraction(start_date: datetime,
-                            end_date: datetime,
-                            day_count: DayCountConvention = DayCountConvention.ACT_365) -> float:
+def calculate_time_fraction(start_date: datetime, end_date: datetime, day_count: DayCountConvention = DayCountConvention.ACT_365) -> float:
     """
     Calculate time fraction between dates using specified day count convention
 
@@ -376,10 +364,7 @@ def calculate_time_fraction(start_date: datetime,
         return time_diff.total_seconds() / (365.25 * 24 * 3600)
 
 
-def risk_free_rate_converter(rate: float,
-                             from_compounding: str = "continuous",
-                             to_compounding: str = "continuous",
-                             frequency: int = 1) -> float:
+def risk_free_rate_converter(rate: float, from_compounding: str = "continuous", to_compounding: str = "continuous", frequency: int = 1) -> float:
     """
     Convert between different interest rate compounding conventions
 
@@ -414,9 +399,4 @@ def risk_free_rate_converter(rate: float,
 
 
 # Export main classes and functions
-__all__ = [
-    'DerivativeType', 'OptionType', 'Position', 'ExerciseStyle', 'UnderlyingType',
-    'DayCountConvention', 'MarketData', 'PricingResult', 'ValidationError', 'PricingError',
-    'DerivativeInstrument', 'ForwardCommitment', 'ContingentClaim', 'PricingEngine',
-    'ModelValidator', 'Constants', 'calculate_time_fraction', 'risk_free_rate_converter'
-]
+__all__ = ["DerivativeType", "OptionType", "Position", "ExerciseStyle", "UnderlyingType", "DayCountConvention", "MarketData", "PricingResult", "ValidationError", "PricingError", "DerivativeInstrument", "ForwardCommitment", "ContingentClaim", "PricingEngine", "ModelValidator", "Constants", "calculate_time_fraction", "risk_free_rate_converter"]

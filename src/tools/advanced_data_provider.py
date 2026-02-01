@@ -659,3 +659,92 @@ if __name__ == "__main__":
             print(f"   {name}: {stat.reliability:.1f}% ({stat.successful_requests}/{stat.total_requests})")
     
     print("\n=== All tests completed ===")
+
+# ============ BACKWARD COMPATIBILITY ALIAS ============
+# AdvancedDataProvider was renamed to MultiSourceDataProvider
+# This alias maintains backward compatibility
+AdvancedDataProvider = MultiSourceDataProvider
+
+# ============ BACKWARD COMPATIBILITY LAYER ============
+# These functions provide backward compatibility with existing tests
+
+def fetch_yahoo_finance(ticker: str, period: str = "5d") -> pd.DataFrame:
+    """
+    Fetch historical prices from Yahoo Finance
+    Backward compatibility function for test suite
+    """
+    try:
+        import yfinance as yf
+        stock = yf.Ticker(ticker)
+        hist = stock.history(period=period)
+        return hist
+    except Exception as e:
+        logger.error(f"Error fetching from Yahoo Finance: {e}")
+        return pd.DataFrame()
+
+
+def get_historical_prices(ticker: str, period: str = "5d", market: str = "US") -> pd.DataFrame:
+    """
+    Get historical prices with auto-market detection
+    Backward compatibility function for test suite
+    """
+    try:
+        import yfinance as yf
+        
+        # Adjust ticker for IDX market
+        if market == "IDX" and not ticker.endswith(".JK"):
+            ticker = f"{ticker}.JK"
+        
+        stock = yf.Ticker(ticker)
+        hist = stock.history(period=period)
+        return hist
+    except Exception as e:
+        logger.error(f"Error fetching historical prices: {e}")
+        return pd.DataFrame()
+
+
+# Backward-compatible class wrapper
+class AdvancedDataProvider:
+    """
+    Backward compatibility wrapper around MultiSourceDataProvider
+    Maintains the old API that tests expect
+    """
+    
+    def __init__(self):
+        self._provider = MultiSourceDataProvider()
+        self.cache = self._provider.cache
+        self.rate_limiters = self._provider.rate_limiters
+        self.stats = self._provider.stats
+    
+    def get_historical_prices(self, ticker: str, period: str = "5d", market: str = "US", asset_type: str = "stock") -> pd.DataFrame:
+        """Get historical prices (backward compatible)"""
+        # Handle different asset types
+        if asset_type == "crypto":
+            return fetch_coingecko(ticker, "usd", int(period.rstrip('d'))) if period.isdigit() or period.endswith('d') else fetch_coingecko(ticker)
+        else:
+            # For stocks, use yahoo finance
+            return fetch_yahoo_finance(ticker, period)
+    
+    def __getattr__(self, name):
+        """Delegate all other attributes to MultiSourceDataProvider"""
+        return getattr(self._provider, name)
+
+# Additional backward compatibility function
+def fetch_coingecko(symbol: str, currency: str = "usd", days: int = 30) -> pd.DataFrame:
+    """
+    Fetch crypto from CoinGecko
+    Backward compatibility function for test suite
+    """
+    try:
+        provider = MultiSourceDataProvider()
+        prices = provider.get_crypto_coingecko(symbol, currency, days)
+        
+        # Convert to DataFrame for backward compatibility
+        if prices:
+            import pandas as pd
+            data = [{'date': p.date, 'close': p.close} for p in prices]
+            return pd.DataFrame(data)
+        return pd.DataFrame()
+    except Exception as e:
+        logger.error(f"Error fetching from CoinGecko: {e}")
+        return pd.DataFrame()

@@ -192,40 +192,27 @@ class PaperBroker(BrokerAPI):
 
     async def get_market_data(self, symbol: str) -> MarketData:
         base_price = 100.0
-        if 'BTC' in symbol:
+        if "BTC" in symbol:
             base_price = 50000.0
-        elif 'ETH' in symbol:
+        elif "ETH" in symbol:
             base_price = 3000.0
-        elif 'AAPL' in symbol:
+        elif "AAPL" in symbol:
             base_price = 175.0
-        elif 'EURUSD' in symbol:
+        elif "EURUSD" in symbol:
             base_price = 1.08
 
         variation = np.random.uniform(-0.02, 0.02)
         price = base_price * (1 + variation)
         spread = price * 0.0005
 
-        return MarketData(
-            symbol=symbol,
-            price=price,
-            bid=price - spread,
-            ask=price + spread,
-            volume=np.random.uniform(100000, 1000000),
-            timestamp=datetime.now(),
-            broker=self.broker_type
-        )
+        return MarketData(symbol=symbol, price=price, bid=price - spread, ask=price + spread, volume=np.random.uniform(100000, 1000000), timestamp=datetime.now(), broker=self.broker_type)
 
     async def get_balance(self) -> AccountBalance:
         portfolio_value = self.balance
         for pos in self.positions.values():
             portfolio_value += pos.market_value
 
-        return AccountBalance(
-            cash=self.balance,
-            buying_power=self.balance * 2,
-            portfolio_value=portfolio_value,
-            broker=self.broker_type
-        )
+        return AccountBalance(cash=self.balance, buying_power=self.balance * 2, portfolio_value=portfolio_value, broker=self.broker_type)
 
     async def get_positions(self) -> Dict[str, Position]:
         return self.positions.copy()
@@ -251,15 +238,7 @@ class PaperBroker(BrokerAPI):
                 pos.avg_price = new_avg
                 pos.market_value = new_qty * market_data.price
             else:
-                self.positions[order.symbol] = Position(
-                    symbol=order.symbol,
-                    quantity=order.quantity,
-                    avg_price=execution_price,
-                    side=PositionSide.LONG,
-                    market_value=order.quantity * execution_price,
-                    unrealized_pnl=0.0,
-                    broker=self.broker_type
-                )
+                self.positions[order.symbol] = Position(symbol=order.symbol, quantity=order.quantity, avg_price=execution_price, side=PositionSide.LONG, market_value=order.quantity * execution_price, unrealized_pnl=0.0, broker=self.broker_type)
         else:
             if order.symbol not in self.positions:
                 raise ValueError(f"No position in {order.symbol}")
@@ -274,19 +253,7 @@ class PaperBroker(BrokerAPI):
             if pos.quantity <= 0:
                 del self.positions[order.symbol]
 
-        order_response = OrderResponse(
-            order_id=order_id,
-            symbol=order.symbol,
-            side=order.side,
-            order_type=order.order_type,
-            quantity=order.quantity,
-            filled_quantity=order.quantity,
-            price=execution_price,
-            status="filled",
-            broker=self.broker_type,
-            created_at=datetime.now(),
-            filled_at=datetime.now()
-        )
+        order_response = OrderResponse(order_id=order_id, symbol=order.symbol, side=order.side, order_type=order.order_type, quantity=order.quantity, filled_quantity=order.quantity, price=execution_price, status="filled", broker=self.broker_type, created_at=datetime.now(), filled_at=datetime.now())
 
         self.orders[order_id] = order_response
         logger.info(f"✅ Paper order filled: {order.side.value} {order.quantity} {order.symbol} @ ${execution_price:.2f}")
@@ -324,10 +291,7 @@ class AlpacaBroker(BrokerAPI):
 
     async def connect(self) -> bool:
         try:
-            headers = {
-                "APCA-API-KEY-ID": self.api_key,
-                "APCA-API-SECRET-KEY": self.secret_key
-            }
+            headers = {"APCA-API-KEY-ID": self.api_key, "APCA-API-SECRET-KEY": self.secret_key}
 
             self.session = aiohttp.ClientSession(headers=headers)
 
@@ -349,35 +313,19 @@ class AlpacaBroker(BrokerAPI):
         self.connected = False
 
     async def get_market_data(self, symbol: str) -> MarketData:
-        headers = {
-            "APCA-API-KEY-ID": self.api_key,
-            "APCA-API-SECRET-KEY": self.secret_key
-        }
+        headers = {"APCA-API-KEY-ID": self.api_key, "APCA-API-SECRET-KEY": self.secret_key}
 
         data_url = f"https://data.alpaca.markets/v2/stocks/{symbol}/quotes/latest"
         async with self.session.get(data_url, headers=headers) as resp:
             data = await resp.json()
 
-        return MarketData(
-            symbol=symbol,
-            price=(float(data['quote']['ap']) + float(data['quote']['bp'])) / 2,
-            bid=float(data['quote']['bp']),
-            ask=float(data['quote']['ap']),
-            volume=0,
-            timestamp=datetime.now(),
-            broker=self.broker_type
-        )
+        return MarketData(symbol=symbol, price=(float(data["quote"]["ap"]) + float(data["quote"]["bp"])) / 2, bid=float(data["quote"]["bp"]), ask=float(data["quote"]["ap"]), volume=0, timestamp=datetime.now(), broker=self.broker_type)
 
     async def get_balance(self) -> AccountBalance:
         async with self.session.get(f"{self.trading_url}/account") as resp:
             data = await resp.json()
 
-        return AccountBalance(
-            cash=float(data['cash']),
-            buying_power=float(data['buying_power']),
-            portfolio_value=float(data['portfolio_value']),
-            broker=self.broker_type
-        )
+        return AccountBalance(cash=float(data["cash"]), buying_power=float(data["buying_power"]), portfolio_value=float(data["portfolio_value"]), broker=self.broker_type)
 
     async def get_positions(self) -> Dict[str, Position]:
         async with self.session.get(f"{self.trading_url}/positions") as resp:
@@ -385,50 +333,33 @@ class AlpacaBroker(BrokerAPI):
 
         positions = {}
         for pos in data:
-            side = PositionSide.LONG if float(pos['qty']) > 0 else PositionSide.SHORT
-            positions[pos['symbol']] = Position(
-                symbol=pos['symbol'],
-                quantity=abs(float(pos['qty'])),
-                avg_price=float(pos['avg_entry_price']),
-                side=side,
-                market_value=float(pos['market_value']),
-                unrealized_pnl=float(pos['unrealized_pl']),
-                broker=self.broker_type
-            )
+            side = PositionSide.LONG if float(pos["qty"]) > 0 else PositionSide.SHORT
+            positions[pos["symbol"]] = Position(symbol=pos["symbol"], quantity=abs(float(pos["qty"])), avg_price=float(pos["avg_entry_price"]), side=side, market_value=float(pos["market_value"]), unrealized_pnl=float(pos["unrealized_pl"]), broker=self.broker_type)
         return positions
 
     async def place_order(self, order: OrderRequest) -> OrderResponse:
-        order_data = {
-            "symbol": order.symbol,
-            "qty": str(order.quantity),
-            "side": order.side.value.upper(),
-            "type": order.order_type.value,
-            "time_in_force": order.time_in_force.value
-        }
+        order_data = {"symbol": order.symbol, "qty": str(order.quantity), "side": order.side.value.upper(), "type": order.order_type.value, "time_in_force": order.time_in_force.value}
 
         if order.price:
             order_data["limit_price"] = str(order.price)
         if order.stop_price:
             order_data["stop_price"] = str(order.stop_price)
 
-        async with self.session.post(
-            f"{self.trading_url}/orders",
-            json=order_data
-        ) as resp:
+        async with self.session.post(f"{self.trading_url}/orders", json=order_data) as resp:
             data = await resp.json()
 
         return OrderResponse(
-            order_id=data['id'],
-            symbol=data['symbol'],
-            side=OrderSide(data['side'].lower()),
-            order_type=OrderType(data['type'].lower()),
-            quantity=float(data['qty']),
-            filled_quantity=float(data['filled_qty']),
-            price=float(data.get('limit_price', 0)),
-            status=data['status'],
+            order_id=data["id"],
+            symbol=data["symbol"],
+            side=OrderSide(data["side"].lower()),
+            order_type=OrderType(data["type"].lower()),
+            quantity=float(data["qty"]),
+            filled_quantity=float(data["filled_qty"]),
+            price=float(data.get("limit_price", 0)),
+            status=data["status"],
             broker=self.broker_type,
-            created_at=datetime.fromisoformat(data['created_at'].replace('Z', '+00:00')),
-            filled_at=datetime.fromisoformat(data['filled_at'].replace('Z', '+00:00')) if data.get('filled_at') else None
+            created_at=datetime.fromisoformat(data["created_at"].replace("Z", "+00:00")),
+            filled_at=datetime.fromisoformat(data["filled_at"].replace("Z", "+00:00")) if data.get("filled_at") else None,
         )
 
     async def cancel_order(self, order_id: str) -> bool:
@@ -441,18 +372,18 @@ class AlpacaBroker(BrokerAPI):
 
         orders = {}
         for o in data:
-            orders[o['id']] = OrderResponse(
-                order_id=o['id'],
-                symbol=o['symbol'],
-                side=OrderSide(o['side'].lower()),
-                order_type=OrderType(o['type'].lower()),
-                quantity=float(o['qty']),
-                filled_quantity=float(o['filled_qty']),
-                price=float(o.get('limit_price', 0)),
-                status=o['status'],
+            orders[o["id"]] = OrderResponse(
+                order_id=o["id"],
+                symbol=o["symbol"],
+                side=OrderSide(o["side"].lower()),
+                order_type=OrderType(o["type"].lower()),
+                quantity=float(o["qty"]),
+                filled_quantity=float(o["filled_qty"]),
+                price=float(o.get("limit_price", 0)),
+                status=o["status"],
                 broker=self.broker_type,
-                created_at=datetime.fromisoformat(o['created_at'].replace('Z', '+00:00')),
-                filled_at=datetime.fromisoformat(o['filled_at'].replace('Z', '+00:00')) if o.get('filled_at') else None
+                created_at=datetime.fromisoformat(o["created_at"].replace("Z", "+00:00")),
+                filled_at=datetime.fromisoformat(o["filled_at"].replace("Z", "+00:00")) if o.get("filled_at") else None,
             )
         return orders
 
@@ -479,11 +410,7 @@ class BinanceBroker(BrokerAPI):
             return params
 
         query_string = "&".join([f"{k}={v}" for k, v in sorted(params.items())])
-        signature = hmac.new(
-            self.secret_key.encode('utf-8'),
-            query_string.encode('utf-8'),
-            hashlib.sha256
-        ).hexdigest()
+        signature = hmac.new(self.secret_key.encode("utf-8"), query_string.encode("utf-8"), hashlib.sha256).hexdigest()
 
         params["signature"] = signature
         return params
@@ -509,34 +436,16 @@ class BinanceBroker(BrokerAPI):
             async with session.get(f"{self.base_url}/ticker/bookTicker", params={"symbol": symbol}) as resp:
                 data = await resp.json()
 
-        return MarketData(
-            symbol=symbol,
-            price=(float(data['bidPrice']) + float(data['askPrice'])) / 2,
-            bid=float(data['bidPrice']),
-            ask=float(data['askPrice']),
-            volume=0,
-            timestamp=datetime.now(),
-            broker=self.broker_type
-        )
+        return MarketData(symbol=symbol, price=(float(data["bidPrice"]) + float(data["askPrice"])) / 2, bid=float(data["bidPrice"]), ask=float(data["askPrice"]), volume=0, timestamp=datetime.now(), broker=self.broker_type)
 
     async def get_balance(self) -> AccountBalance:
-        return AccountBalance(
-            cash=0,
-            buying_power=0,
-            portfolio_value=0,
-            broker=self.broker_type
-        )
+        return AccountBalance(cash=0, buying_power=0, portfolio_value=0, broker=self.broker_type)
 
     async def get_positions(self) -> Dict[str, Position]:
         return {}
 
     async def place_order(self, order: OrderRequest) -> OrderResponse:
-        params = {
-            "symbol": order.symbol,
-            "side": order.side.value.upper(),
-            "type": order.order_type.value.upper(),
-            "quantity": int(order.quantity)
-        }
+        params = {"symbol": order.symbol, "side": order.side.value.upper(), "type": order.order_type.value.upper(), "quantity": int(order.quantity)}
 
         if order.order_type == OrderType.LIMIT:
             params["price"] = int(order.price)
@@ -550,17 +459,17 @@ class BinanceBroker(BrokerAPI):
                 data = await resp.json()
 
         return OrderResponse(
-            order_id=str(data['orderId']),
-            symbol=data['symbol'],
-            side=OrderSide(data['side'].lower()),
-            order_type=OrderType(data['type'].lower()),
-            quantity=float(data['origQty']),
-            filled_quantity=float(data['executedQty']),
-            price=float(data.get('price', 0)),
-            status=data['status'].lower(),
+            order_id=str(data["orderId"]),
+            symbol=data["symbol"],
+            side=OrderSide(data["side"].lower()),
+            order_type=OrderType(data["type"].lower()),
+            quantity=float(data["origQty"]),
+            filled_quantity=float(data["executedQty"]),
+            price=float(data.get("price", 0)),
+            status=data["status"].lower(),
             broker=self.broker_type,
-            created_at=datetime.fromtimestamp(data['transactTime'] / 1000),
-            filled_at=datetime.fromtimestamp(data['transactTime'] / 1000) if data['status'] == 'FILLED' else None
+            created_at=datetime.fromtimestamp(data["transactTime"] / 1000),
+            filled_at=datetime.fromtimestamp(data["transactTime"] / 1000) if data["status"] == "FILLED" else None,
         )
 
     async def cancel_order(self, order_id: str) -> bool:
@@ -594,62 +503,34 @@ class CCXTBroker(BrokerAPI):
 
     def _get_exchange(self):
         import ccxt
+
         exchange_class = getattr(ccxt, self.exchange_name)
-        return exchange_class({
-            'enableRateLimit': True,
-        })
+        return exchange_class(
+            {
+                "enableRateLimit": True,
+            }
+        )
 
     async def disconnect(self):
         self.connected = False
 
     async def get_market_data(self, symbol: str) -> MarketData:
         ticker = await self._exchange.fetch_ticker(symbol)
-        return MarketData(
-            symbol=symbol,
-            price=ticker['last'],
-            bid=ticker['bid'] or ticker['last'],
-            ask=ticker['ask'] or ticker['last'],
-            volume=ticker['baseVolume'],
-            timestamp=datetime.fromtimestamp(ticker['timestamp'] / 1000),
-            broker=self.broker_type
-        )
+        return MarketData(symbol=symbol, price=ticker["last"], bid=ticker["bid"] or ticker["last"], ask=ticker["ask"] or ticker["last"], volume=ticker["baseVolume"], timestamp=datetime.fromtimestamp(ticker["timestamp"] / 1000), broker=self.broker_type)
 
     async def get_balance(self) -> AccountBalance:
         balance = await self._exchange.fetch_balance()
-        total = balance.get('total', {})
+        total = balance.get("total", {})
 
-        return AccountBalance(
-            cash=total.get('USDT', 0),
-            buying_power=total.get('USDT', 0),
-            portfolio_value=sum(total.values()),
-            broker=self.broker_type
-        )
+        return AccountBalance(cash=total.get("USDT", 0), buying_power=total.get("USDT", 0), portfolio_value=sum(total.values()), broker=self.broker_type)
 
     async def get_positions(self) -> Dict[str, Position]:
         return {}
 
     async def place_order(self, order: OrderRequest) -> OrderResponse:
-        result = await self._exchange.create_order(
-            symbol=order.symbol,
-            type=order.order_type.value,
-            side=order.side.value,
-            amount=order.quantity,
-            price=order.price
-        )
+        result = await self._exchange.create_order(symbol=order.symbol, type=order.order_type.value, side=order.side.value, amount=order.quantity, price=order.price)
 
-        return OrderResponse(
-            order_id=result['id'],
-            symbol=result['symbol'],
-            side=OrderSide(result['side']),
-            order_type=OrderType(result['type']),
-            quantity=float(result['amount']),
-            filled_quantity=float(result.get('filled', 0)),
-            price=float(result.get('price', 0)),
-            status=result['status'],
-            broker=self.broker_type,
-            created_at=datetime.fromtimestamp(result['timestamp'] / 1000),
-            filled_at=datetime.now()
-        )
+        return OrderResponse(order_id=result["id"], symbol=result["symbol"], side=OrderSide(result["side"]), order_type=OrderType(result["type"]), quantity=float(result["amount"]), filled_quantity=float(result.get("filled", 0)), price=float(result.get("price", 0)), status=result["status"], broker=self.broker_type, created_at=datetime.fromtimestamp(result["timestamp"] / 1000), filled_at=datetime.now())
 
     async def cancel_order(self, order_id: str) -> bool:
         return True
@@ -692,7 +573,7 @@ class FreeBrokerGateway:
             await broker.disconnect()
 
     async def get_best_broker(self, symbol: str) -> BrokerAPI:
-        if 'BTC' in symbol or 'ETH' in symbol or 'USDT' in symbol:
+        if "BTC" in symbol or "ETH" in symbol or "USDT" in symbol:
             if BrokerType.CCXT in self.brokers:
                 return self.brokers[BrokerType.CCXT]
             if BrokerType.BINANCE in self.brokers:
@@ -712,12 +593,7 @@ class FreeBrokerGateway:
         positions = await broker.get_positions()
         orders = await broker.get_orders()
 
-        return Account(
-            balance=balance,
-            positions=positions,
-            orders=orders,
-            broker=broker.broker_type
-        )
+        return Account(balance=balance, positions=positions, orders=orders, broker=broker.broker_type)
 
     async def get_all_accounts(self) -> List[Account]:
         accounts = []
@@ -732,8 +608,8 @@ def create_broker(broker_type: BrokerType, **kwargs) -> BrokerAPI:
     """Factory function to create broker instances"""
     brokers = {
         BrokerType.PAPER: PaperBroker,
-        BrokerType.ALPACA: lambda: AlpacaBroker(kwargs.get('api_key'), kwargs.get('secret_key'), kwargs.get('paper', True)),
-        BrokerType.BINANCE: lambda: BinanceBroker(kwargs.get('api_key'), kwargs.get('secret_key'), kwargs.get('testnet', True)),
-        BrokerType.CCXT: lambda: CCXTBroker(kwargs.get('exchange', 'binance')),
+        BrokerType.ALPACA: lambda: AlpacaBroker(kwargs.get("api_key"), kwargs.get("secret_key"), kwargs.get("paper", True)),
+        BrokerType.BINANCE: lambda: BinanceBroker(kwargs.get("api_key"), kwargs.get("secret_key"), kwargs.get("testnet", True)),
+        BrokerType.CCXT: lambda: CCXTBroker(kwargs.get("exchange", "binance")),
     }
     return brokers.get(broker_type, PaperBroker)()

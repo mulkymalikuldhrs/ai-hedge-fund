@@ -39,10 +39,7 @@ from datetime import datetime, timedelta
 from abc import ABC, abstractmethod
 import logging
 
-from config import (
-    MarketData, CashFlow, Performance, AssetParameters, AssetClass,
-    Constants, Config, ValidationRules
-)
+from config import MarketData, CashFlow, Performance, AssetParameters, AssetClass, Constants, Config, ValidationRules
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +48,7 @@ class FinancialMath:
     """Core financial mathematics functions following CFA standards"""
 
     @staticmethod
-    def irr(cash_flows: List[CashFlow], guess: Decimal = Decimal('0.10')) -> Optional[Decimal]:
+    def irr(cash_flows: List[CashFlow], guess: Decimal = Decimal("0.10")) -> Optional[Decimal]:
         """
         Calculate Internal Rate of Return using Newton-Raphson method
         CFA Standard: IRR is the discount rate that makes NPV = 0
@@ -70,7 +67,7 @@ class FinancialMath:
         sorted_cfs = sorted(cash_flows, key=lambda x: x.date)
 
         # Convert to numpy arrays for calculation
-        dates = [datetime.strptime(cf.date, '%Y-%m-%d') for cf in sorted_cfs]
+        dates = [datetime.strptime(cf.date, "%Y-%m-%d") for cf in sorted_cfs]
         amounts = [float(cf.amount) for cf in sorted_cfs]
 
         # Calculate days from first cash flow
@@ -81,8 +78,7 @@ class FinancialMath:
             return sum(amount / (1 + rate) ** (day / 365.25) for amount, day in zip(amounts, days))
 
         def npv_derivative(rate):
-            return sum(-amount * (day / 365.25) / (1 + rate) ** ((day / 365.25) + 1)
-                       for amount, day in zip(amounts, days))
+            return sum(-amount * (day / 365.25) / (1 + rate) ** ((day / 365.25) + 1) for amount, day in zip(amounts, days))
 
         rate = float(guess)
         for _ in range(Config.PE_IRR_MAX_ITERATIONS):
@@ -112,16 +108,16 @@ class FinancialMath:
             NPV value
         """
         if not cash_flows:
-            return Decimal('0')
+            return Decimal("0")
 
         sorted_cfs = sorted(cash_flows, key=lambda x: x.date)
-        base_date = datetime.strptime(sorted_cfs[0].date, '%Y-%m-%d')
+        base_date = datetime.strptime(sorted_cfs[0].date, "%Y-%m-%d")
 
-        npv_value = Decimal('0')
+        npv_value = Decimal("0")
         for cf in sorted_cfs:
-            cf_date = datetime.strptime(cf.date, '%Y-%m-%d')
+            cf_date = datetime.strptime(cf.date, "%Y-%m-%d")
             years = Decimal(str((cf_date - base_date).days)) / Constants.DAYS_IN_YEAR
-            present_value = cf.amount / ((Decimal('1') + discount_rate) ** years)
+            present_value = cf.amount / ((Decimal("1") + discount_rate) ** years)
             npv_value += present_value
 
         return npv_value
@@ -138,8 +134,8 @@ class FinancialMath:
         Returns:
             MOIC as decimal multiple
         """
-        total_invested = Decimal('0')
-        total_distributed = Decimal('0')
+        total_invested = Decimal("0")
+        total_distributed = Decimal("0")
 
         for cf in cash_flows:
             if cf.amount < 0:  # Investment/contribution
@@ -164,17 +160,17 @@ class FinancialMath:
         Returns:
             DPI ratio
         """
-        total_paid_in = Decimal('0')
-        total_distributions = Decimal('0')
+        total_paid_in = Decimal("0")
+        total_distributions = Decimal("0")
 
         for cf in cash_flows:
-            if cf.cf_type in ['capital_call', 'investment'] or cf.amount < 0:
+            if cf.cf_type in ["capital_call", "investment"] or cf.amount < 0:
                 total_paid_in += abs(cf.amount)
-            elif cf.cf_type == 'distribution' or cf.amount > 0:
+            elif cf.cf_type == "distribution" or cf.amount > 0:
                 total_distributions += cf.amount
 
         if total_paid_in == 0:
-            return Decimal('0')
+            return Decimal("0")
 
         return total_distributions / total_paid_in
 
@@ -191,14 +187,14 @@ class FinancialMath:
         Returns:
             RVPI ratio
         """
-        total_paid_in = Decimal('0')
+        total_paid_in = Decimal("0")
 
         for cf in cash_flows:
-            if cf.cf_type in ['capital_call', 'investment'] or cf.amount < 0:
+            if cf.cf_type in ["capital_call", "investment"] or cf.amount < 0:
                 total_paid_in += abs(cf.amount)
 
         if total_paid_in == 0:
-            return Decimal('0')
+            return Decimal("0")
 
         return current_nav / total_paid_in
 
@@ -216,7 +212,7 @@ class FinancialMath:
             Sharpe ratio
         """
         if len(returns) < 2:
-            return Decimal('0')
+            return Decimal("0")
 
         if risk_free_rate is None:
             risk_free_rate = Config.RISK_FREE_RATE / Constants.MONTHS_IN_YEAR  # Monthly rate
@@ -225,18 +221,18 @@ class FinancialMath:
         mean_excess = sum(excess_returns) / len(excess_returns)
 
         if len(excess_returns) == 1:
-            return Decimal('0')
+            return Decimal("0")
 
         variance = sum((r - mean_excess) ** 2 for r in excess_returns) / (len(excess_returns) - 1)
         std_dev = variance.sqrt()
 
         if std_dev == 0:
-            return Decimal('0')
+            return Decimal("0")
 
         return mean_excess / std_dev
 
     @staticmethod
-    def sortino_ratio(returns: List[Decimal], target_return: Decimal = Decimal('0')) -> Decimal:
+    def sortino_ratio(returns: List[Decimal], target_return: Decimal = Decimal("0")) -> Decimal:
         """
         Calculate Sortino Ratio
         CFA Standard: (Portfolio Return - Target Return) / Downside Deviation
@@ -249,7 +245,7 @@ class FinancialMath:
             Sortino ratio
         """
         if len(returns) < 2:
-            return Decimal('0')
+            return Decimal("0")
 
         excess_returns = [r - target_return for r in returns]
         mean_excess = sum(excess_returns) / len(excess_returns)
@@ -258,13 +254,13 @@ class FinancialMath:
         downside_returns = [r for r in excess_returns if r < 0]
 
         if not downside_returns:
-            return Decimal('999')  # No downside risk
+            return Decimal("999")  # No downside risk
 
-        downside_variance = sum(r ** 2 for r in downside_returns) / len(returns)
+        downside_variance = sum(r**2 for r in downside_returns) / len(returns)
         downside_deviation = downside_variance.sqrt()
 
         if downside_deviation == 0:
-            return Decimal('0')
+            return Decimal("0")
 
         return mean_excess / downside_deviation
 
@@ -281,9 +277,9 @@ class FinancialMath:
             Tuple of (max_drawdown, peak_index, trough_index)
         """
         if len(prices) < 2:
-            return Decimal('0'), 0, 0
+            return Decimal("0"), 0, 0
 
-        max_dd = Decimal('0')
+        max_dd = Decimal("0")
         peak_idx = 0
         trough_idx = 0
         current_peak = prices[0]
@@ -303,7 +299,7 @@ class FinancialMath:
         return max_dd, peak_idx, trough_idx
 
     @staticmethod
-    def var_historical(returns: List[Decimal], confidence_level: Decimal = Decimal('0.05')) -> Decimal:
+    def var_historical(returns: List[Decimal], confidence_level: Decimal = Decimal("0.05")) -> Decimal:
         """
         Calculate Historical Value at Risk
         CFA Standard: Historical simulation method
@@ -316,7 +312,7 @@ class FinancialMath:
             VaR value (positive number representing loss)
         """
         if not returns:
-            return Decimal('0')
+            return Decimal("0")
 
         sorted_returns = sorted(returns)
         index = int(len(sorted_returns) * confidence_level)
@@ -340,7 +336,7 @@ class FinancialMath:
             Calmar ratio
         """
         if max_drawdown == 0:
-            return Decimal('999')  # No drawdown
+            return Decimal("999")  # No drawdown
 
         return annual_return / max_drawdown
 
@@ -363,17 +359,11 @@ class AlternativeInvestmentBase(ABC):
     def _validate_parameters(self) -> None:
         """Validate asset parameters"""
         if self.parameters.management_fee:
-            if not ValidationRules.validate_management_fee(
-                    self.parameters.management_fee,
-                    self.parameters.asset_class
-            ):
+            if not ValidationRules.validate_management_fee(self.parameters.management_fee, self.parameters.asset_class):
                 raise ValueError(f"Invalid management fee: {self.parameters.management_fee}")
 
         if self.parameters.performance_fee:
-            if not ValidationRules.validate_performance_fee(
-                    self.parameters.performance_fee,
-                    self.parameters.asset_class
-            ):
+            if not ValidationRules.validate_performance_fee(self.parameters.performance_fee, self.parameters.asset_class):
                 raise ValueError(f"Invalid performance fee: {self.parameters.performance_fee}")
 
     def add_market_data(self, data: List[MarketData]) -> None:
@@ -438,7 +428,7 @@ class AlternativeInvestmentBase(ABC):
             returns = self.calculate_simple_returns()
 
         if len(returns) < 2:
-            return Decimal('0')
+            return Decimal("0")
 
         mean_return = sum(returns) / len(returns)
         variance = sum((r - mean_return) ** 2 for r in returns) / (len(returns) - 1)
@@ -455,7 +445,7 @@ class AlternativeInvestmentBase(ABC):
         price_data = self.get_price_history(start_date, end_date)
 
         if len(price_data) < 2:
-            return Decimal('0')
+            return Decimal("0")
 
         # Price appreciation
         start_price = price_data[0].price
@@ -481,17 +471,17 @@ class AlternativeInvestmentBase(ABC):
         # Management fee
         if self.parameters.management_fee:
             mgmt_fee = nav * self.parameters.management_fee * (Decimal(str(period_days)) / Constants.DAYS_IN_YEAR)
-            fees['management_fee'] = mgmt_fee
+            fees["management_fee"] = mgmt_fee
 
         # Performance fee (simplified - would need high water mark tracking)
         if self.parameters.performance_fee:
             # This is a simplified calculation
             returns = self.calculate_simple_returns()
             if returns:
-                excess_return = sum(returns) - (self.parameters.hurdle_rate or Decimal('0'))
+                excess_return = sum(returns) - (self.parameters.hurdle_rate or Decimal("0"))
                 if excess_return > 0:
                     perf_fee = nav * excess_return * self.parameters.performance_fee
-                    fees['performance_fee'] = perf_fee
+                    fees["performance_fee"] = perf_fee
 
         return fees
 
@@ -524,22 +514,12 @@ class AlternativeInvestmentBase(ABC):
         prices = [md.price for md in self.market_data]
         max_dd, peak_idx, trough_idx = self.math.maximum_drawdown(prices)
 
-        var_95 = self.math.var_historical(returns, Decimal('0.05'))
+        var_95 = self.math.var_historical(returns, Decimal("0.05"))
 
         total_return = self.calculate_total_return()
 
-        return {
-            'total_return': float(total_return),
-            'annualized_return': float(total_return * Constants.DAYS_IN_YEAR / len(self.market_data)),
-            'volatility': float(volatility),
-            'sharpe_ratio': float(sharpe),
-            'sortino_ratio': float(sortino),
-            'maximum_drawdown': float(max_dd),
-            'var_95': float(var_95),
-            'number_of_observations': len(returns),
-            'latest_price': float(self.get_latest_price() or 0)
-        }
+        return {"total_return": float(total_return), "annualized_return": float(total_return * Constants.DAYS_IN_YEAR / len(self.market_data)), "volatility": float(volatility), "sharpe_ratio": float(sharpe), "sortino_ratio": float(sortino), "maximum_drawdown": float(max_dd), "var_95": float(var_95), "number_of_observations": len(returns), "latest_price": float(self.get_latest_price() or 0)}
 
 
 # Export main components
-__all__ = ['FinancialMath', 'AlternativeInvestmentBase']
+__all__ = ["FinancialMath", "AlternativeInvestmentBase"]

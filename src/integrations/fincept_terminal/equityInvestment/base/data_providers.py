@@ -1,4 +1,3 @@
-
 """Equity Investment Data Providers Module
 ======================================
 
@@ -28,7 +27,6 @@ PARAMETERS:
 """
 
 
-
 import pandas as pd
 import numpy as np
 import yfinance as yf
@@ -40,12 +38,9 @@ from datetime import datetime, timedelta
 from abc import ABC, abstractmethod
 import warnings
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
-from .base_models import (
-    DataProvider, CompanyData, MarketData, SecurityType,
-    DataProviderError, FinceptAnalyticsError
-)
+from .base_models import DataProvider, CompanyData, MarketData, SecurityType, DataProviderError, FinceptAnalyticsError
 
 
 class YahooFinanceProvider(DataProvider):
@@ -62,59 +57,48 @@ class YahooFinanceProvider(DataProvider):
             info = ticker.info
 
             # Get current price and basic info
-            current_price = info.get('currentPrice') or info.get('regularMarketPrice', 0)
-            shares_outstanding = info.get('sharesOutstanding', 0)
-            market_cap = info.get('marketCap', current_price * shares_outstanding)
+            current_price = info.get("currentPrice") or info.get("regularMarketPrice", 0)
+            shares_outstanding = info.get("sharesOutstanding", 0)
+            market_cap = info.get("marketCap", current_price * shares_outstanding)
 
             # Financial data extraction
             financial_data = {
-                'revenue': info.get('totalRevenue', 0),
-                'net_income': info.get('netIncomeToCommon', 0),
-                'total_assets': info.get('totalAssets', 0),
-                'total_debt': info.get('totalDebt', 0),
-                'book_value': info.get('bookValue', 0),
-                'earnings_per_share': info.get('trailingEps', 0),
-                'dividend_per_share': info.get('dividendRate', 0),
-                'roe': info.get('returnOnEquity', 0),
-                'roa': info.get('returnOnAssets', 0),
-                'profit_margin': info.get('profitMargins', 0),
-                'debt_to_equity': info.get('debtToEquity', 0),
-                'current_ratio': info.get('currentRatio', 0),
-                'quick_ratio': info.get('quickRatio', 0),
-                'ebitda': info.get('ebitda', 0),
-                'free_cash_flow': info.get('freeCashflow', 0),
-                'operating_cash_flow': info.get('operatingCashflow', 0)
+                "revenue": info.get("totalRevenue", 0),
+                "net_income": info.get("netIncomeToCommon", 0),
+                "total_assets": info.get("totalAssets", 0),
+                "total_debt": info.get("totalDebt", 0),
+                "book_value": info.get("bookValue", 0),
+                "earnings_per_share": info.get("trailingEps", 0),
+                "dividend_per_share": info.get("dividendRate", 0),
+                "roe": info.get("returnOnEquity", 0),
+                "roa": info.get("returnOnAssets", 0),
+                "profit_margin": info.get("profitMargins", 0),
+                "debt_to_equity": info.get("debtToEquity", 0),
+                "current_ratio": info.get("currentRatio", 0),
+                "quick_ratio": info.get("quickRatio", 0),
+                "ebitda": info.get("ebitda", 0),
+                "free_cash_flow": info.get("freeCashflow", 0),
+                "operating_cash_flow": info.get("operatingCashflow", 0),
             }
 
             # Market data extraction
             market_data = {
-                'beta': info.get('beta', 1.0),
-                'pe_ratio': info.get('trailingPE', 0),
-                'forward_pe': info.get('forwardPE', 0),
-                'pb_ratio': info.get('priceToBook', 0),
-                'ps_ratio': info.get('priceToSalesTrailing12Months', 0),
-                'peg_ratio': info.get('pegRatio', 0),
-                'dividend_yield': info.get('dividendYield', 0),
-                'revenue_growth': info.get('revenueGrowth', 0),
-                'earnings_growth': info.get('earningsGrowth', 0),
-                '52_week_high': info.get('fiftyTwoWeekHigh', 0),
-                '52_week_low': info.get('fiftyTwoWeekLow', 0),
-                'average_volume': info.get('averageVolume', 0),
-                'float_shares': info.get('floatShares', shares_outstanding)
+                "beta": info.get("beta", 1.0),
+                "pe_ratio": info.get("trailingPE", 0),
+                "forward_pe": info.get("forwardPE", 0),
+                "pb_ratio": info.get("priceToBook", 0),
+                "ps_ratio": info.get("priceToSalesTrailing12Months", 0),
+                "peg_ratio": info.get("pegRatio", 0),
+                "dividend_yield": info.get("dividendYield", 0),
+                "revenue_growth": info.get("revenueGrowth", 0),
+                "earnings_growth": info.get("earningsGrowth", 0),
+                "52_week_high": info.get("fiftyTwoWeekHigh", 0),
+                "52_week_low": info.get("fiftyTwoWeekLow", 0),
+                "average_volume": info.get("averageVolume", 0),
+                "float_shares": info.get("floatShares", shares_outstanding),
             }
 
-            return CompanyData(
-                symbol=symbol.upper(),
-                name=info.get('longName', symbol),
-                sector=info.get('sector', 'Unknown'),
-                industry=info.get('industry', 'Unknown'),
-                market_cap=market_cap,
-                shares_outstanding=shares_outstanding,
-                current_price=current_price,
-                financial_data=financial_data,
-                market_data=market_data,
-                last_updated=datetime.now()
-            )
+            return CompanyData(symbol=symbol.upper(), name=info.get("longName", symbol), sector=info.get("sector", "Unknown"), industry=info.get("industry", "Unknown"), market_cap=market_cap, shares_outstanding=shares_outstanding, current_price=current_price, financial_data=financial_data, market_data=market_data, last_updated=datetime.now())
 
         except Exception as e:
             raise DataProviderError(f"Failed to retrieve company data for {symbol}: {str(e)}")
@@ -127,21 +111,14 @@ class YahooFinanceProvider(DataProvider):
 
             # Get risk-free rate (10-year Treasury)
             treasury = yf.Ticker("^TNX")
-            risk_free_rate = treasury.history(period="1d")['Close'].iloc[-1] / 100
+            risk_free_rate = treasury.history(period="1d")["Close"].iloc[-1] / 100
 
             # Get market return (S&P 500 annual return)
             sp500 = yf.Ticker("^GSPC")
             sp500_data = sp500.history(period="1y")
-            market_return = (sp500_data['Close'].iloc[-1] / sp500_data['Close'].iloc[0] - 1)
+            market_return = sp500_data["Close"].iloc[-1] / sp500_data["Close"].iloc[0] - 1
 
-            return MarketData(
-                risk_free_rate=risk_free_rate,
-                market_return=market_return,
-                beta=info.get('beta', 1.0),
-                dividend_yield=info.get('dividendYield', 0),
-                growth_rate=info.get('earningsGrowth', 0.03),  # Default 3% if not available
-                required_return=risk_free_rate + info.get('beta', 1.0) * (market_return - risk_free_rate)
-            )
+            return MarketData(risk_free_rate=risk_free_rate, market_return=market_return, beta=info.get("beta", 1.0), dividend_yield=info.get("dividendYield", 0), growth_rate=info.get("earningsGrowth", 0.03), required_return=risk_free_rate + info.get("beta", 1.0) * (market_return - risk_free_rate))  # Default 3% if not available
 
         except Exception as e:
             raise DataProviderError(f"Failed to retrieve market data for {symbol}: {str(e)}")
@@ -160,11 +137,7 @@ class YahooFinanceProvider(DataProvider):
                 balance_sheet = ticker.quarterly_balance_sheet
                 cash_flow = ticker.quarterly_cashflow
 
-            return {
-                'income_statement': income_stmt,
-                'balance_sheet': balance_sheet,
-                'cash_flow_statement': cash_flow
-            }
+            return {"income_statement": income_stmt, "balance_sheet": balance_sheet, "cash_flow_statement": cash_flow}
 
         except Exception as e:
             raise DataProviderError(f"Failed to retrieve financial statements for {symbol}: {str(e)}")
@@ -188,7 +161,7 @@ class AlphaVantageProvider(DataProvider):
 
     def _make_request(self, params: Dict[str, str]) -> Dict[str, Any]:
         """Make API request to Alpha Vantage"""
-        params['apikey'] = self.api_key
+        params["apikey"] = self.api_key
         response = requests.get(self.base_url, params=params)
         response.raise_for_status()
         return response.json()
@@ -197,57 +170,32 @@ class AlphaVantageProvider(DataProvider):
         """Retrieve company data from Alpha Vantage"""
         try:
             # Get company overview
-            overview_params = {
-                'function': 'OVERVIEW',
-                'symbol': symbol
-            }
+            overview_params = {"function": "OVERVIEW", "symbol": symbol}
             overview = self._make_request(overview_params)
 
             # Get quote data
-            quote_params = {
-                'function': 'GLOBAL_QUOTE',
-                'symbol': symbol
-            }
+            quote_params = {"function": "GLOBAL_QUOTE", "symbol": symbol}
             quote_data = self._make_request(quote_params)
-            quote = quote_data.get('Global Quote', {})
+            quote = quote_data.get("Global Quote", {})
 
-            current_price = float(quote.get('05. price', 0))
-            shares_outstanding = float(overview.get('SharesOutstanding', 0))
+            current_price = float(quote.get("05. price", 0))
+            shares_outstanding = float(overview.get("SharesOutstanding", 0))
 
             financial_data = {
-                'revenue': float(overview.get('RevenueTTM', 0)),
-                'net_income': float(overview.get('ProfitMargin', 0)) * float(overview.get('RevenueTTM', 0)),
-                'total_assets': 0,  # Not available in overview
-                'book_value': float(overview.get('BookValue', 0)),
-                'earnings_per_share': float(overview.get('EPS', 0)),
-                'dividend_per_share': float(overview.get('DividendPerShare', 0)),
-                'roe': float(overview.get('ReturnOnEquityTTM', 0)),
-                'profit_margin': float(overview.get('ProfitMargin', 0)),
-                'ebitda': float(overview.get('EBITDA', 0))
+                "revenue": float(overview.get("RevenueTTM", 0)),
+                "net_income": float(overview.get("ProfitMargin", 0)) * float(overview.get("RevenueTTM", 0)),
+                "total_assets": 0,  # Not available in overview
+                "book_value": float(overview.get("BookValue", 0)),
+                "earnings_per_share": float(overview.get("EPS", 0)),
+                "dividend_per_share": float(overview.get("DividendPerShare", 0)),
+                "roe": float(overview.get("ReturnOnEquityTTM", 0)),
+                "profit_margin": float(overview.get("ProfitMargin", 0)),
+                "ebitda": float(overview.get("EBITDA", 0)),
             }
 
-            market_data = {
-                'beta': float(overview.get('Beta', 1.0)),
-                'pe_ratio': float(overview.get('PERatio', 0)),
-                'pb_ratio': float(overview.get('PriceToBookRatio', 0)),
-                'peg_ratio': float(overview.get('PEGRatio', 0)),
-                'dividend_yield': float(overview.get('DividendYield', 0)),
-                '52_week_high': float(overview.get('52WeekHigh', 0)),
-                '52_week_low': float(overview.get('52WeekLow', 0))
-            }
+            market_data = {"beta": float(overview.get("Beta", 1.0)), "pe_ratio": float(overview.get("PERatio", 0)), "pb_ratio": float(overview.get("PriceToBookRatio", 0)), "peg_ratio": float(overview.get("PEGRatio", 0)), "dividend_yield": float(overview.get("DividendYield", 0)), "52_week_high": float(overview.get("52WeekHigh", 0)), "52_week_low": float(overview.get("52WeekLow", 0))}
 
-            return CompanyData(
-                symbol=symbol.upper(),
-                name=overview.get('Name', symbol),
-                sector=overview.get('Sector', 'Unknown'),
-                industry=overview.get('Industry', 'Unknown'),
-                market_cap=float(overview.get('MarketCapitalization', 0)),
-                shares_outstanding=shares_outstanding,
-                current_price=current_price,
-                financial_data=financial_data,
-                market_data=market_data,
-                last_updated=datetime.now()
-            )
+            return CompanyData(symbol=symbol.upper(), name=overview.get("Name", symbol), sector=overview.get("Sector", "Unknown"), industry=overview.get("Industry", "Unknown"), market_cap=float(overview.get("MarketCapitalization", 0)), shares_outstanding=shares_outstanding, current_price=current_price, financial_data=financial_data, market_data=market_data, last_updated=datetime.now())
 
         except Exception as e:
             raise DataProviderError(f"Failed to retrieve company data for {symbol}: {str(e)}")
@@ -257,20 +205,10 @@ class AlphaVantageProvider(DataProvider):
         # Implementation similar to Yahoo Finance but using Alpha Vantage API
         # For brevity, using simplified version
         try:
-            overview_params = {
-                'function': 'OVERVIEW',
-                'symbol': symbol
-            }
+            overview_params = {"function": "OVERVIEW", "symbol": symbol}
             overview = self._make_request(overview_params)
 
-            return MarketData(
-                risk_free_rate=0.05,  # Default values - would need Treasury API
-                market_return=0.10,
-                beta=float(overview.get('Beta', 1.0)),
-                dividend_yield=float(overview.get('DividendYield', 0)),
-                growth_rate=0.03,
-                required_return=0.08
-            )
+            return MarketData(risk_free_rate=0.05, market_return=0.10, beta=float(overview.get("Beta", 1.0)), dividend_yield=float(overview.get("DividendYield", 0)), growth_rate=0.03, required_return=0.08)  # Default values - would need Treasury API
         except Exception as e:
             raise DataProviderError(f"Failed to retrieve market data for {symbol}: {str(e)}")
 
@@ -280,40 +218,31 @@ class AlphaVantageProvider(DataProvider):
             statements = {}
 
             # Income Statement
-            income_params = {
-                'function': 'INCOME_STATEMENT',
-                'symbol': symbol
-            }
+            income_params = {"function": "INCOME_STATEMENT", "symbol": symbol}
             income_data = self._make_request(income_params)
 
             if period == "annual":
-                statements['income_statement'] = pd.DataFrame(income_data.get('annualReports', []))
+                statements["income_statement"] = pd.DataFrame(income_data.get("annualReports", []))
             else:
-                statements['income_statement'] = pd.DataFrame(income_data.get('quarterlyReports', []))
+                statements["income_statement"] = pd.DataFrame(income_data.get("quarterlyReports", []))
 
             # Balance Sheet
-            balance_params = {
-                'function': 'BALANCE_SHEET',
-                'symbol': symbol
-            }
+            balance_params = {"function": "BALANCE_SHEET", "symbol": symbol}
             balance_data = self._make_request(balance_params)
 
             if period == "annual":
-                statements['balance_sheet'] = pd.DataFrame(balance_data.get('annualReports', []))
+                statements["balance_sheet"] = pd.DataFrame(balance_data.get("annualReports", []))
             else:
-                statements['balance_sheet'] = pd.DataFrame(balance_data.get('quarterlyReports', []))
+                statements["balance_sheet"] = pd.DataFrame(balance_data.get("quarterlyReports", []))
 
             # Cash Flow
-            cashflow_params = {
-                'function': 'CASH_FLOW',
-                'symbol': symbol
-            }
+            cashflow_params = {"function": "CASH_FLOW", "symbol": symbol}
             cashflow_data = self._make_request(cashflow_params)
 
             if period == "annual":
-                statements['cash_flow_statement'] = pd.DataFrame(cashflow_data.get('annualReports', []))
+                statements["cash_flow_statement"] = pd.DataFrame(cashflow_data.get("annualReports", []))
             else:
-                statements['cash_flow_statement'] = pd.DataFrame(cashflow_data.get('quarterlyReports', []))
+                statements["cash_flow_statement"] = pd.DataFrame(cashflow_data.get("quarterlyReports", []))
 
             return statements
 
@@ -323,20 +252,16 @@ class AlphaVantageProvider(DataProvider):
     def get_price_data(self, symbol: str, start_date: str, end_date: str) -> pd.DataFrame:
         """Retrieve historical price data from Alpha Vantage"""
         try:
-            params = {
-                'function': 'TIME_SERIES_DAILY_ADJUSTED',
-                'symbol': symbol,
-                'outputsize': 'full'
-            }
+            params = {"function": "TIME_SERIES_DAILY_ADJUSTED", "symbol": symbol, "outputsize": "full"}
             data = self._make_request(params)
-            time_series = data.get('Time Series (Daily)', {})
+            time_series = data.get("Time Series (Daily)", {})
 
-            df = pd.DataFrame.from_dict(time_series, orient='index')
+            df = pd.DataFrame.from_dict(time_series, orient="index")
             df.index = pd.to_datetime(df.index)
             df = df.sort_index()
 
             # Rename columns to match yfinance format
-            df.columns = ['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume', 'Dividend', 'Split']
+            df.columns = ["Open", "High", "Low", "Close", "Adj Close", "Volume", "Dividend", "Split"]
             df = df.astype(float)
 
             # Filter by date range
@@ -365,19 +290,19 @@ class ManualDataProvider(DataProvider):
 
             # Convert CSV data to CompanyData format
             # Assumes specific CSV structure - can be customized
-            financial_data = df.to_dict('records')[0] if not df.empty else {}
+            financial_data = df.to_dict("records")[0] if not df.empty else {}
 
             company_data = CompanyData(
                 symbol=symbol.upper(),
-                name=financial_data.get('company_name', symbol),
-                sector=financial_data.get('sector', 'Unknown'),
-                industry=financial_data.get('industry', 'Unknown'),
-                market_cap=float(financial_data.get('market_cap', 0)),
-                shares_outstanding=float(financial_data.get('shares_outstanding', 0)),
-                current_price=float(financial_data.get('current_price', 0)),
+                name=financial_data.get("company_name", symbol),
+                sector=financial_data.get("sector", "Unknown"),
+                industry=financial_data.get("industry", "Unknown"),
+                market_cap=float(financial_data.get("market_cap", 0)),
+                shares_outstanding=float(financial_data.get("shares_outstanding", 0)),
+                current_price=float(financial_data.get("current_price", 0)),
                 financial_data=financial_data,
                 market_data={},
-                last_updated=datetime.now()
+                last_updated=datetime.now(),
             )
 
             self.add_company_data(company_data)
@@ -394,14 +319,7 @@ class ManualDataProvider(DataProvider):
     def get_market_data(self, symbol: str) -> MarketData:
         """Retrieve market data - requires manual input"""
         # Return default market data or raise error for manual input
-        return MarketData(
-            risk_free_rate=0.05,
-            market_return=0.10,
-            beta=1.0,
-            dividend_yield=0.02,
-            growth_rate=0.03,
-            required_return=0.08
-        )
+        return MarketData(risk_free_rate=0.05, market_return=0.10, beta=1.0, dividend_yield=0.02, growth_rate=0.03, required_return=0.08)
 
     def get_financial_statements(self, symbol: str, period: str = "annual") -> Dict[str, pd.DataFrame]:
         """Manual financial statements not implemented"""

@@ -26,7 +26,7 @@ class TestAdvancedDataProvider:
     def test_provider_initialization(self, data_provider):
         """Test provider initializes correctly"""
         assert data_provider.cache is not None
-        assert data_provider.rate_limiter is not None
+        assert data_provider.rate_limiters is not None
     
     def test_get_historical_prices_import(self):
         """Test get_historical_prices can be imported"""

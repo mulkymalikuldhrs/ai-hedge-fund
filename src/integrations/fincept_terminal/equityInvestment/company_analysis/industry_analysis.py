@@ -1,4 +1,3 @@
-
 """Equity Investment Industry Analysis Module
 ======================================
 
@@ -28,7 +27,6 @@ PARAMETERS:
 """
 
 
-
 import numpy as np
 import pandas as pd
 from typing import List, Dict, Any, Optional, Tuple
@@ -36,14 +34,12 @@ from dataclasses import dataclass
 from enum import Enum
 import warnings
 
-from .base_models import (
-    BaseCompanyAnalysisModel, CompanyData, ValidationError,
-    FinceptAnalyticsError
-)
+from .base_models import BaseCompanyAnalysisModel, CompanyData, ValidationError, FinceptAnalyticsError
 
 
 class IndustryClassificationSystem(Enum):
     """Industry classification systems"""
+
     GICS = "Global Industry Classification Standard"
     ICB = "Industry Classification Benchmark"
     NAICS = "North American Industry Classification System"
@@ -52,6 +48,7 @@ class IndustryClassificationSystem(Enum):
 
 class CompetitivePosition(Enum):
     """Competitive position categories"""
+
     MARKET_LEADER = "market_leader"
     STRONG_COMPETITOR = "strong_competitor"
     NICHE_PLAYER = "niche_player"
@@ -61,6 +58,7 @@ class CompetitivePosition(Enum):
 @dataclass
 class IndustryMetrics:
     """Industry-level metrics and characteristics"""
+
     industry_name: str
     total_market_size: float
     growth_rate: float
@@ -76,6 +74,7 @@ class IndustryMetrics:
 @dataclass
 class CompetitorProfile:
     """Individual competitor profile"""
+
     company_name: str
     symbol: str
     market_cap: float
@@ -89,6 +88,7 @@ class CompetitorProfile:
 @dataclass
 class PortersFiveForcesAnalysis:
     """Porter's Five Forces analysis structure"""
+
     threat_of_new_entrants: Dict[str, Any]
     bargaining_power_suppliers: Dict[str, Any]
     bargaining_power_buyers: Dict[str, Any]
@@ -100,6 +100,7 @@ class PortersFiveForcesAnalysis:
 @dataclass
 class PESTLEAnalysis:
     """PESTLE analysis structure"""
+
     political_factors: List[str]
     economic_factors: List[str]
     social_factors: List[str]
@@ -115,26 +116,21 @@ class IndustryClassifier:
     def __init__(self):
         # GICS sector and industry mappings (simplified)
         self.gics_sectors = {
-            'Energy': ['Oil & Gas Exploration', 'Oil & Gas Refining', 'Coal & Consumable Fuels'],
-            'Materials': ['Chemicals', 'Metals & Mining', 'Paper & Forest Products'],
-            'Industrials': ['Aerospace & Defense', 'Airlines', 'Construction & Engineering'],
-            'Consumer Discretionary': ['Automobiles', 'Hotels & Restaurants', 'Retail'],
-            'Consumer Staples': ['Food & Beverages', 'Household Products', 'Tobacco'],
-            'Health Care': ['Biotechnology', 'Pharmaceuticals', 'Health Care Equipment'],
-            'Financials': ['Banks', 'Insurance', 'Real Estate'],
-            'Information Technology': ['Software', 'Semiconductors', 'IT Services'],
-            'Communication Services': ['Telecommunications', 'Media & Entertainment'],
-            'Utilities': ['Electric Utilities', 'Gas Utilities', 'Water Utilities'],
-            'Real Estate': ['REITs', 'Real Estate Management']
+            "Energy": ["Oil & Gas Exploration", "Oil & Gas Refining", "Coal & Consumable Fuels"],
+            "Materials": ["Chemicals", "Metals & Mining", "Paper & Forest Products"],
+            "Industrials": ["Aerospace & Defense", "Airlines", "Construction & Engineering"],
+            "Consumer Discretionary": ["Automobiles", "Hotels & Restaurants", "Retail"],
+            "Consumer Staples": ["Food & Beverages", "Household Products", "Tobacco"],
+            "Health Care": ["Biotechnology", "Pharmaceuticals", "Health Care Equipment"],
+            "Financials": ["Banks", "Insurance", "Real Estate"],
+            "Information Technology": ["Software", "Semiconductors", "IT Services"],
+            "Communication Services": ["Telecommunications", "Media & Entertainment"],
+            "Utilities": ["Electric Utilities", "Gas Utilities", "Water Utilities"],
+            "Real Estate": ["REITs", "Real Estate Management"],
         }
 
         # Industry characteristics
-        self.industry_characteristics = {
-            'Cyclical': ['Energy', 'Materials', 'Industrials', 'Consumer Discretionary'],
-            'Defensive': ['Consumer Staples', 'Health Care', 'Utilities'],
-            'Growth': ['Information Technology', 'Communication Services', 'Health Care'],
-            'Value': ['Financials', 'Energy', 'Materials']
-        }
+        self.industry_characteristics = {"Cyclical": ["Energy", "Materials", "Industrials", "Consumer Discretionary"], "Defensive": ["Consumer Staples", "Health Care", "Utilities"], "Growth": ["Information Technology", "Communication Services", "Health Care"], "Value": ["Financials", "Energy", "Materials"]}
 
     def classify_company(self, company_data: CompanyData) -> Dict[str, str]:
         """Classify company by various systems"""
@@ -152,18 +148,12 @@ class IndustryClassifier:
             if sector in sectors:
                 characteristics.append(char_type)
 
-        return {
-            'gics_sector': gics_sector,
-            'gics_industry': gics_industry,
-            'industry_characteristics': characteristics,
-            'business_cycle_sensitivity': self.determine_cycle_sensitivity(sector),
-            'regulatory_intensity': self.determine_regulatory_intensity(sector)
-        }
+        return {"gics_sector": gics_sector, "gics_industry": gics_industry, "industry_characteristics": characteristics, "business_cycle_sensitivity": self.determine_cycle_sensitivity(sector), "regulatory_intensity": self.determine_regulatory_intensity(sector)}
 
     def determine_cycle_sensitivity(self, sector: str) -> str:
         """Determine business cycle sensitivity"""
-        high_sensitivity = ['Energy', 'Materials', 'Industrials', 'Consumer Discretionary', 'Financials']
-        low_sensitivity = ['Consumer Staples', 'Health Care', 'Utilities']
+        high_sensitivity = ["Energy", "Materials", "Industrials", "Consumer Discretionary", "Financials"]
+        low_sensitivity = ["Consumer Staples", "Health Care", "Utilities"]
 
         if sector in high_sensitivity:
             return "High"
@@ -174,8 +164,8 @@ class IndustryClassifier:
 
     def determine_regulatory_intensity(self, sector: str) -> str:
         """Determine regulatory intensity"""
-        high_regulation = ['Health Care', 'Financials', 'Utilities', 'Energy']
-        medium_regulation = ['Information Technology', 'Communication Services']
+        high_regulation = ["Health Care", "Financials", "Utilities", "Energy"]
+        medium_regulation = ["Information Technology", "Communication Services"]
 
         if sector in high_regulation:
             return "High"
@@ -194,7 +184,7 @@ class IndustryAnalyzer(BaseCompanyAnalysisModel):
 
     def validate_inputs(self, **kwargs) -> bool:
         """Validate inputs for industry analysis"""
-        company_data = kwargs.get('company_data')
+        company_data = kwargs.get("company_data")
         if not isinstance(company_data, CompanyData):
             raise ValidationError("Valid CompanyData object required")
         return True
@@ -203,14 +193,14 @@ class IndustryAnalyzer(BaseCompanyAnalysisModel):
         """Comprehensive industry analysis for a company"""
 
         analysis = {
-            'industry_overview': self.analyze_industry_overview(company_data),
-            'industry_structure': self.analyze_industry_structure(company_data),
-            'competitive_landscape': self.analyze_competitive_landscape(company_data),
-            'porters_five_forces': self.perform_porters_analysis(company_data),
-            'pestle_analysis': self.perform_pestle_analysis(company_data),
-            'company_positioning': self.analyze_company_positioning(company_data),
-            'industry_trends': self.identify_industry_trends(company_data),
-            'investment_implications': self.assess_investment_implications(company_data)
+            "industry_overview": self.analyze_industry_overview(company_data),
+            "industry_structure": self.analyze_industry_structure(company_data),
+            "competitive_landscape": self.analyze_competitive_landscape(company_data),
+            "porters_five_forces": self.perform_porters_analysis(company_data),
+            "pestle_analysis": self.perform_pestle_analysis(company_data),
+            "company_positioning": self.analyze_company_positioning(company_data),
+            "industry_trends": self.identify_industry_trends(company_data),
+            "investment_implications": self.assess_investment_implications(company_data),
         }
 
         return analysis
@@ -228,35 +218,19 @@ class IndustryAnalyzer(BaseCompanyAnalysisModel):
         growth_profile = self.determine_growth_profile(company_data.sector)
 
         return {
-            'classification': classification,
-            'industry_size': {
-                'estimated_total_market': estimated_market_size,
-                'company_market_share': self.estimate_market_share(market_cap, estimated_market_size),
-                'size_category': self.categorize_industry_size(estimated_market_size)
-            },
-            'growth_characteristics': growth_profile,
-            'industry_lifecycle': self.determine_industry_lifecycle(company_data),
-            'key_success_factors': self.identify_success_factors(company_data.sector),
-            'industry_risks': self.identify_industry_risks(company_data.sector)
+            "classification": classification,
+            "industry_size": {"estimated_total_market": estimated_market_size, "company_market_share": self.estimate_market_share(market_cap, estimated_market_size), "size_category": self.categorize_industry_size(estimated_market_size)},
+            "growth_characteristics": growth_profile,
+            "industry_lifecycle": self.determine_industry_lifecycle(company_data),
+            "key_success_factors": self.identify_success_factors(company_data.sector),
+            "industry_risks": self.identify_industry_risks(company_data.sector),
         }
 
     def estimate_industry_size(self, sector: str, company_market_cap: float) -> float:
         """Estimate total industry market size"""
 
         # Simplified multipliers based on sector characteristics
-        multipliers = {
-            'Information Technology': 50,
-            'Health Care': 40,
-            'Financials': 30,
-            'Consumer Discretionary': 35,
-            'Consumer Staples': 25,
-            'Industrials': 30,
-            'Energy': 20,
-            'Materials': 15,
-            'Utilities': 10,
-            'Communication Services': 25,
-            'Real Estate': 20
-        }
+        multipliers = {"Information Technology": 50, "Health Care": 40, "Financials": 30, "Consumer Discretionary": 35, "Consumer Staples": 25, "Industrials": 30, "Energy": 20, "Materials": 15, "Utilities": 10, "Communication Services": 25, "Real Estate": 20}
 
         multiplier = multipliers.get(sector, 25)
         return company_market_cap * multiplier
@@ -283,20 +257,20 @@ class IndustryAnalyzer(BaseCompanyAnalysisModel):
 
         # Historical growth patterns by sector (simplified)
         growth_profiles = {
-            'Information Technology': {'historical_growth': 0.12, 'volatility': 'High', 'trend': 'Growing'},
-            'Health Care': {'historical_growth': 0.08, 'volatility': 'Medium', 'trend': 'Growing'},
-            'Consumer Discretionary': {'historical_growth': 0.06, 'volatility': 'High', 'trend': 'Cyclical'},
-            'Financials': {'historical_growth': 0.05, 'volatility': 'High', 'trend': 'Cyclical'},
-            'Consumer Staples': {'historical_growth': 0.04, 'volatility': 'Low', 'trend': 'Stable'},
-            'Industrials': {'historical_growth': 0.05, 'volatility': 'Medium', 'trend': 'Cyclical'},
-            'Energy': {'historical_growth': 0.02, 'volatility': 'Very High', 'trend': 'Declining'},
-            'Materials': {'historical_growth': 0.03, 'volatility': 'High', 'trend': 'Cyclical'},
-            'Utilities': {'historical_growth': 0.02, 'volatility': 'Low', 'trend': 'Stable'},
-            'Communication Services': {'historical_growth': 0.07, 'volatility': 'Medium', 'trend': 'Growing'},
-            'Real Estate': {'historical_growth': 0.04, 'volatility': 'Medium', 'trend': 'Cyclical'}
+            "Information Technology": {"historical_growth": 0.12, "volatility": "High", "trend": "Growing"},
+            "Health Care": {"historical_growth": 0.08, "volatility": "Medium", "trend": "Growing"},
+            "Consumer Discretionary": {"historical_growth": 0.06, "volatility": "High", "trend": "Cyclical"},
+            "Financials": {"historical_growth": 0.05, "volatility": "High", "trend": "Cyclical"},
+            "Consumer Staples": {"historical_growth": 0.04, "volatility": "Low", "trend": "Stable"},
+            "Industrials": {"historical_growth": 0.05, "volatility": "Medium", "trend": "Cyclical"},
+            "Energy": {"historical_growth": 0.02, "volatility": "Very High", "trend": "Declining"},
+            "Materials": {"historical_growth": 0.03, "volatility": "High", "trend": "Cyclical"},
+            "Utilities": {"historical_growth": 0.02, "volatility": "Low", "trend": "Stable"},
+            "Communication Services": {"historical_growth": 0.07, "volatility": "Medium", "trend": "Growing"},
+            "Real Estate": {"historical_growth": 0.04, "volatility": "Medium", "trend": "Cyclical"},
         }
 
-        return growth_profiles.get(sector, {'historical_growth': 0.05, 'volatility': 'Medium', 'trend': 'Stable'})
+        return growth_profiles.get(sector, {"historical_growth": 0.05, "volatility": "Medium", "trend": "Stable"})
 
     def determine_industry_lifecycle(self, company_data: CompanyData) -> str:
         """Determine industry lifecycle stage"""
@@ -304,7 +278,7 @@ class IndustryAnalyzer(BaseCompanyAnalysisModel):
         sector = company_data.sector
         growth_profile = self.determine_growth_profile(sector)
 
-        growth_rate = growth_profile['historical_growth']
+        growth_rate = growth_profile["historical_growth"]
 
         if growth_rate > 0.10:
             return "Growth"
@@ -319,92 +293,26 @@ class IndustryAnalyzer(BaseCompanyAnalysisModel):
         """Identify key success factors by sector"""
 
         success_factors = {
-            'Information Technology': [
-                'Innovation and R&D capability',
-                'Talent acquisition and retention',
-                'Scalable technology platforms',
-                'Network effects',
-                'Speed to market'
-            ],
-            'Health Care': [
-                'R&D pipeline strength',
-                'Regulatory approval capabilities',
-                'Patent protection',
-                'Clinical trial success rates',
-                'Market access and distribution'
-            ],
-            'Financials': [
-                'Risk management capabilities',
-                'Regulatory compliance',
-                'Technology infrastructure',
-                'Customer relationships',
-                'Capital adequacy'
-            ],
-            'Consumer Discretionary': [
-                'Brand strength and recognition',
-                'Distribution network',
-                'Product innovation',
-                'Supply chain efficiency',
-                'Customer experience'
-            ],
-            'Energy': [
-                'Reserve quality and quantity',
-                'Operational efficiency',
-                'Technology and innovation',
-                'Environmental compliance',
-                'Geographic diversification'
-            ]
+            "Information Technology": ["Innovation and R&D capability", "Talent acquisition and retention", "Scalable technology platforms", "Network effects", "Speed to market"],
+            "Health Care": ["R&D pipeline strength", "Regulatory approval capabilities", "Patent protection", "Clinical trial success rates", "Market access and distribution"],
+            "Financials": ["Risk management capabilities", "Regulatory compliance", "Technology infrastructure", "Customer relationships", "Capital adequacy"],
+            "Consumer Discretionary": ["Brand strength and recognition", "Distribution network", "Product innovation", "Supply chain efficiency", "Customer experience"],
+            "Energy": ["Reserve quality and quantity", "Operational efficiency", "Technology and innovation", "Environmental compliance", "Geographic diversification"],
         }
 
-        return success_factors.get(sector, [
-            'Operational efficiency',
-            'Market position',
-            'Financial strength',
-            'Innovation capability',
-            'Customer relationships'
-        ])
+        return success_factors.get(sector, ["Operational efficiency", "Market position", "Financial strength", "Innovation capability", "Customer relationships"])
 
     def identify_industry_risks(self, sector: str) -> List[str]:
         """Identify key industry risks by sector"""
 
         industry_risks = {
-            'Information Technology': [
-                'Technological obsolescence',
-                'Cybersecurity threats',
-                'Regulatory changes',
-                'Talent shortage',
-                'Market saturation'
-            ],
-            'Health Care': [
-                'Regulatory approval risks',
-                'Patent cliff exposure',
-                'Pricing pressures',
-                'Clinical trial failures',
-                'Regulatory changes'
-            ],
-            'Financials': [
-                'Interest rate risk',
-                'Credit risk',
-                'Regulatory changes',
-                'Economic cycles',
-                'Technology disruption'
-            ],
-            'Energy': [
-                'Commodity price volatility',
-                'Environmental regulations',
-                'Geopolitical risks',
-                'Stranded asset risk',
-                'Energy transition'
-            ]
+            "Information Technology": ["Technological obsolescence", "Cybersecurity threats", "Regulatory changes", "Talent shortage", "Market saturation"],
+            "Health Care": ["Regulatory approval risks", "Patent cliff exposure", "Pricing pressures", "Clinical trial failures", "Regulatory changes"],
+            "Financials": ["Interest rate risk", "Credit risk", "Regulatory changes", "Economic cycles", "Technology disruption"],
+            "Energy": ["Commodity price volatility", "Environmental regulations", "Geopolitical risks", "Stranded asset risk", "Energy transition"],
         }
 
-        return industry_risks.get(sector, [
-            'Economic cycles',
-            'Competitive pressure',
-            'Regulatory changes',
-            'Technology disruption',
-            'Supply chain disruption'
-        ])
+        return industry_risks.get(sector, ["Economic cycles", "Competitive pressure", "Regulatory changes", "Technology disruption", "Supply chain disruption"])
 
     def analyze_industry_structure(self, company_data: CompanyData) -> Dict[str, Any]:
         """Analyze industry structure and concentration"""
@@ -423,23 +331,19 @@ class IndustryAnalyzer(BaseCompanyAnalysisModel):
         profitability_profile = self.assess_industry_profitability(company_data.sector)
 
         return {
-            'market_concentration': {
-                'concentration_level': concentration_level,
-                'estimated_hhi': self.estimate_hhi(concentration_level),
-                'market_structure': self.determine_market_structure(concentration_level)
-            },
-            'barriers_to_entry': entry_barriers,
-            'profitability_profile': profitability_profile,
-            'competitive_dynamics': self.assess_competitive_dynamics(company_data.sector),
-            'industry_maturity': self.assess_industry_maturity(company_data.sector)
+            "market_concentration": {"concentration_level": concentration_level, "estimated_hhi": self.estimate_hhi(concentration_level), "market_structure": self.determine_market_structure(concentration_level)},
+            "barriers_to_entry": entry_barriers,
+            "profitability_profile": profitability_profile,
+            "competitive_dynamics": self.assess_competitive_dynamics(company_data.sector),
+            "industry_maturity": self.assess_industry_maturity(company_data.sector),
         }
 
     def estimate_concentration(self, sector: str) -> str:
         """Estimate industry concentration level"""
 
-        high_concentration = ['Utilities', 'Communication Services', 'Aerospace & Defense']
-        medium_concentration = ['Energy', 'Materials', 'Industrials', 'Health Care']
-        low_concentration = ['Information Technology', 'Consumer Discretionary', 'Financials']
+        high_concentration = ["Utilities", "Communication Services", "Aerospace & Defense"]
+        medium_concentration = ["Energy", "Materials", "Industrials", "Health Care"]
+        low_concentration = ["Information Technology", "Consumer Discretionary", "Financials"]
 
         if sector in high_concentration:
             return "High"
@@ -451,11 +355,7 @@ class IndustryAnalyzer(BaseCompanyAnalysisModel):
     def estimate_hhi(self, concentration_level: str) -> int:
         """Estimate Herfindahl-Hirschman Index"""
 
-        hhi_ranges = {
-            'High': 2000,
-            'Medium': 1200,
-            'Low': 800
-        }
+        hhi_ranges = {"High": 2000, "Medium": 1200, "Low": 800}
 
         return hhi_ranges.get(concentration_level, 1000)
 
@@ -473,105 +373,46 @@ class IndustryAnalyzer(BaseCompanyAnalysisModel):
         """Assess barriers to entry"""
 
         barrier_assessments = {
-            'Information Technology': {
-                'capital_requirements': 'Medium',
-                'regulatory_barriers': 'Low',
-                'technology_barriers': 'High',
-                'brand_loyalty': 'Medium',
-                'network_effects': 'High'
-            },
-            'Health Care': {
-                'capital_requirements': 'Very High',
-                'regulatory_barriers': 'Very High',
-                'technology_barriers': 'High',
-                'brand_loyalty': 'High',
-                'network_effects': 'Low'
-            },
-            'Utilities': {
-                'capital_requirements': 'Very High',
-                'regulatory_barriers': 'Very High',
-                'technology_barriers': 'Medium',
-                'brand_loyalty': 'Low',
-                'network_effects': 'High'
-            },
-            'Financials': {
-                'capital_requirements': 'Very High',
-                'regulatory_barriers': 'Very High',
-                'technology_barriers': 'Medium',
-                'brand_loyalty': 'Medium',
-                'network_effects': 'Medium'
-            }
+            "Information Technology": {"capital_requirements": "Medium", "regulatory_barriers": "Low", "technology_barriers": "High", "brand_loyalty": "Medium", "network_effects": "High"},
+            "Health Care": {"capital_requirements": "Very High", "regulatory_barriers": "Very High", "technology_barriers": "High", "brand_loyalty": "High", "network_effects": "Low"},
+            "Utilities": {"capital_requirements": "Very High", "regulatory_barriers": "Very High", "technology_barriers": "Medium", "brand_loyalty": "Low", "network_effects": "High"},
+            "Financials": {"capital_requirements": "Very High", "regulatory_barriers": "Very High", "technology_barriers": "Medium", "brand_loyalty": "Medium", "network_effects": "Medium"},
         }
 
-        return barrier_assessments.get(sector, {
-            'capital_requirements': 'Medium',
-            'regulatory_barriers': 'Medium',
-            'technology_barriers': 'Medium',
-            'brand_loyalty': 'Medium',
-            'network_effects': 'Low'
-        })
+        return barrier_assessments.get(sector, {"capital_requirements": "Medium", "regulatory_barriers": "Medium", "technology_barriers": "Medium", "brand_loyalty": "Medium", "network_effects": "Low"})
 
     def assess_industry_profitability(self, sector: str) -> Dict[str, Any]:
         """Assess industry profitability characteristics"""
 
         # Historical average margins by sector (simplified)
         profitability_data = {
-            'Information Technology': {'avg_margin': 0.15, 'margin_stability': 'Medium', 'trend': 'Stable'},
-            'Health Care': {'avg_margin': 0.12, 'margin_stability': 'High', 'trend': 'Declining'},
-            'Financials': {'avg_margin': 0.20, 'margin_stability': 'Low', 'trend': 'Cyclical'},
-            'Consumer Staples': {'avg_margin': 0.08, 'margin_stability': 'High', 'trend': 'Stable'},
-            'Energy': {'avg_margin': 0.05, 'margin_stability': 'Very Low', 'trend': 'Volatile'},
-            'Utilities': {'avg_margin': 0.10, 'margin_stability': 'High', 'trend': 'Stable'}
+            "Information Technology": {"avg_margin": 0.15, "margin_stability": "Medium", "trend": "Stable"},
+            "Health Care": {"avg_margin": 0.12, "margin_stability": "High", "trend": "Declining"},
+            "Financials": {"avg_margin": 0.20, "margin_stability": "Low", "trend": "Cyclical"},
+            "Consumer Staples": {"avg_margin": 0.08, "margin_stability": "High", "trend": "Stable"},
+            "Energy": {"avg_margin": 0.05, "margin_stability": "Very Low", "trend": "Volatile"},
+            "Utilities": {"avg_margin": 0.10, "margin_stability": "High", "trend": "Stable"},
         }
 
-        return profitability_data.get(sector, {
-            'avg_margin': 0.08,
-            'margin_stability': 'Medium',
-            'trend': 'Stable'
-        })
+        return profitability_data.get(sector, {"avg_margin": 0.08, "margin_stability": "Medium", "trend": "Stable"})
 
     def assess_competitive_dynamics(self, sector: str) -> Dict[str, str]:
         """Assess competitive dynamics"""
 
         dynamics = {
-            'Information Technology': {
-                'intensity': 'Very High',
-                'basis': 'Innovation and Speed',
-                'pricing_power': 'Medium',
-                'differentiation': 'High'
-            },
-            'Health Care': {
-                'intensity': 'High',
-                'basis': 'Innovation and Quality',
-                'pricing_power': 'High',
-                'differentiation': 'Very High'
-            },
-            'Utilities': {
-                'intensity': 'Low',
-                'basis': 'Regulation and Service',
-                'pricing_power': 'Low',
-                'differentiation': 'Low'
-            },
-            'Energy': {
-                'intensity': 'High',
-                'basis': 'Cost and Efficiency',
-                'pricing_power': 'Low',
-                'differentiation': 'Low'
-            }
+            "Information Technology": {"intensity": "Very High", "basis": "Innovation and Speed", "pricing_power": "Medium", "differentiation": "High"},
+            "Health Care": {"intensity": "High", "basis": "Innovation and Quality", "pricing_power": "High", "differentiation": "Very High"},
+            "Utilities": {"intensity": "Low", "basis": "Regulation and Service", "pricing_power": "Low", "differentiation": "Low"},
+            "Energy": {"intensity": "High", "basis": "Cost and Efficiency", "pricing_power": "Low", "differentiation": "Low"},
         }
 
-        return dynamics.get(sector, {
-            'intensity': 'Medium',
-            'basis': 'Price and Quality',
-            'pricing_power': 'Medium',
-            'differentiation': 'Medium'
-        })
+        return dynamics.get(sector, {"intensity": "Medium", "basis": "Price and Quality", "pricing_power": "Medium", "differentiation": "Medium"})
 
     def assess_industry_maturity(self, sector: str) -> str:
         """Assess industry maturity level"""
 
-        mature_industries = ['Utilities', 'Consumer Staples', 'Energy', 'Materials']
-        growth_industries = ['Information Technology', 'Health Care', 'Communication Services']
+        mature_industries = ["Utilities", "Consumer Staples", "Energy", "Materials"]
+        growth_industries = ["Information Technology", "Health Care", "Communication Services"]
 
         if sector in mature_industries:
             return "Mature"
@@ -596,13 +437,7 @@ class PortersFiveForcesAnalyzer:
         competitive_rivalry = self.analyze_competitive_rivalry(sector)
 
         # Overall industry attractiveness
-        forces_scores = [
-            threat_new_entrants['threat_level_score'],
-            supplier_power['power_level_score'],
-            buyer_power['power_level_score'],
-            threat_substitutes['threat_level_score'],
-            competitive_rivalry['intensity_score']
-        ]
+        forces_scores = [threat_new_entrants["threat_level_score"], supplier_power["power_level_score"], buyer_power["power_level_score"], threat_substitutes["threat_level_score"], competitive_rivalry["intensity_score"]]
 
         avg_score = np.mean(forces_scores)
 
@@ -615,54 +450,19 @@ class PortersFiveForcesAnalyzer:
         else:
             attractiveness = "Unattractive"
 
-        return PortersFiveForcesAnalysis(
-            threat_of_new_entrants=threat_new_entrants,
-            bargaining_power_suppliers=supplier_power,
-            bargaining_power_buyers=buyer_power,
-            threat_of_substitutes=threat_substitutes,
-            competitive_rivalry=competitive_rivalry,
-            overall_attractiveness=attractiveness
-        )
+        return PortersFiveForcesAnalysis(threat_of_new_entrants=threat_new_entrants, bargaining_power_suppliers=supplier_power, bargaining_power_buyers=buyer_power, threat_of_substitutes=threat_substitutes, competitive_rivalry=competitive_rivalry, overall_attractiveness=attractiveness)
 
     def analyze_threat_of_new_entrants(self, sector: str) -> Dict[str, Any]:
         """Analyze threat of new entrants"""
 
         # Sector-specific entry barrier analysis
         entry_barriers = {
-            'Information Technology': {
-                'capital_requirements': 3,  # 1-5 scale (1=low barrier, 5=high barrier)
-                'technology_complexity': 4,
-                'regulatory_requirements': 2,
-                'brand_loyalty': 3,
-                'network_effects': 4,
-                'access_to_distribution': 3
-            },
-            'Health Care': {
-                'capital_requirements': 5,
-                'technology_complexity': 5,
-                'regulatory_requirements': 5,
-                'brand_loyalty': 4,
-                'network_effects': 2,
-                'access_to_distribution': 4
-            },
-            'Utilities': {
-                'capital_requirements': 5,
-                'technology_complexity': 3,
-                'regulatory_requirements': 5,
-                'brand_loyalty': 2,
-                'network_effects': 5,
-                'access_to_distribution': 5
-            }
+            "Information Technology": {"capital_requirements": 3, "technology_complexity": 4, "regulatory_requirements": 2, "brand_loyalty": 3, "network_effects": 4, "access_to_distribution": 3},  # 1-5 scale (1=low barrier, 5=high barrier)
+            "Health Care": {"capital_requirements": 5, "technology_complexity": 5, "regulatory_requirements": 5, "brand_loyalty": 4, "network_effects": 2, "access_to_distribution": 4},
+            "Utilities": {"capital_requirements": 5, "technology_complexity": 3, "regulatory_requirements": 5, "brand_loyalty": 2, "network_effects": 5, "access_to_distribution": 5},
         }
 
-        barriers = entry_barriers.get(sector, {
-            'capital_requirements': 3,
-            'technology_complexity': 3,
-            'regulatory_requirements': 3,
-            'brand_loyalty': 3,
-            'network_effects': 3,
-            'access_to_distribution': 3
-        })
+        barriers = entry_barriers.get(sector, {"capital_requirements": 3, "technology_complexity": 3, "regulatory_requirements": 3, "brand_loyalty": 3, "network_effects": 3, "access_to_distribution": 3})
 
         avg_barrier_strength = np.mean(list(barriers.values()))
         threat_level_score = 6 - avg_barrier_strength  # Inverse relationship
@@ -674,48 +474,18 @@ class PortersFiveForcesAnalyzer:
         else:
             threat_level = "High"
 
-        return {
-            'entry_barriers': barriers,
-            'threat_level': threat_level,
-            'threat_level_score': threat_level_score,
-            'key_barriers': [k for k, v in barriers.items() if v >= 4],
-            'analysis': f"Entry barriers are {'strong' if avg_barrier_strength >= 4 else 'moderate' if avg_barrier_strength >= 3 else 'weak'}"
-        }
+        return {"entry_barriers": barriers, "threat_level": threat_level, "threat_level_score": threat_level_score, "key_barriers": [k for k, v in barriers.items() if v >= 4], "analysis": f"Entry barriers are {'strong' if avg_barrier_strength >= 4 else 'moderate' if avg_barrier_strength >= 3 else 'weak'}"}
 
     def analyze_supplier_power(self, sector: str) -> Dict[str, Any]:
         """Analyze bargaining power of suppliers"""
 
         supplier_power_factors = {
-            'Information Technology': {
-                'supplier_concentration': 3,
-                'switching_costs': 3,
-                'input_importance': 4,
-                'substitute_inputs': 3,
-                'forward_integration_threat': 2
-            },
-            'Health Care': {
-                'supplier_concentration': 4,
-                'switching_costs': 4,
-                'input_importance': 5,
-                'substitute_inputs': 2,
-                'forward_integration_threat': 2
-            },
-            'Automotive': {
-                'supplier_concentration': 4,
-                'switching_costs': 4,
-                'input_importance': 4,
-                'substitute_inputs': 3,
-                'forward_integration_threat': 3
-            }
+            "Information Technology": {"supplier_concentration": 3, "switching_costs": 3, "input_importance": 4, "substitute_inputs": 3, "forward_integration_threat": 2},
+            "Health Care": {"supplier_concentration": 4, "switching_costs": 4, "input_importance": 5, "substitute_inputs": 2, "forward_integration_threat": 2},
+            "Automotive": {"supplier_concentration": 4, "switching_costs": 4, "input_importance": 4, "substitute_inputs": 3, "forward_integration_threat": 3},
         }
 
-        factors = supplier_power_factors.get(sector, {
-            'supplier_concentration': 3,
-            'switching_costs': 3,
-            'input_importance': 3,
-            'substitute_inputs': 3,
-            'forward_integration_threat': 3
-        })
+        factors = supplier_power_factors.get(sector, {"supplier_concentration": 3, "switching_costs": 3, "input_importance": 3, "substitute_inputs": 3, "forward_integration_threat": 3})
 
         avg_power = np.mean(list(factors.values()))
 
@@ -726,55 +496,21 @@ class PortersFiveForcesAnalyzer:
         else:
             power_level = "Low"
 
-        return {
-            'power_factors': factors,
-            'power_level': power_level,
-            'power_level_score': avg_power,
-            'key_factors': [k for k, v in factors.items() if v >= 4],
-            'analysis': f"Supplier power is {power_level.lower()} due to {', '.join([k.replace('_', ' ') for k, v in factors.items() if v >= 4])}"
-        }
+        return {"power_factors": factors, "power_level": power_level, "power_level_score": avg_power, "key_factors": [k for k, v in factors.items() if v >= 4], "analysis": f"Supplier power is {power_level.lower()} due to {', '.join([k.replace('_', ' ') for k, v in factors.items() if v >= 4])}"}
 
     def analyze_buyer_power(self, sector: str) -> Dict[str, Any]:
         """Analyze bargaining power of buyers"""
 
         buyer_power_factors = {
-            'Information Technology': {
-                'buyer_concentration': 3,
-                'switching_costs': 2,
-                'product_importance': 4,
-                'substitute_products': 3,
-                'backward_integration_threat': 2,
-                'price_sensitivity': 3
-            },
-            'Health Care': {
-                'buyer_concentration': 4,
-                'switching_costs': 4,
-                'product_importance': 5,
-                'substitute_products': 2,
-                'backward_integration_threat': 1,
-                'price_sensitivity': 4
-            },
-            'Retail': {
-                'buyer_concentration': 2,
-                'switching_costs': 1,
-                'product_importance': 2,
-                'substitute_products': 4,
-                'backward_integration_threat': 2,
-                'price_sensitivity': 5
-            }
+            "Information Technology": {"buyer_concentration": 3, "switching_costs": 2, "product_importance": 4, "substitute_products": 3, "backward_integration_threat": 2, "price_sensitivity": 3},
+            "Health Care": {"buyer_concentration": 4, "switching_costs": 4, "product_importance": 5, "substitute_products": 2, "backward_integration_threat": 1, "price_sensitivity": 4},
+            "Retail": {"buyer_concentration": 2, "switching_costs": 1, "product_importance": 2, "substitute_products": 4, "backward_integration_threat": 2, "price_sensitivity": 5},
         }
 
-        factors = buyer_power_factors.get(sector, {
-            'buyer_concentration': 3,
-            'switching_costs': 3,
-            'product_importance': 3,
-            'substitute_products': 3,
-            'backward_integration_threat': 3,
-            'price_sensitivity': 3
-        })
+        factors = buyer_power_factors.get(sector, {"buyer_concentration": 3, "switching_costs": 3, "product_importance": 3, "substitute_products": 3, "backward_integration_threat": 3, "price_sensitivity": 3})
 
         # Adjust for factors that reduce buyer power
-        power_reducing_factors = ['switching_costs', 'product_importance']
+        power_reducing_factors = ["switching_costs", "product_importance"]
         for factor in power_reducing_factors:
             if factor in factors:
                 factors[factor] = 6 - factors[factor]  # Invert scale
@@ -788,47 +524,17 @@ class PortersFiveForcesAnalyzer:
         else:
             power_level = "Low"
 
-        return {
-            'power_factors': buyer_power_factors.get(sector, factors),
-            'power_level': power_level,
-            'power_level_score': avg_power,
-            'key_factors': [k for k, v in factors.items() if v >= 4],
-            'analysis': f"Buyer power is {power_level.lower()}"
-        }
+        return {"power_factors": buyer_power_factors.get(sector, factors), "power_level": power_level, "power_level_score": avg_power, "key_factors": [k for k, v in factors.items() if v >= 4], "analysis": f"Buyer power is {power_level.lower()}"}
 
     def analyze_threat_of_substitutes(self, sector: str) -> Dict[str, Any]:
         """Analyze threat of substitute products"""
 
-        substitute_factors = {
-            'Information Technology': {
-                'substitute_availability': 4,
-                'switching_costs': 3,
-                'substitute_performance': 3,
-                'price_performance': 3
-            },
-            'Energy': {
-                'substitute_availability': 4,
-                'switching_costs': 4,
-                'substitute_performance': 3,
-                'price_performance': 4
-            },
-            'Transportation': {
-                'substitute_availability': 3,
-                'switching_costs': 3,
-                'substitute_performance': 3,
-                'price_performance': 3
-            }
-        }
+        substitute_factors = {"Information Technology": {"substitute_availability": 4, "switching_costs": 3, "substitute_performance": 3, "price_performance": 3}, "Energy": {"substitute_availability": 4, "switching_costs": 4, "substitute_performance": 3, "price_performance": 4}, "Transportation": {"substitute_availability": 3, "switching_costs": 3, "substitute_performance": 3, "price_performance": 3}}
 
-        factors = substitute_factors.get(sector, {
-            'substitute_availability': 3,
-            'switching_costs': 3,
-            'substitute_performance': 3,
-            'price_performance': 3
-        })
+        factors = substitute_factors.get(sector, {"substitute_availability": 3, "switching_costs": 3, "substitute_performance": 3, "price_performance": 3})
 
         # Switching costs reduce threat
-        factors['switching_costs'] = 6 - factors['switching_costs']
+        factors["switching_costs"] = 6 - factors["switching_costs"]
 
         avg_threat = np.mean(list(factors.values()))
 
@@ -839,55 +545,21 @@ class PortersFiveForcesAnalyzer:
         else:
             threat_level = "Low"
 
-        return {
-            'substitute_factors': substitute_factors.get(sector, factors),
-            'threat_level': threat_level,
-            'threat_level_score': avg_threat,
-            'key_factors': [k for k, v in factors.items() if v >= 4],
-            'analysis': f"Substitute threat is {threat_level.lower()}"
-        }
+        return {"substitute_factors": substitute_factors.get(sector, factors), "threat_level": threat_level, "threat_level_score": avg_threat, "key_factors": [k for k, v in factors.items() if v >= 4], "analysis": f"Substitute threat is {threat_level.lower()}"}
 
     def analyze_competitive_rivalry(self, sector: str) -> Dict[str, Any]:
         """Analyze intensity of competitive rivalry"""
 
         rivalry_factors = {
-            'Information Technology': {
-                'number_of_competitors': 5,
-                'industry_growth': 2,  # High growth reduces rivalry
-                'product_differentiation': 3,
-                'switching_costs': 2,
-                'exit_barriers': 3,
-                'fixed_costs': 3
-            },
-            'Airlines': {
-                'number_of_competitors': 4,
-                'industry_growth': 3,
-                'product_differentiation': 2,
-                'switching_costs': 1,
-                'exit_barriers': 5,
-                'fixed_costs': 5
-            },
-            'Utilities': {
-                'number_of_competitors': 2,
-                'industry_growth': 2,
-                'product_differentiation': 1,
-                'switching_costs': 4,
-                'exit_barriers': 5,
-                'fixed_costs': 5
-            }
+            "Information Technology": {"number_of_competitors": 5, "industry_growth": 2, "product_differentiation": 3, "switching_costs": 2, "exit_barriers": 3, "fixed_costs": 3},  # High growth reduces rivalry
+            "Airlines": {"number_of_competitors": 4, "industry_growth": 3, "product_differentiation": 2, "switching_costs": 1, "exit_barriers": 5, "fixed_costs": 5},
+            "Utilities": {"number_of_competitors": 2, "industry_growth": 2, "product_differentiation": 1, "switching_costs": 4, "exit_barriers": 5, "fixed_costs": 5},
         }
 
-        factors = rivalry_factors.get(sector, {
-            'number_of_competitors': 4,
-            'industry_growth': 3,
-            'product_differentiation': 3,
-            'switching_costs': 3,
-            'exit_barriers': 3,
-            'fixed_costs': 3
-        })
+        factors = rivalry_factors.get(sector, {"number_of_competitors": 4, "industry_growth": 3, "product_differentiation": 3, "switching_costs": 3, "exit_barriers": 3, "fixed_costs": 3})
 
         # Factors that reduce rivalry (invert scale)
-        rivalry_reducing = ['industry_growth', 'product_differentiation', 'switching_costs']
+        rivalry_reducing = ["industry_growth", "product_differentiation", "switching_costs"]
         for factor in rivalry_reducing:
             if factor in factors:
                 factors[factor] = 6 - factors[factor]
@@ -903,13 +575,7 @@ class PortersFiveForcesAnalyzer:
         else:
             intensity = "Low"
 
-        return {
-            'rivalry_factors': rivalry_factors.get(sector, factors),
-            'intensity': intensity,
-            'intensity_score': avg_intensity,
-            'key_factors': [k for k, v in factors.items() if v >= 4],
-            'analysis': f"Competitive rivalry is {intensity.lower()}"
-        }
+        return {"rivalry_factors": rivalry_factors.get(sector, factors), "intensity": intensity, "intensity_score": avg_intensity, "key_factors": [k for k, v in factors.items() if v >= 4], "analysis": f"Competitive rivalry is {intensity.lower()}"}
 
 
 class PESTLEAnalyzer:
@@ -929,12 +595,12 @@ class PESTLEAnalyzer:
 
         # Overall impact assessment
         factor_impacts = [
-            len([f for f in political_factors if 'positive' not in f.lower()]),
-            len([f for f in economic_factors if 'positive' not in f.lower()]),
-            len([f for f in social_factors if 'positive' not in f.lower()]),
-            len([f for f in technological_factors if 'threat' in f.lower() or 'disruption' in f.lower()]),
-            len([f for f in legal_factors if 'risk' in f.lower() or 'compliance' in f.lower()]),
-            len([f for f in environmental_factors if 'regulation' in f.lower() or 'pressure' in f.lower()])
+            len([f for f in political_factors if "positive" not in f.lower()]),
+            len([f for f in economic_factors if "positive" not in f.lower()]),
+            len([f for f in social_factors if "positive" not in f.lower()]),
+            len([f for f in technological_factors if "threat" in f.lower() or "disruption" in f.lower()]),
+            len([f for f in legal_factors if "risk" in f.lower() or "compliance" in f.lower()]),
+            len([f for f in environmental_factors if "regulation" in f.lower() or "pressure" in f.lower()]),
         ]
 
         total_negative_factors = sum(factor_impacts)
@@ -946,274 +612,85 @@ class PESTLEAnalyzer:
         else:
             overall_impact = "Challenging"
 
-        return PESTLEAnalysis(
-            political_factors=political_factors,
-            economic_factors=economic_factors,
-            social_factors=social_factors,
-            technological_factors=technological_factors,
-            legal_factors=legal_factors,
-            environmental_factors=environmental_factors,
-            overall_impact=overall_impact
-        )
+        return PESTLEAnalysis(political_factors=political_factors, economic_factors=economic_factors, social_factors=social_factors, technological_factors=technological_factors, legal_factors=legal_factors, environmental_factors=environmental_factors, overall_impact=overall_impact)
 
     def analyze_political_factors(self, sector: str) -> List[str]:
         """Analyze political factors affecting the industry"""
 
         political_factors_by_sector = {
-            'Health Care': [
-                'Healthcare policy changes',
-                'Drug pricing regulations',
-                'FDA approval processes',
-                'International trade policies',
-                'Government healthcare spending'
-            ],
-            'Energy': [
-                'Energy policy and subsidies',
-                'Environmental regulations',
-                'Geopolitical stability',
-                'Carbon pricing policies',
-                'Infrastructure investment'
-            ],
-            'Financials': [
-                'Banking regulations',
-                'Monetary policy',
-                'Tax policy changes',
-                'International sanctions',
-                'Political stability'
-            ],
-            'Information Technology': [
-                'Data privacy regulations',
-                'Antitrust scrutiny',
-                'International trade tensions',
-                'Cybersecurity policies',
-                'Government technology spending'
-            ]
+            "Health Care": ["Healthcare policy changes", "Drug pricing regulations", "FDA approval processes", "International trade policies", "Government healthcare spending"],
+            "Energy": ["Energy policy and subsidies", "Environmental regulations", "Geopolitical stability", "Carbon pricing policies", "Infrastructure investment"],
+            "Financials": ["Banking regulations", "Monetary policy", "Tax policy changes", "International sanctions", "Political stability"],
+            "Information Technology": ["Data privacy regulations", "Antitrust scrutiny", "International trade tensions", "Cybersecurity policies", "Government technology spending"],
         }
 
-        return political_factors_by_sector.get(sector, [
-            'Regulatory changes',
-            'Tax policy shifts',
-            'Government spending',
-            'Political stability',
-            'International relations'
-        ])
+        return political_factors_by_sector.get(sector, ["Regulatory changes", "Tax policy shifts", "Government spending", "Political stability", "International relations"])
 
     def analyze_economic_factors(self, sector: str) -> List[str]:
         """Analyze economic factors affecting the industry"""
 
         economic_factors_by_sector = {
-            'Consumer Discretionary': [
-                'Consumer spending trends',
-                'Employment levels',
-                'Disposable income changes',
-                'Interest rate environment',
-                'Economic growth rates'
-            ],
-            'Financials': [
-                'Interest rate cycles',
-                'Credit market conditions',
-                'Economic growth outlook',
-                'Inflation expectations',
-                'Currency exchange rates'
-            ],
-            'Real Estate': [
-                'Interest rate environment',
-                'Economic growth trends',
-                'Employment levels',
-                'Population demographics',
-                'Government housing policies'
-            ],
-            'Energy': [
-                'Commodity price cycles',
-                'Global economic growth',
-                'Currency fluctuations',
-                'Supply-demand dynamics',
-                'Energy transition economics'
-            ]
+            "Consumer Discretionary": ["Consumer spending trends", "Employment levels", "Disposable income changes", "Interest rate environment", "Economic growth rates"],
+            "Financials": ["Interest rate cycles", "Credit market conditions", "Economic growth outlook", "Inflation expectations", "Currency exchange rates"],
+            "Real Estate": ["Interest rate environment", "Economic growth trends", "Employment levels", "Population demographics", "Government housing policies"],
+            "Energy": ["Commodity price cycles", "Global economic growth", "Currency fluctuations", "Supply-demand dynamics", "Energy transition economics"],
         }
 
-        return economic_factors_by_sector.get(sector, [
-            'Economic growth rates',
-            'Interest rate environment',
-            'Inflation trends',
-            'Employment levels',
-            'Consumer confidence'
-        ])
+        return economic_factors_by_sector.get(sector, ["Economic growth rates", "Interest rate environment", "Inflation trends", "Employment levels", "Consumer confidence"])
 
     def analyze_social_factors(self, sector: str) -> List[str]:
         """Analyze social factors affecting the industry"""
 
         social_factors_by_sector = {
-            'Consumer Staples': [
-                'Health and wellness trends',
-                'Demographic shifts',
-                'Lifestyle changes',
-                'Cultural preferences',
-                'Social responsibility expectations'
-            ],
-            'Health Care': [
-                'Aging population trends',
-                'Health awareness levels',
-                'Lifestyle disease prevalence',
-                'Healthcare access expectations',
-                'Social healthcare attitudes'
-            ],
-            'Information Technology': [
-                'Digital adoption rates',
-                'Remote work trends',
-                'Privacy concerns',
-                'Social media usage',
-                'Educational technology needs'
-            ],
-            'Automotive': [
-                'Transportation preferences',
-                'Environmental consciousness',
-                'Urbanization trends',
-                'Mobility service adoption',
-                'Safety awareness'
-            ]
+            "Consumer Staples": ["Health and wellness trends", "Demographic shifts", "Lifestyle changes", "Cultural preferences", "Social responsibility expectations"],
+            "Health Care": ["Aging population trends", "Health awareness levels", "Lifestyle disease prevalence", "Healthcare access expectations", "Social healthcare attitudes"],
+            "Information Technology": ["Digital adoption rates", "Remote work trends", "Privacy concerns", "Social media usage", "Educational technology needs"],
+            "Automotive": ["Transportation preferences", "Environmental consciousness", "Urbanization trends", "Mobility service adoption", "Safety awareness"],
         }
 
-        return social_factors_by_sector.get(sector, [
-            'Demographic changes',
-            'Cultural shifts',
-            'Lifestyle trends',
-            'Social values evolution',
-            'Consumer behavior changes'
-        ])
+        return social_factors_by_sector.get(sector, ["Demographic changes", "Cultural shifts", "Lifestyle trends", "Social values evolution", "Consumer behavior changes"])
 
     def analyze_technological_factors(self, sector: str) -> List[str]:
         """Analyze technological factors affecting the industry"""
 
         tech_factors_by_sector = {
-            'Information Technology': [
-                'AI and machine learning advancement',
-                'Cloud computing evolution',
-                'Cybersecurity developments',
-                'Quantum computing potential',
-                'IoT expansion'
-            ],
-            'Health Care': [
-                'Biotechnology advances',
-                'Digital health solutions',
-                'Precision medicine development',
-                'Medical device innovation',
-                'Telemedicine growth'
-            ],
-            'Automotive': [
-                'Electric vehicle technology',
-                'Autonomous driving development',
-                'Battery technology advances',
-                'Connected car features',
-                'Manufacturing automation'
-            ],
-            'Financial Services': [
-                'Fintech innovation',
-                'Blockchain technology',
-                'Digital payment systems',
-                'Robo-advisory platforms',
-                'Regulatory technology'
-            ]
+            "Information Technology": ["AI and machine learning advancement", "Cloud computing evolution", "Cybersecurity developments", "Quantum computing potential", "IoT expansion"],
+            "Health Care": ["Biotechnology advances", "Digital health solutions", "Precision medicine development", "Medical device innovation", "Telemedicine growth"],
+            "Automotive": ["Electric vehicle technology", "Autonomous driving development", "Battery technology advances", "Connected car features", "Manufacturing automation"],
+            "Financial Services": ["Fintech innovation", "Blockchain technology", "Digital payment systems", "Robo-advisory platforms", "Regulatory technology"],
         }
 
-        return tech_factors_by_sector.get(sector, [
-            'Automation advances',
-            'Digital transformation',
-            'Innovation pace',
-            'Technology disruption threats',
-            'R&D developments'
-        ])
+        return tech_factors_by_sector.get(sector, ["Automation advances", "Digital transformation", "Innovation pace", "Technology disruption threats", "R&D developments"])
 
     def analyze_legal_factors(self, sector: str) -> List[str]:
         """Analyze legal factors affecting the industry"""
 
         legal_factors_by_sector = {
-            'Health Care': [
-                'FDA regulatory requirements',
-                'Patent law changes',
-                'Healthcare compliance',
-                'International drug regulations',
-                'Liability and malpractice laws'
-            ],
-            'Financials': [
-                'Banking compliance requirements',
-                'Consumer protection laws',
-                'Anti-money laundering regulations',
-                'International banking standards',
-                'Data protection compliance'
-            ],
-            'Energy': [
-                'Environmental compliance',
-                'Safety regulations',
-                'Land use rights',
-                'International energy agreements',
-                'Carbon emission regulations'
-            ],
-            'Information Technology': [
-                'Data privacy laws',
-                'Intellectual property protection',
-                'Antitrust regulations',
-                'International data transfer rules',
-                'Cybersecurity compliance'
-            ]
+            "Health Care": ["FDA regulatory requirements", "Patent law changes", "Healthcare compliance", "International drug regulations", "Liability and malpractice laws"],
+            "Financials": ["Banking compliance requirements", "Consumer protection laws", "Anti-money laundering regulations", "International banking standards", "Data protection compliance"],
+            "Energy": ["Environmental compliance", "Safety regulations", "Land use rights", "International energy agreements", "Carbon emission regulations"],
+            "Information Technology": ["Data privacy laws", "Intellectual property protection", "Antitrust regulations", "International data transfer rules", "Cybersecurity compliance"],
         }
 
-        return legal_factors_by_sector.get(sector, [
-            'Regulatory compliance requirements',
-            'Industry-specific laws',
-            'International regulations',
-            'Intellectual property protection',
-            'Employment law changes'
-        ])
+        return legal_factors_by_sector.get(sector, ["Regulatory compliance requirements", "Industry-specific laws", "International regulations", "Intellectual property protection", "Employment law changes"])
 
     def analyze_environmental_factors(self, sector: str) -> List[str]:
         """Analyze environmental factors affecting the industry"""
 
         environmental_factors_by_sector = {
-            'Energy': [
-                'Climate change policies',
-                'Carbon emission regulations',
-                'Renewable energy transition',
-                'Environmental impact assessments',
-                'Sustainability reporting requirements'
-            ],
-            'Materials': [
-                'Resource scarcity concerns',
-                'Recycling and waste management',
-                'Environmental regulations',
-                'Sustainable sourcing requirements',
-                'Carbon footprint pressures'
-            ],
-            'Automotive': [
-                'Emission standards',
-                'Electric vehicle mandates',
-                'Fuel efficiency requirements',
-                'End-of-life vehicle regulations',
-                'Sustainable manufacturing'
-            ],
-            'Consumer Staples': [
-                'Sustainable packaging requirements',
-                'Organic and natural trends',
-                'Water usage regulations',
-                'Supply chain sustainability',
-                'Carbon footprint disclosure'
-            ]
+            "Energy": ["Climate change policies", "Carbon emission regulations", "Renewable energy transition", "Environmental impact assessments", "Sustainability reporting requirements"],
+            "Materials": ["Resource scarcity concerns", "Recycling and waste management", "Environmental regulations", "Sustainable sourcing requirements", "Carbon footprint pressures"],
+            "Automotive": ["Emission standards", "Electric vehicle mandates", "Fuel efficiency requirements", "End-of-life vehicle regulations", "Sustainable manufacturing"],
+            "Consumer Staples": ["Sustainable packaging requirements", "Organic and natural trends", "Water usage regulations", "Supply chain sustainability", "Carbon footprint disclosure"],
         }
 
-        return environmental_factors_by_sector.get(sector, [
-            'Environmental regulations',
-            'Climate change impact',
-            'Sustainability requirements',
-            'Resource availability',
-            'Waste management regulations'
-        ])
+        return environmental_factors_by_sector.get(sector, ["Environmental regulations", "Climate change impact", "Sustainability requirements", "Resource availability", "Waste management regulations"])
 
 
 class CompetitivePositionAnalyzer:
     """Analyze company's competitive position"""
 
-    def analyze_competitive_position(self, company_data: CompanyData,
-                                     industry_metrics: IndustryMetrics = None) -> Dict[str, Any]:
+    def analyze_competitive_position(self, company_data: CompanyData, industry_metrics: IndustryMetrics = None) -> Dict[str, Any]:
         """Analyze company's competitive position in industry"""
 
         financial_data = company_data.financial_data
@@ -1233,18 +710,17 @@ class CompetitivePositionAnalyzer:
         competitive_position = self.determine_competitive_position(position_score)
 
         return {
-            'market_position': market_position,
-            'financial_position': financial_position,
-            'strategic_position': strategic_position,
-            'overall_position': competitive_position,
-            'position_score': position_score,
-            'competitive_advantages': self.identify_competitive_advantages(company_data),
-            'competitive_disadvantages': self.identify_competitive_disadvantages(company_data),
-            'strategic_recommendations': self.generate_strategic_recommendations(company_data, competitive_position)
+            "market_position": market_position,
+            "financial_position": financial_position,
+            "strategic_position": strategic_position,
+            "overall_position": competitive_position,
+            "position_score": position_score,
+            "competitive_advantages": self.identify_competitive_advantages(company_data),
+            "competitive_disadvantages": self.identify_competitive_disadvantages(company_data),
+            "strategic_recommendations": self.generate_strategic_recommendations(company_data, competitive_position),
         }
 
-    def assess_market_position(self, company_data: CompanyData,
-                               industry_metrics: IndustryMetrics = None) -> Dict[str, Any]:
+    def assess_market_position(self, company_data: CompanyData, industry_metrics: IndustryMetrics = None) -> Dict[str, Any]:
         """Assess market position"""
 
         market_cap = company_data.market_cap
@@ -1254,11 +730,7 @@ class CompetitivePositionAnalyzer:
             estimated_market_share = (market_cap / industry_metrics.total_market_size) * 100
         else:
             # Use sector-based estimation
-            sector_multiplier = {
-                'Information Technology': 50,
-                'Health Care': 40,
-                'Financials': 30
-            }.get(company_data.sector, 35)
+            sector_multiplier = {"Information Technology": 50, "Health Care": 40, "Financials": 30}.get(company_data.sector, 35)
 
             estimated_industry_size = market_cap * sector_multiplier
             estimated_market_share = (market_cap / estimated_industry_size) * 100
@@ -1280,16 +752,9 @@ class CompetitivePositionAnalyzer:
             market_position_category = "Small Player"
             position_score = 1
 
-        return {
-            'estimated_market_share': estimated_market_share,
-            'market_position_category': market_position_category,
-            'position_score': position_score,
-            'market_cap_ranking': self.estimate_market_cap_ranking(company_data),
-            'brand_strength': self.assess_brand_strength(company_data)
-        }
+        return {"estimated_market_share": estimated_market_share, "market_position_category": market_position_category, "position_score": position_score, "market_cap_ranking": self.estimate_market_cap_ranking(company_data), "brand_strength": self.assess_brand_strength(company_data)}
 
-    def assess_financial_position(self, company_data: CompanyData,
-                                  industry_metrics: IndustryMetrics = None) -> Dict[str, Any]:
+    def assess_financial_position(self, company_data: CompanyData, industry_metrics: IndustryMetrics = None) -> Dict[str, Any]:
         """Assess financial competitive position"""
 
         financial_data = company_data.financial_data
@@ -1303,8 +768,8 @@ class CompetitivePositionAnalyzer:
             industry_roe = 0.10
             industry_margin = 0.08
 
-        company_roe = financial_data.get('roe', 0)
-        company_margin = financial_data.get('net_margin', 0)
+        company_roe = financial_data.get("roe", 0)
+        company_margin = financial_data.get("net_margin", 0)
 
         # Financial strength score
         financial_score = 0
@@ -1326,26 +791,20 @@ class CompetitivePositionAnalyzer:
             financial_score -= 1
 
         # Debt position
-        debt_to_equity = financial_data.get('debt_to_equity', 0)
+        debt_to_equity = financial_data.get("debt_to_equity", 0)
         if debt_to_equity < 0.3:
             financial_score += 1
         elif debt_to_equity > 1.5:
             financial_score -= 1
 
-        return {
-            'financial_strength_score': financial_score,
-            'roe_vs_industry': company_roe / industry_roe if industry_roe > 0 else 1,
-            'margin_vs_industry': company_margin / industry_margin if industry_margin > 0 else 1,
-            'debt_position': 'Conservative' if debt_to_equity < 0.5 else 'Aggressive' if debt_to_equity > 1.5 else 'Moderate',
-            'cash_position': self.assess_cash_position(company_data)
-        }
+        return {"financial_strength_score": financial_score, "roe_vs_industry": company_roe / industry_roe if industry_roe > 0 else 1, "margin_vs_industry": company_margin / industry_margin if industry_margin > 0 else 1, "debt_position": "Conservative" if debt_to_equity < 0.5 else "Aggressive" if debt_to_equity > 1.5 else "Moderate", "cash_position": self.assess_cash_position(company_data)}
 
     def assess_strategic_position(self, company_data: CompanyData) -> Dict[str, Any]:
         """Assess strategic competitive position"""
 
         # Innovation assessment (proxy metrics)
         market_data = company_data.market_data
-        pb_ratio = market_data.get('pb_ratio', 0)
+        pb_ratio = market_data.get("pb_ratio", 0)
 
         # Innovation score based on market valuation premium
         if pb_ratio > 3:
@@ -1368,25 +827,17 @@ class CompetitivePositionAnalyzer:
         else:
             scale_advantage = 0
 
-        return {
-            'innovation_score': innovation_score,
-            'scale_advantage': scale_advantage,
-            'diversification': self.assess_diversification(company_data),
-            'operational_efficiency': self.assess_operational_efficiency(company_data),
-            'strategic_focus': self.assess_strategic_focus(company_data)
-        }
+        return {"innovation_score": innovation_score, "scale_advantage": scale_advantage, "diversification": self.assess_diversification(company_data), "operational_efficiency": self.assess_operational_efficiency(company_data), "strategic_focus": self.assess_strategic_focus(company_data)}
 
-    def calculate_position_score(self, market_position: Dict, financial_position: Dict,
-                                 strategic_position: Dict) -> float:
+    def calculate_position_score(self, market_position: Dict, financial_position: Dict, strategic_position: Dict) -> float:
         """Calculate overall competitive position score"""
 
-        market_score = market_position['position_score']
-        financial_score = max(0, financial_position['financial_strength_score'] + 3)  # Normalize to 0-5
-        strategic_score = (strategic_position['innovation_score'] +
-                           strategic_position['scale_advantage']) / 2
+        market_score = market_position["position_score"]
+        financial_score = max(0, financial_position["financial_strength_score"] + 3)  # Normalize to 0-5
+        strategic_score = (strategic_position["innovation_score"] + strategic_position["scale_advantage"]) / 2
 
         # Weighted average
-        total_score = (market_score * 0.4 + financial_score * 0.4 + strategic_score * 0.2)
+        total_score = market_score * 0.4 + financial_score * 0.4 + strategic_score * 0.2
         return total_score
 
     def determine_competitive_position(self, position_score: float) -> CompetitivePosition:
@@ -1421,7 +872,7 @@ class CompetitivePositionAnalyzer:
         """Assess brand strength"""
 
         market_data = company_data.market_data
-        pb_ratio = market_data.get('pb_ratio', 0)
+        pb_ratio = market_data.get("pb_ratio", 0)
 
         # Use P/B as proxy for brand/intangible value
         if pb_ratio > 5:
@@ -1437,7 +888,7 @@ class CompetitivePositionAnalyzer:
         """Assess cash position strength"""
 
         financial_data = company_data.financial_data
-        current_ratio = financial_data.get('current_ratio', 0)
+        current_ratio = financial_data.get("current_ratio", 0)
 
         if current_ratio > 2.5:
             return "Very Strong"
@@ -1466,7 +917,7 @@ class CompetitivePositionAnalyzer:
         """Assess operational efficiency"""
 
         financial_data = company_data.financial_data
-        asset_turnover = financial_data.get('revenue', 0) / financial_data.get('total_assets', 1)
+        asset_turnover = financial_data.get("revenue", 0) / financial_data.get("total_assets", 1)
 
         if asset_turnover > 1.5:
             return "High"
@@ -1489,21 +940,21 @@ class CompetitivePositionAnalyzer:
         market_data = company_data.market_data
 
         # Financial advantages
-        if financial_data.get('roe', 0) > 0.15:
+        if financial_data.get("roe", 0) > 0.15:
             advantages.append("Strong profitability")
 
-        if financial_data.get('debt_to_equity', 0) < 0.3:
+        if financial_data.get("debt_to_equity", 0) < 0.3:
             advantages.append("Strong balance sheet")
 
         # Market advantages
         if company_data.market_cap > 10_000_000_000:
             advantages.append("Scale advantages")
 
-        if market_data.get('pb_ratio', 0) > 3:
+        if market_data.get("pb_ratio", 0) > 3:
             advantages.append("Strong brand/intangibles")
 
         # Operational advantages
-        asset_turnover = financial_data.get('revenue', 0) / financial_data.get('total_assets', 1)
+        asset_turnover = financial_data.get("revenue", 0) / financial_data.get("total_assets", 1)
         if asset_turnover > 1.5:
             advantages.append("Operational efficiency")
 
@@ -1515,13 +966,13 @@ class CompetitivePositionAnalyzer:
         disadvantages = []
         financial_data = company_data.financial_data
 
-        if financial_data.get('roe', 0) < 0:
+        if financial_data.get("roe", 0) < 0:
             disadvantages.append("Poor profitability")
 
-        if financial_data.get('debt_to_equity', 0) > 2:
+        if financial_data.get("debt_to_equity", 0) > 2:
             disadvantages.append("High leverage")
 
-        if financial_data.get('current_ratio', 0) < 1:
+        if financial_data.get("current_ratio", 0) < 1:
             disadvantages.append("Liquidity constraints")
 
         if company_data.market_cap < 1_000_000_000:
@@ -1529,43 +980,22 @@ class CompetitivePositionAnalyzer:
 
         return disadvantages if disadvantages else ["No significant competitive disadvantages identified"]
 
-    def generate_strategic_recommendations(self, company_data: CompanyData,
-                                           position: CompetitivePosition) -> List[str]:
+    def generate_strategic_recommendations(self, company_data: CompanyData, position: CompetitivePosition) -> List[str]:
         """Generate strategic recommendations based on competitive position"""
 
         recommendations = []
 
         if position == CompetitivePosition.MARKET_LEADER:
-            recommendations = [
-                "Maintain market leadership through innovation",
-                "Consider strategic acquisitions for growth",
-                "Invest in emerging markets or technologies",
-                "Optimize operational efficiency"
-            ]
+            recommendations = ["Maintain market leadership through innovation", "Consider strategic acquisitions for growth", "Invest in emerging markets or technologies", "Optimize operational efficiency"]
 
         elif position == CompetitivePosition.STRONG_COMPETITOR:
-            recommendations = [
-                "Focus on differentiation strategies",
-                "Identify niche market opportunities",
-                "Strengthen core competencies",
-                "Consider strategic partnerships"
-            ]
+            recommendations = ["Focus on differentiation strategies", "Identify niche market opportunities", "Strengthen core competencies", "Consider strategic partnerships"]
 
         elif position == CompetitivePosition.NICHE_PLAYER:
-            recommendations = [
-                "Defend niche market position",
-                "Explore adjacent market opportunities",
-                "Build strategic alliances",
-                "Focus on customer loyalty"
-            ]
+            recommendations = ["Defend niche market position", "Explore adjacent market opportunities", "Build strategic alliances", "Focus on customer loyalty"]
 
         else:  # STRUGGLING_COMPETITOR
-            recommendations = [
-                "Restructure operations for efficiency",
-                "Consider strategic alternatives",
-                "Focus on core profitable segments",
-                "Improve financial position"
-            ]
+            recommendations = ["Restructure operations for efficiency", "Consider strategic alternatives", "Focus on core profitable segments", "Improve financial position"]
 
         return recommendations
 

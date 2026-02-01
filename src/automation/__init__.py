@@ -8,20 +8,6 @@ This package contains the "brain" of our AI hedge fund:
 - Performance optimization
 """
 
-from .ai_auto_trader import (
-    SignalStrength,
-    SignalSource,
-    TradingSignal,
-    Trade,
-    AIAutoTrader,
-    create_auto_trader
-)
+from .ai_auto_trader import SignalStrength, SignalSource, TradingSignal, Trade, AIAutoTrader, create_auto_trader
 
-__all__ = [
-    'SignalStrength',
-    'SignalSource',
-    'TradingSignal',
-    'Trade',
-    'AIAutoTrader',
-    'create_auto_trader'
-]
+__all__ = ["SignalStrength", "SignalSource", "TradingSignal", "Trade", "AIAutoTrader", "create_auto_trader"]

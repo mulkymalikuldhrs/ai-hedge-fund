@@ -54,9 +54,7 @@ class BaseAgent(ABC):
     ):
         self.agent_name = agent_name
         self.db_path = db_path or f"data/{agent_name.lower()}_agent.db"
-        self.config_path = (
-            config_path or f"src/agents/config/{agent_name.lower()}_agent_config.yaml"
-        )
+        self.config_path = config_path or f"src/agents/config/{agent_name.lower()}_agent_config.yaml"
         self.logger = logging.getLogger(f"{__name__}.{agent_name}")
 
         self._initialize_database()
@@ -175,17 +173,11 @@ class BaseAgent(ABC):
 
                     if step_result.success:
                         successful_steps += 1
-                        self.logger.debug(
-                            f"Step {step_num} completed: {step_result.message}"
-                        )
+                        self.logger.debug(f"Step {step_num} completed: {step_result.message}")
                     else:
                         failed_steps += 1
-                        errors.append(
-                            f"Phase {phase_name}, Step {step_num}: {step_result.error}"
-                        )
-                        self.logger.warning(
-                            f"Step {step_num} failed: {step_result.error}"
-                        )
+                        errors.append(f"Phase {phase_name}, Step {step_num}: {step_result.error}")
+                        self.logger.warning(f"Step {step_num} failed: {step_result.error}")
 
                 except Exception as e:
                     failed_steps += 1
@@ -219,11 +211,7 @@ class BaseAgent(ABC):
             warnings=warnings,
         )
 
-        self.logger.info(
-            f"Plan execution completed: {total_steps} steps, "
-            f"{successful_steps} success, {failed_steps} failed, "
-            f"{skipped_steps} skipped, {execution_time:.2f}s"
-        )
+        self.logger.info(f"Plan execution completed: {total_steps} steps, " f"{successful_steps} success, {failed_steps} failed, " f"{skipped_steps} skipped, {execution_time:.2f}s")
 
         self._save_execution_result(result)
         return result

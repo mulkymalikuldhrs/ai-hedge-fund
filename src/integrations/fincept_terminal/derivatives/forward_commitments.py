@@ -41,11 +41,7 @@ from datetime import datetime, date
 from dataclasses import dataclass
 import logging
 
-from .core import (
-    ForwardCommitment, DerivativeType, UnderlyingType, DayCountConvention,
-    MarketData, PricingResult, PricingEngine, ValidationError, ModelValidator,
-    Constants, calculate_time_fraction
-)
+from .core import ForwardCommitment, DerivativeType, UnderlyingType, DayCountConvention, MarketData, PricingResult, PricingEngine, ValidationError, ModelValidator, Constants, calculate_time_fraction
 from .market_data import MarketDataManager, CurveData, YieldCurvePoint
 
 logger = logging.getLogger(__name__)
@@ -54,6 +50,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class CarryModel:
     """Carry arbitrage model parameters"""
+
     spot_price: float
     risk_free_rate: float
     dividend_yield: float = 0.0
@@ -86,20 +83,8 @@ class CarryModel:
 class EquityForward(ForwardCommitment):
     """Equity forward contract implementation"""
 
-    def __init__(self,
-                 underlying_symbol: str,
-                 expiry_date: datetime,
-                 contract_price: float,
-                 notional: float = 1.0,
-                 day_count: DayCountConvention = DayCountConvention.ACT_365):
-        super().__init__(
-            DerivativeType.FORWARD,
-            UnderlyingType.EQUITY,
-            expiry_date,
-            contract_price,
-            notional,
-            day_count
-        )
+    def __init__(self, underlying_symbol: str, expiry_date: datetime, contract_price: float, notional: float = 1.0, day_count: DayCountConvention = DayCountConvention.ACT_365):
+        super().__init__(DerivativeType.FORWARD, UnderlyingType.EQUITY, expiry_date, contract_price, notional, day_count)
         self.underlying_symbol = underlying_symbol
 
     def calculate_payoff(self, spot_price: float) -> float:
@@ -118,37 +103,14 @@ class EquityForward(ForwardCommitment):
         discount_factor = np.exp(-market_data.risk_free_rate * time_to_expiry)
         fair_value = (self.contract_price - theoretical_forward_price) * discount_factor * self.notional
 
-        return PricingResult(
-            fair_value=fair_value,
-            calculation_details={
-                "theoretical_forward_price": theoretical_forward_price,
-                "market_forward_price": self.contract_price,
-                "carry_rate": carry_rate,
-                "discount_factor": discount_factor,
-                "time_to_expiry": time_to_expiry
-            }
-        )
+        return PricingResult(fair_value=fair_value, calculation_details={"theoretical_forward_price": theoretical_forward_price, "market_forward_price": self.contract_price, "carry_rate": carry_rate, "discount_factor": discount_factor, "time_to_expiry": time_to_expiry})
 
 
 class InterestRateForward(ForwardCommitment):
     """Interest rate forward contract (FRA - Forward Rate Agreement)"""
 
-    def __init__(self,
-                 start_date: datetime,
-                 end_date: datetime,
-                 contract_rate: float,
-                 notional: float = 1000000,  # $1M standard
-                 day_count: DayCountConvention = DayCountConvention.ACT_360,
-                 currency: str = "USD"):
-
-        super().__init__(
-            DerivativeType.FORWARD,
-            UnderlyingType.INTEREST_RATE,
-            end_date,
-            contract_rate,
-            notional,
-            day_count
-        )
+    def __init__(self, start_date: datetime, end_date: datetime, contract_rate: float, notional: float = 1000000, day_count: DayCountConvention = DayCountConvention.ACT_360, currency: str = "USD"):  # $1M standard
+        super().__init__(DerivativeType.FORWARD, UnderlyingType.INTEREST_RATE, end_date, contract_rate, notional, day_count)
         self.start_date = start_date
         self.currency = currency
 
@@ -191,39 +153,14 @@ class InterestRateForward(ForwardCommitment):
 
         fair_value = (rate_diff * period_length * self.notional * discount_factor) / (1 + forward_rate * period_length)
 
-        return PricingResult(
-            fair_value=fair_value,
-            calculation_details={
-                "forward_rate": forward_rate,
-                "contract_rate": self.contract_price,
-                "period_length": period_length,
-                "t1": t1,
-                "t2": t2,
-                "r1": r1,
-                "r2": r2,
-                "discount_factor": discount_factor
-            }
-        )
+        return PricingResult(fair_value=fair_value, calculation_details={"forward_rate": forward_rate, "contract_rate": self.contract_price, "period_length": period_length, "t1": t1, "t2": t2, "r1": r1, "r2": r2, "discount_factor": discount_factor})
 
 
 class FixedIncomeForward(ForwardCommitment):
     """Fixed income forward contract"""
 
-    def __init__(self,
-                 bond_details: Dict,
-                 expiry_date: datetime,
-                 contract_price: float,
-                 notional: float = 100,  # Par value
-                 day_count: DayCountConvention = DayCountConvention.ACT_365):
-
-        super().__init__(
-            DerivativeType.FORWARD,
-            UnderlyingType.BOND,
-            expiry_date,
-            contract_price,
-            notional,
-            day_count
-        )
+    def __init__(self, bond_details: Dict, expiry_date: datetime, contract_price: float, notional: float = 100, day_count: DayCountConvention = DayCountConvention.ACT_365):  # Par value
+        super().__init__(DerivativeType.FORWARD, UnderlyingType.BOND, expiry_date, contract_price, notional, day_count)
         self.bond_details = bond_details
         self.coupon_rate = bond_details.get("coupon_rate", 0.0)
         self.face_value = bond_details.get("face_value", 100)
@@ -247,15 +184,7 @@ class FixedIncomeForward(ForwardCommitment):
         discount_factor = np.exp(-market_data.risk_free_rate * time_to_expiry)
         fair_value = (self.contract_price - theoretical_forward_price) * discount_factor * self.notional
 
-        return PricingResult(
-            fair_value=fair_value,
-            calculation_details={
-                "theoretical_forward_price": theoretical_forward_price,
-                "coupon_pv": coupon_pv,
-                "adjusted_spot_price": adjusted_spot,
-                "time_to_expiry": time_to_expiry
-            }
-        )
+        return PricingResult(fair_value=fair_value, calculation_details={"theoretical_forward_price": theoretical_forward_price, "coupon_pv": coupon_pv, "adjusted_spot_price": adjusted_spot, "time_to_expiry": time_to_expiry})
 
     def _calculate_coupon_pv(self, risk_free_rate: float, time_to_expiry: float) -> float:
         """Calculate present value of coupons paid during forward period"""
@@ -278,16 +207,7 @@ class FixedIncomeForward(ForwardCommitment):
 class InterestRateSwap:
     """Interest Rate Swap implementation"""
 
-    def __init__(self,
-                 notional: float,
-                 fixed_rate: float,
-                 floating_rate_index: str,
-                 start_date: datetime,
-                 end_date: datetime,
-                 payment_frequency: float = 0.25,  # Quarterly
-                 day_count: DayCountConvention = DayCountConvention.ACT_360,
-                 currency: str = "USD"):
-
+    def __init__(self, notional: float, fixed_rate: float, floating_rate_index: str, start_date: datetime, end_date: datetime, payment_frequency: float = 0.25, day_count: DayCountConvention = DayCountConvention.ACT_360, currency: str = "USD"):  # Quarterly
         self.notional = notional
         self.fixed_rate = fixed_rate
         self.floating_rate_index = floating_rate_index
@@ -316,9 +236,7 @@ class InterestRateSwap:
             fixed_leg_pv += fixed_payment * discount_factor
 
         # Calculate floating leg PV (simplified)
-        floating_leg_pv = self.notional * (1 - np.exp(-yield_curve.interpolate_rate(
-            calculate_time_fraction(datetime.now(), self.end_date, self.day_count)
-        ) * calculate_time_fraction(datetime.now(), self.end_date, self.day_count)))
+        floating_leg_pv = self.notional * (1 - np.exp(-yield_curve.interpolate_rate(calculate_time_fraction(datetime.now(), self.end_date, self.day_count)) * calculate_time_fraction(datetime.now(), self.end_date, self.day_count)))
 
         # Swap value depends on position
         if pay_fixed:
@@ -326,15 +244,7 @@ class InterestRateSwap:
         else:
             fair_value = fixed_leg_pv - floating_leg_pv
 
-        return PricingResult(
-            fair_value=fair_value,
-            calculation_details={
-                "fixed_leg_pv": fixed_leg_pv,
-                "floating_leg_pv": floating_leg_pv,
-                "pay_fixed": pay_fixed,
-                "payment_dates": len(payment_dates)
-            }
-        )
+        return PricingResult(fair_value=fair_value, calculation_details={"fixed_leg_pv": fixed_leg_pv, "floating_leg_pv": floating_leg_pv, "pay_fixed": pay_fixed, "payment_dates": len(payment_dates)})
 
     def _generate_payment_dates(self) -> List[datetime]:
         """Generate payment dates for swap"""
@@ -376,17 +286,7 @@ class InterestRateSwap:
 class CurrencySwap:
     """Currency Swap implementation"""
 
-    def __init__(self,
-                 notional_domestic: float,
-                 notional_foreign: float,
-                 fixed_rate_domestic: float,
-                 fixed_rate_foreign: float,
-                 start_date: datetime,
-                 end_date: datetime,
-                 domestic_currency: str = "USD",
-                 foreign_currency: str = "EUR",
-                 payment_frequency: float = 0.5):  # Semi-annual
-
+    def __init__(self, notional_domestic: float, notional_foreign: float, fixed_rate_domestic: float, fixed_rate_foreign: float, start_date: datetime, end_date: datetime, domestic_currency: str = "USD", foreign_currency: str = "EUR", payment_frequency: float = 0.5):  # Semi-annual
         self.notional_domestic = notional_domestic
         self.notional_foreign = notional_foreign
         self.fixed_rate_domestic = fixed_rate_domestic
@@ -400,25 +300,14 @@ class CurrencySwap:
         ModelValidator.validate_positive(notional_domestic, "domestic_notional")
         ModelValidator.validate_positive(notional_foreign, "foreign_notional")
 
-    def fair_value(self,
-                   domestic_curve: CurveData,
-                   foreign_curve: CurveData,
-                   fx_rate: float) -> PricingResult:
+    def fair_value(self, domestic_curve: CurveData, foreign_curve: CurveData, fx_rate: float) -> PricingResult:
         """Calculate currency swap fair value"""
 
         # Calculate domestic leg PV
-        domestic_leg_pv = self._calculate_leg_pv(
-            self.notional_domestic,
-            self.fixed_rate_domestic,
-            domestic_curve
-        )
+        domestic_leg_pv = self._calculate_leg_pv(self.notional_domestic, self.fixed_rate_domestic, domestic_curve)
 
         # Calculate foreign leg PV in foreign currency
-        foreign_leg_pv_foreign = self._calculate_leg_pv(
-            self.notional_foreign,
-            self.fixed_rate_foreign,
-            foreign_curve
-        )
+        foreign_leg_pv_foreign = self._calculate_leg_pv(self.notional_foreign, self.fixed_rate_foreign, foreign_curve)
 
         # Convert foreign leg to domestic currency
         foreign_leg_pv_domestic = foreign_leg_pv_foreign * fx_rate
@@ -426,15 +315,7 @@ class CurrencySwap:
         # Swap value = Foreign leg PV - Domestic leg PV
         fair_value = foreign_leg_pv_domestic - domestic_leg_pv
 
-        return PricingResult(
-            fair_value=fair_value,
-            calculation_details={
-                "domestic_leg_pv": domestic_leg_pv,
-                "foreign_leg_pv_foreign": foreign_leg_pv_foreign,
-                "foreign_leg_pv_domestic": foreign_leg_pv_domestic,
-                "fx_rate": fx_rate
-            }
-        )
+        return PricingResult(fair_value=fair_value, calculation_details={"domestic_leg_pv": domestic_leg_pv, "foreign_leg_pv_foreign": foreign_leg_pv_foreign, "foreign_leg_pv_domestic": foreign_leg_pv_domestic, "fx_rate": fx_rate})
 
     def _calculate_leg_pv(self, notional: float, fixed_rate: float, yield_curve: CurveData) -> float:
         """Calculate present value of one leg"""
@@ -461,15 +342,7 @@ class CurrencySwap:
 class EquitySwap:
     """Equity Swap implementation"""
 
-    def __init__(self,
-                 notional: float,
-                 equity_leg_return: str,  # "total_return" or "price_return"
-                 fixed_rate: Optional[float] = None,
-                 floating_rate_spread: float = 0.0,
-                 start_date: datetime = None,
-                 end_date: datetime = None,
-                 payment_frequency: float = 0.25):  # Quarterly
-
+    def __init__(self, notional: float, equity_leg_return: str, fixed_rate: Optional[float] = None, floating_rate_spread: float = 0.0, start_date: datetime = None, end_date: datetime = None, payment_frequency: float = 0.25):  # "total_return" or "price_return"  # Quarterly
         self.notional = notional
         self.equity_leg_return = equity_leg_return
         self.fixed_rate = fixed_rate
@@ -480,10 +353,7 @@ class EquitySwap:
 
         ModelValidator.validate_positive(notional, "notional")
 
-    def calculate_equity_leg_payment(self,
-                                     initial_price: float,
-                                     final_price: float,
-                                     dividends: float = 0.0) -> float:
+    def calculate_equity_leg_payment(self, initial_price: float, final_price: float, dividends: float = 0.0) -> float:
         """Calculate equity leg payment"""
         price_return = (final_price - initial_price) / initial_price
 
@@ -504,8 +374,7 @@ class EquitySwap:
         time_to_expiry = calculate_time_fraction(self.start_date, self.end_date, DayCountConvention.ACT_365)
 
         # Expected equity leg PV
-        expected_equity_pv = self.notional * expected_equity_return * np.exp(
-            -market_data.risk_free_rate * time_to_expiry)
+        expected_equity_pv = self.notional * expected_equity_return * np.exp(-market_data.risk_free_rate * time_to_expiry)
 
         # Fixed leg PV
         if self.fixed_rate is not None:
@@ -518,15 +387,7 @@ class EquitySwap:
 
         fair_value = expected_equity_pv - fixed_leg_pv
 
-        return PricingResult(
-            fair_value=fair_value,
-            calculation_details={
-                "expected_equity_pv": expected_equity_pv,
-                "fixed_leg_pv": fixed_leg_pv,
-                "expected_equity_return": expected_equity_return,
-                "time_to_expiry": time_to_expiry
-            }
-        )
+        return PricingResult(fair_value=fair_value, calculation_details={"expected_equity_pv": expected_equity_pv, "fixed_leg_pv": fixed_leg_pv, "expected_equity_return": expected_equity_return, "time_to_expiry": time_to_expiry})
 
 
 class CarryArbitrageCalculator:
@@ -543,27 +404,23 @@ class CarryArbitrageCalculator:
         return spot * np.exp((risk_free_rate - yield_rate) * time_to_expiry)
 
     @staticmethod
-    def forward_price_with_discrete_income(spot: float, risk_free_rate: float, income_pv: float,
-                                           time_to_expiry: float) -> float:
+    def forward_price_with_discrete_income(spot: float, risk_free_rate: float, income_pv: float, time_to_expiry: float) -> float:
         """Forward price with discrete income payments"""
         return (spot - income_pv) * np.exp(risk_free_rate * time_to_expiry)
 
     @staticmethod
-    def forward_price_with_storage_cost(spot: float, risk_free_rate: float, storage_cost_rate: float,
-                                        time_to_expiry: float) -> float:
+    def forward_price_with_storage_cost(spot: float, risk_free_rate: float, storage_cost_rate: float, time_to_expiry: float) -> float:
         """Forward price with storage costs"""
         return spot * np.exp((risk_free_rate + storage_cost_rate) * time_to_expiry)
 
     @staticmethod
-    def forward_price_commodity(spot: float, risk_free_rate: float, storage_cost_rate: float, convenience_yield: float,
-                                time_to_expiry: float) -> float:
+    def forward_price_commodity(spot: float, risk_free_rate: float, storage_cost_rate: float, convenience_yield: float, time_to_expiry: float) -> float:
         """Forward price for commodities with storage costs and convenience yield"""
         net_cost = risk_free_rate + storage_cost_rate - convenience_yield
         return spot * np.exp(net_cost * time_to_expiry)
 
     @staticmethod
-    def arbitrage_profit(forward_market_price: float, forward_theoretical_price: float, risk_free_rate: float,
-                         time_to_expiry: float) -> float:
+    def arbitrage_profit(forward_market_price: float, forward_theoretical_price: float, risk_free_rate: float, time_to_expiry: float) -> float:
         """Calculate arbitrage profit"""
         price_diff = forward_market_price - forward_theoretical_price
         return price_diff * np.exp(-risk_free_rate * time_to_expiry)
@@ -606,8 +463,4 @@ class ForwardCommitmentPricingEngine(PricingEngine):
 
 
 # Export main classes
-__all__ = [
-    'CarryModel', 'EquityForward', 'InterestRateForward', 'FixedIncomeForward',
-    'InterestRateSwap', 'CurrencySwap', 'EquitySwap', 'CarryArbitrageCalculator',
-    'ForwardCommitmentPricingEngine'
-]
+__all__ = ["CarryModel", "EquityForward", "InterestRateForward", "FixedIncomeForward", "InterestRateSwap", "CurrencySwap", "EquitySwap", "CarryArbitrageCalculator", "ForwardCommitmentPricingEngine"]

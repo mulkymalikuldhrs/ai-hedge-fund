@@ -19,6 +19,7 @@ __author__ = "AI Hedge Fund Team"
 
 from .strategies import *
 from .analysis import *
+
 # Temporarily disabled for core functionality testing
 # from .backtesting import *
 # from .brokers import *  # Requires plotly
@@ -32,7 +33,4 @@ from .indicators import *
 from .fund_management import *
 from .utils import *
 
-__all__ = [
-    '__version__',
-    '__author__'
-]
+__all__ = ["__version__", "__author__"]

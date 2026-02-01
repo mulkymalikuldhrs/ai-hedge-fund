@@ -85,7 +85,7 @@ class TestMACD(TestTechnicalIndicators):
     
     def test_macd_custom_periods(self, ti, sample_data):
         """Test MACD with custom periods"""
-        macd, signal, hist = ti.macd(sample_data['closes'], fast=8, slow=17, signal_period=9)
+        macd, signal, hist = ti.macd(sample_data['closes'], fast_period=8, slow_period=17, signal_period=9)
         assert len(macd) == len(sample_data['closes'])
     
     def test_macd_histogram_sign(self, ti, sample_data):

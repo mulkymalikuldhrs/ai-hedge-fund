@@ -45,30 +45,34 @@ getcontext().prec = 28
 # CALCULATION CONSTANTS
 # ============================================================================
 
+
 class Constants:
     """Mathematical and financial constants"""
-    DAYS_IN_YEAR = Decimal('365.25')
-    BUSINESS_DAYS_IN_YEAR = Decimal('252')
-    MONTHS_IN_YEAR = Decimal('12')
-    QUARTERS_IN_YEAR = Decimal('4')
-    BASIS_POINTS = Decimal('10000')
-    PERCENT = Decimal('100')
+
+    DAYS_IN_YEAR = Decimal("365.25")
+    BUSINESS_DAYS_IN_YEAR = Decimal("252")
+    MONTHS_IN_YEAR = Decimal("12")
+    QUARTERS_IN_YEAR = Decimal("4")
+    BASIS_POINTS = Decimal("10000")
+    PERCENT = Decimal("100")
 
     # Risk-free rates (update as needed)
-    DEFAULT_RISK_FREE_RATE = Decimal('0.03')  # 3%
+    DEFAULT_RISK_FREE_RATE = Decimal("0.03")  # 3%
 
     # Alternative investment specific
     PE_TYPICAL_FUND_LIFE = 10  # years
     RE_DEPRECIATION_YEARS = 39  # US commercial real estate
-    COMMODITY_STORAGE_COST_TYPICAL = Decimal('0.02')  # 2%
+    COMMODITY_STORAGE_COST_TYPICAL = Decimal("0.02")  # 2%
 
 
 # ============================================================================
 # ENUMS AND CLASSIFICATIONS
 # ============================================================================
 
+
 class AssetClass(Enum):
     """Alternative investment asset classes"""
+
     PRIVATE_EQUITY = "private_equity"
     PRIVATE_DEBT = "private_debt"
     REAL_ESTATE = "real_estate"
@@ -84,6 +88,7 @@ class AssetClass(Enum):
 
 class InvestmentMethod(Enum):
     """Investment access methods"""
+
     DIRECT = "direct"
     CO_INVESTMENT = "co_investment"
     FUND = "fund"
@@ -91,6 +96,7 @@ class InvestmentMethod(Enum):
 
 class HedgeFundStrategy(Enum):
     """Hedge fund strategy classifications"""
+
     # Equity Related
     LONG_SHORT_EQUITY = "long_short_equity"
     EQUITY_MARKET_NEUTRAL = "equity_market_neutral"
@@ -123,6 +129,7 @@ class HedgeFundStrategy(Enum):
 
 class CommoditySector(Enum):
     """Commodity sector classifications"""
+
     ENERGY = "energy"
     METALS = "metals"
     AGRICULTURE = "agriculture"
@@ -131,6 +138,7 @@ class CommoditySector(Enum):
 
 class RealEstateType(Enum):
     """Real estate property types"""
+
     OFFICE = "office"
     RETAIL = "retail"
     INDUSTRIAL = "industrial"
@@ -144,9 +152,11 @@ class RealEstateType(Enum):
 # DATA SCHEMAS
 # ============================================================================
 
+
 @dataclass
 class AssetParameters:
     """Standard parameters for alternative investments"""
+
     asset_class: AssetClass
     ticker: Optional[str] = None
     name: Optional[str] = None
@@ -164,6 +174,7 @@ class AssetParameters:
 @dataclass
 class MarketData:
     """Standardized market data structure"""
+
     timestamp: str
     price: Decimal
     volume: Optional[Decimal] = None
@@ -178,6 +189,7 @@ class MarketData:
 @dataclass
 class CashFlow:
     """Cash flow data structure"""
+
     date: str
     amount: Decimal
     cf_type: str  # 'inflow', 'outflow', 'distribution', 'capital_call'
@@ -187,6 +199,7 @@ class CashFlow:
 @dataclass
 class Performance:
     """Performance metrics structure"""
+
     period: str
     total_return: Decimal
     annualized_return: Optional[Decimal] = None
@@ -202,39 +215,40 @@ class Performance:
 # CONFIGURATION SETTINGS
 # ============================================================================
 
+
 class Config:
     """Main configuration class"""
 
     # Data validation settings
-    PRICE_TOLERANCE = Decimal('0.0001')  # 1 basis point
-    MAX_LEVERAGE = Decimal('10.0')
-    MIN_PRICE = Decimal('0.0001')
+    PRICE_TOLERANCE = Decimal("0.0001")  # 1 basis point
+    MAX_LEVERAGE = Decimal("10.0")
+    MIN_PRICE = Decimal("0.0001")
 
     # Performance calculation settings
     ANNUALIZATION_FACTOR = Constants.DAYS_IN_YEAR
     RISK_FREE_RATE = Constants.DEFAULT_RISK_FREE_RATE
 
     # Alternative investment specific settings
-    PE_IRR_TOLERANCE = Decimal('0.000001')
+    PE_IRR_TOLERANCE = Decimal("0.000001")
     PE_IRR_MAX_ITERATIONS = 1000
 
     # Real estate settings
-    RE_CAP_RATE_MIN = Decimal('0.01')  # 1%
-    RE_CAP_RATE_MAX = Decimal('0.20')  # 20%
+    RE_CAP_RATE_MIN = Decimal("0.01")  # 1%
+    RE_CAP_RATE_MAX = Decimal("0.20")  # 20%
 
     # Commodity settings
     COMMODITY_ROLL_DAYS = 5  # Days before expiry to roll
 
     # Hedge fund settings
     HF_HIGH_WATER_MARK_DEFAULT = True
-    HF_HURDLE_RATE_DEFAULT = Decimal('0.08')  # 8%
+    HF_HURDLE_RATE_DEFAULT = Decimal("0.08")  # 8%
 
     # Digital assets settings
-    CRYPTO_VOLATILITY_FLOOR = Decimal('0.10')  # 10% minimum volatility
+    CRYPTO_VOLATILITY_FLOOR = Decimal("0.10")  # 10% minimum volatility
 
     # Portfolio settings
-    MAX_CONCENTRATION = Decimal('0.50')  # 50% max in single asset
-    MIN_WEIGHT = Decimal('0.001')  # 0.1% minimum weight
+    MAX_CONCENTRATION = Decimal("0.50")  # 50% max in single asset
+    MIN_WEIGHT = Decimal("0.001")  # 0.1% minimum weight
 
     # Reporting settings
     DECIMAL_PLACES = 4
@@ -244,38 +258,12 @@ class Config:
     def get_asset_defaults(cls, asset_class: AssetClass) -> Dict[str, Any]:
         """Get default parameters for asset class"""
         defaults = {
-            AssetClass.PRIVATE_EQUITY: {
-                'management_fee': Decimal('0.02'),  # 2%
-                'performance_fee': Decimal('0.20'),  # 20%
-                'lock_up_period': 120,  # 10 years
-                'minimum_investment': Decimal('1000000')  # $1M
-            },
-            AssetClass.PRIVATE_DEBT: {
-                'management_fee': Decimal('0.015'),  # 1.5%
-                'performance_fee': Decimal('0.10'),  # 10%
-                'lock_up_period': 60,  # 5 years
-                'minimum_investment': Decimal('250000')  # $250K
-            },
-            AssetClass.REAL_ESTATE: {
-                'management_fee': Decimal('0.01'),  # 1%
-                'performance_fee': Decimal('0.15'),  # 15%
-                'minimum_investment': Decimal('50000')  # $50K
-            },
-            AssetClass.HEDGE_FUND: {
-                'management_fee': Decimal('0.02'),  # 2%
-                'performance_fee': Decimal('0.20'),  # 20%
-                'hurdle_rate': Decimal('0.08'),  # 8%
-                'high_water_mark': True,
-                'minimum_investment': Decimal('100000')  # $100K
-            },
-            AssetClass.COMMODITIES: {
-                'management_fee': Decimal('0.005'),  # 0.5%
-                'minimum_investment': Decimal('10000')  # $10K
-            },
-            AssetClass.DIGITAL_ASSETS: {
-                'management_fee': Decimal('0.01'),  # 1%
-                'minimum_investment': Decimal('1000')  # $1K
-            }
+            AssetClass.PRIVATE_EQUITY: {"management_fee": Decimal("0.02"), "performance_fee": Decimal("0.20"), "lock_up_period": 120, "minimum_investment": Decimal("1000000")},  # 2%  # 20%  # 10 years  # $1M
+            AssetClass.PRIVATE_DEBT: {"management_fee": Decimal("0.015"), "performance_fee": Decimal("0.10"), "lock_up_period": 60, "minimum_investment": Decimal("250000")},  # 1.5%  # 10%  # 5 years  # $250K
+            AssetClass.REAL_ESTATE: {"management_fee": Decimal("0.01"), "performance_fee": Decimal("0.15"), "minimum_investment": Decimal("50000")},  # 1%  # 15%  # $50K
+            AssetClass.HEDGE_FUND: {"management_fee": Decimal("0.02"), "performance_fee": Decimal("0.20"), "hurdle_rate": Decimal("0.08"), "high_water_mark": True, "minimum_investment": Decimal("100000")},  # 2%  # 20%  # 8%  # $100K
+            AssetClass.COMMODITIES: {"management_fee": Decimal("0.005"), "minimum_investment": Decimal("10000")},  # 0.5%  # $10K
+            AssetClass.DIGITAL_ASSETS: {"management_fee": Decimal("0.01"), "minimum_investment": Decimal("1000")},  # 1%  # $1K
         }
         return defaults.get(asset_class, {})
 
@@ -284,21 +272,19 @@ class Config:
 # LOGGING CONFIGURATION
 # ============================================================================
 
+
 def setup_logging(level: str = "INFO") -> logging.Logger:
     """Setup logging for the analytics module"""
-    logging.basicConfig(
-        level=getattr(logging, level.upper()),
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-    )
+    logging.basicConfig(level=getattr(logging, level.upper()), format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
-    logger = logging.getLogger('alternative_investments')
+    logger = logging.getLogger("alternative_investments")
     return logger
 
 
 # ============================================================================
 # VALIDATION RULES
 # ============================================================================
+
 
 class ValidationRules:
     """Validation rules for different asset classes"""
@@ -307,32 +293,28 @@ class ValidationRules:
     def validate_performance_fee(fee: Decimal, asset_class: AssetClass) -> bool:
         """Validate performance fee ranges"""
         if asset_class == AssetClass.PRIVATE_EQUITY:
-            return Decimal('0.15') <= fee <= Decimal('0.30')  # 15-30%
+            return Decimal("0.15") <= fee <= Decimal("0.30")  # 15-30%
         elif asset_class == AssetClass.HEDGE_FUND:
-            return Decimal('0.10') <= fee <= Decimal('0.50')  # 10-50%
+            return Decimal("0.10") <= fee <= Decimal("0.50")  # 10-50%
         elif asset_class == AssetClass.REAL_ESTATE:
-            return Decimal('0.05') <= fee <= Decimal('0.25')  # 5-25%
+            return Decimal("0.05") <= fee <= Decimal("0.25")  # 5-25%
         return True
 
     @staticmethod
     def validate_management_fee(fee: Decimal, asset_class: AssetClass) -> bool:
         """Validate management fee ranges"""
-        return Decimal('0.001') <= fee <= Decimal('0.05')  # 0.1-5%
+        return Decimal("0.001") <= fee <= Decimal("0.05")  # 0.1-5%
 
     @staticmethod
     def validate_return(return_value: Decimal) -> bool:
         """Validate return values"""
-        return Decimal('-0.99') <= return_value <= Decimal('10.0')  # -99% to 1000%
+        return Decimal("-0.99") <= return_value <= Decimal("10.0")  # -99% to 1000%
 
     @staticmethod
     def validate_volatility(vol: Decimal) -> bool:
         """Validate volatility values"""
-        return Decimal('0.001') <= vol <= Decimal('5.0')  # 0.1% to 500%
+        return Decimal("0.001") <= vol <= Decimal("5.0")  # 0.1% to 500%
 
 
 # Export main components
-__all__ = [
-    'Constants', 'AssetClass', 'InvestmentMethod', 'HedgeFundStrategy',
-    'CommoditySector', 'RealEstateType', 'AssetParameters', 'MarketData',
-    'CashFlow', 'Performance', 'Config', 'ValidationRules', 'setup_logging'
-]
+__all__ = ["Constants", "AssetClass", "InvestmentMethod", "HedgeFundStrategy", "CommoditySector", "RealEstateType", "AssetParameters", "MarketData", "CashFlow", "Performance", "Config", "ValidationRules", "setup_logging"]
