@@ -110,3 +110,8 @@ print('✅ Portfolio Manager works without LLM')
 **TARGET**: Portfolio Manager working without LLM
 
 *"Fix portfolio_manager.py NOW - Project depends on it!"*
+---
+
+> **Contact:** Mulky Malikul Dhaher — [mulkymalikuldhaher@email.com](mailto:mulkymalikuldhaher@email.com)
+>
+> **Disclaimer:** This project is for Education Purpose only. Risiko apapun tidak kita tanggung. (We are not responsible for any risks or damages.)

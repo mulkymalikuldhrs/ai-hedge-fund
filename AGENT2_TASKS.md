@@ -152,3 +152,8 @@ python3 launcher.py --help
 **TARGET**: Verify basic functionality works
 
 *"Test core modules NOW - Coordinate with Agent 1!"*
+---
+
+> **Contact:** Mulky Malikul Dhaher — [mulkymalikuldhaher@email.com](mailto:mulkymalikuldhaher@email.com)
+>
+> **Disclaimer:** This project is for Education Purpose only. Risiko apapun tidak kita tanggung. (We are not responsible for any risks or damages.)

@@ -2163,3 +2163,9 @@ class ExecutionController:
 **Document Version**: 2.0-ADDENDUM
 **Last Updated**: 2026-01-16
 **Next Review**: 2026-01-23
+
+---
+
+> **Contact:** Mulky Malikul Dhaher — [mulkymalikuldhaher@email.com](mailto:mulkymalikuldhaher@email.com)
+>
+> **Disclaimer:** This project is for Education Purpose only. Risiko apapun tidak kita tanggung. (We are not responsible for any risks or damages.)

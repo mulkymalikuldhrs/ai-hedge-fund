@@ -156,3 +156,8 @@ Untuk update status, gunakan format:
 
 *Agent 3 - Head Coordinator*  
 *"I ensure agents work together, not against each other"*
+---
+
+> **Contact:** Mulky Malikul Dhaher — [mulkymalikuldhaher@email.com](mailto:mulkymalikuldhaher@email.com)
+>
+> **Disclaimer:** This project is for Education Purpose only. Risiko apapun tidak kita tanggung. (We are not responsible for any risks or damages.)

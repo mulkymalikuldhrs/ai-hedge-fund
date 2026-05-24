@@ -122,3 +122,8 @@ Setiap 15 menit:
 **Tujuan**: "kedua belah pihak harus sinkron"  
 
 ***"Mohon konfirmasi Agent 1 agar kita bisa kerja bersama sesuai rencana"***
+---
+
+> **Contact:** Mulky Malikul Dhaher — [mulkymalikuldhaher@email.com](mailto:mulkymalikuldhaher@email.com)
+>
+> **Disclaimer:** This project is for Education Purpose only. Risiko apapun tidak kita tanggung. (We are not responsible for any risks or damages.)

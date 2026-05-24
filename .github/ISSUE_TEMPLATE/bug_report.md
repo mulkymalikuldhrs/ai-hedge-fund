@@ -15,3 +15,9 @@ Add a screenshot of the bug to help explain your problem.
 
 **Additional context**
 Add any other context about the problem here.
+
+---
+
+> **Contact:** Mulky Malikul Dhaher — [mulkymalikuldhaher@email.com](mailto:mulkymalikuldhaher@email.com)
+>
+> **Disclaimer:** This project is for Education Purpose only. Risiko apapun tidak kita tanggung. (We are not responsible for any risks or damages.)

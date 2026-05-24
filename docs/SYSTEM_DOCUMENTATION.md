@@ -632,3 +632,9 @@ poetry run python run_terminal.py
 *Generated: 2026-01-14*
 *Version: 3.5*
 *Status: PRODUCTION READY* ✅
+
+---
+
+> **Contact:** Mulky Malikul Dhaher — [mulkymalikuldhaher@email.com](mailto:mulkymalikuldhaher@email.com)
+>
+> **Disclaimer:** This project is for Education Purpose only. Risiko apapun tidak kita tanggung. (We are not responsible for any risks or damages.)

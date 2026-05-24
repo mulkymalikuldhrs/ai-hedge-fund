@@ -565,3 +565,9 @@ Level 3: Product Owner
 
 **Last Updated**: 2026-01-15  
 **Next Review**: 2026-01-22
+
+---
+
+> **Contact:** Mulky Malikul Dhaher — [mulkymalikuldhaher@email.com](mailto:mulkymalikuldhaher@email.com)
+>
+> **Disclaimer:** This project is for Education Purpose only. Risiko apapun tidak kita tanggung. (We are not responsible for any risks or damages.)

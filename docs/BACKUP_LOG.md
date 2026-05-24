@@ -67,3 +67,9 @@ Next Steps for User:
 1. poetry run python run_terminal.py
 2. Open http://localhost:5000
 3. Start trading with AI-powered strategies!
+
+---
+
+> **Contact:** Mulky Malikul Dhaher — [mulkymalikuldhaher@email.com](mailto:mulkymalikuldhaher@email.com)
+>
+> **Disclaimer:** This project is for Education Purpose only. Risiko apapun tidak kita tanggung. (We are not responsible for any risks or damages.)

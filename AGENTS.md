@@ -1825,3 +1825,9 @@ MUST TO : check everythiing from beginning, not always aggree to me, and think, 
 
 Negative : mock, simulation, inconsistent, bad, not quant, not clever, not autonomous, not executing, no tradingplan, no result, stop, no thinking, low quality, wasting time, missing, forget, miss integration, miss implementation, no check every code, not planning, not documenting, not update, not upgrade, always follow me, buruk, jelek, tidak lengkap, tertinggal dari segi fitur front dan back, kau tidak autonomous, project kurang baik, tidak memberi saran, selalu menanyakan untuk konfirmasi ke user, buang waktu, tidak baik, membosankan, tidak production ready, back end manual, tidak otomatis, back end tidak ai driven, duplikat, tidak membaca semua codebase/syntax, mock, simulasi, campur tanganku, tidak improve, mock, simulation, inconsistent, bad, not quant, not clever, not autonomous, not executing, no browser view, no result, stop, no thinking, low quality, wasting time, missing, forget, miss integration, miss implementation, no check every code, not planning, not documenting, not update, not upgrade, always follow me, lari dari alur, tidak teliti, tidak bagi tugas menjadi kecil kecil, project tidak terstruktur, project tidak rapi dan tidak update changelog agents.md readme, 
 
+
+---
+
+> **Contact:** Mulky Malikul Dhaher — [mulkymalikuldhaher@email.com](mailto:mulkymalikuldhaher@email.com)
+>
+> **Disclaimer:** This project is for Education Purpose only. Risiko apapun tidak kita tanggung. (We are not responsible for any risks or damages.)

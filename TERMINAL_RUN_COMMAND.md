@@ -229,3 +229,8 @@ Market Data → Technical Analysis → Strategy Selection
 *Agent 2: Complete system integration and validation*
 *Status: MISSION ACCOMPLISHED* ✅</content>
 <parameter name="filePath">/home/mulky/ai-hedge-fund/FINAL_SYSTEM_DOCUMENTATION.md
+---
+
+> **Contact:** Mulky Malikul Dhaher — [mulkymalikuldhaher@email.com](mailto:mulkymalikuldhaher@email.com)
+>
+> **Disclaimer:** This project is for Education Purpose only. Risiko apapun tidak kita tanggung. (We are not responsible for any risks or damages.)

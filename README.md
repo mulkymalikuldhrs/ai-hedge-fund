@@ -788,34 +788,45 @@ crypto = provider.get_crypto_data("BTC", days=180)
 # Forex
 forex = provider.get_forex_data("EURUSD")
 ```
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! We encourage the community to help improve this project.
+
+1. **Fork** the repository
+2. Create a **feature branch** (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. Open a **Pull Request**
+
+Please make sure to update tests as appropriate and follow the existing code style.
 
 ---
 
-## Disclaimer
+## 📬 Contact
 
-This is for **educational purposes only**. Not financial advice.
+**Mulky Malikul Dhaher** — [mulkymalikuldhaher@email.com](mailto:mulkymalikuldhaher@email.com)
 
-Trading financial markets involves substantial risk of loss. Past performance does not guarantee future results.
-
-**The developer (Mulky Malikul Dhaher) is not responsible for any financial losses incurred while using this software.**
+GitHub: [https://github.com/mulkymalikuldhrs](https://github.com/mulkymalikuldhrs)
 
 ---
 
-## License & Credits
+## ⚠️ Disclaimer
 
-### License
+**This project is for Education Purpose only.**
 
-MIT License - See LICENSE file for details.
+All content, code, and documentation provided in this repository are intended solely for educational and research purposes. Nothing in this repository constitutes financial, investment, legal, or professional advice.
 
-### Credits
+**Risiko apapun tidak kita tanggung.** (We are not responsible for any risks or damages.)
 
-- **Developer**: Mulky Malikul Dhaher
-- **Data Sources**: Yahoo Finance, CoinGecko, ExchangeRate-API
-- **Open Source References**: Freqtrade, Backtrader, QuantConnect Lean, FinRL
-- **Strategy References**: ICT, Warren Buffett, Benjamin Graham, Peter Lynch, Michael Burry, and more
+Use at your own risk. The authors and contributors assume no liability for any losses, damages, or consequences arising from the use of this software or information provided herein.
 
 ---
 
-**Built with ❤️ by Mulky Malikul Dhaher**
+## 📄 License
 
-*AI Quant Hedge Fund v2.2.2 - RISET Fullstack Implementation*
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+
+Copyright © Mulky Malikul Dhaher. All rights reserved.
+

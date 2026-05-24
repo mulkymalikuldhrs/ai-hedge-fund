@@ -288,3 +288,9 @@ poetry run python -c "from src.tools.advanced_data_provider import data_provider
 **System Version**: 1.1.0  
 **Last Updated**: 2026-01-14  
 **Status**: ✅ Production Ready
+
+---
+
+> **Contact:** Mulky Malikul Dhaher — [mulkymalikuldhaher@email.com](mailto:mulkymalikuldhaher@email.com)
+>
+> **Disclaimer:** This project is for Education Purpose only. Risiko apapun tidak kita tanggung. (We are not responsible for any risks or damages.)

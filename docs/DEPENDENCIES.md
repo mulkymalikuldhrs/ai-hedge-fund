@@ -254,3 +254,9 @@ poetry == 1.x
 4. **CoinGecko** provides crypto data - no API key needed (rate limited)
 
 This project is designed to work with **ZERO** paid API subscriptions!
+
+---
+
+> **Contact:** Mulky Malikul Dhaher — [mulkymalikuldhaher@email.com](mailto:mulkymalikuldhaher@email.com)
+>
+> **Disclaimer:** This project is for Education Purpose only. Risiko apapun tidak kita tanggung. (We are not responsible for any risks or damages.)

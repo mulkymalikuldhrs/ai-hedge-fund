@@ -278,3 +278,9 @@ MIT License - See LICENSE file
 **Blueprint Version**: 1.0  
 **Last Modified**: 2026-01-14  
 **Next Review**: 2026-02-14
+
+---
+
+> **Contact:** Mulky Malikul Dhaher — [mulkymalikuldhaher@email.com](mailto:mulkymalikuldhaher@email.com)
+>
+> **Disclaimer:** This project is for Education Purpose only. Risiko apapun tidak kita tanggung. (We are not responsible for any risks or damages.)

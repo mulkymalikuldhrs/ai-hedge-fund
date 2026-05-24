@@ -328,3 +328,9 @@ python3 main.py AAPL,BTC,USD/IDR --mode semi-auto
 ---
 
 *Session completed successfully - AI Hedge Fund v2.2 Phase 2 Done!*
+
+---
+
+> **Contact:** Mulky Malikul Dhaher — [mulkymalikuldhaher@email.com](mailto:mulkymalikuldhaher@email.com)
+>
+> **Disclaimer:** This project is for Education Purpose only. Risiko apapun tidak kita tanggung. (We are not responsible for any risks or damages.)

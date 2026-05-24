@@ -288,3 +288,9 @@ Continue with strategy testing as planned. No stopping.
 **Last Updated**: 2026-02-01 15:20:00
 **Mode**: FULL AUTONOMOUS - uwu.md UPDATE ENABLED
 **Next Action**: Test Warren Buffett Agent
+
+---
+
+> **Contact:** Mulky Malikul Dhaher — [mulkymalikuldhaher@email.com](mailto:mulkymalikuldhaher@email.com)
+>
+> **Disclaimer:** This project is for Education Purpose only. Risiko apapun tidak kita tanggung. (We are not responsible for any risks or damages.)
