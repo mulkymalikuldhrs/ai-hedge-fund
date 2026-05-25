@@ -15,6 +15,7 @@ No paid MetaTrader API needed - built from scratch!
 import asyncio
 import json
 import logging
+import os
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
 from dataclasses import dataclass, field, asdict
@@ -27,7 +28,7 @@ import plotly.graph_objects as go
 from plotly.utils import PlotlyJSONEncoder
 from src.brokers.free_broker_api import FreeBrokerGateway, BrokerAPI, BrokerType, OrderRequest, OrderSide, OrderType, TimeInForce, Account, Position, MarketData
 from src.strategies.wyckoff.wyckoff_strategy import WyckoffAnalyzer, WyckoffPhase
-from src.analysis.timeframe.multi_timeframe import MultiTimeframeAnalyzer
+from src.analysis.timeframe.multi_timeframe import MultiTimeframeAnalyzer, TrendDirection
 
 logger = logging.getLogger(__name__)
 
@@ -119,7 +120,7 @@ class TradingTerminal:
 
             if tf_analysis.confidence > 70:
                 signal_score += 20
-                reasons.append(f"High confidence: {tf_analysis.confreshold}%")
+                reasons.append(f"High confidence: {tf_analysis.confidence}%")
 
             if wyckoff and wyckoff.events:
                 signal_score += 10
@@ -227,29 +228,19 @@ class TradingTerminal:
         }
 
     async def _fetch_candles(self, symbol: str, timeframe: str, limit: int) -> pd.DataFrame:
-        base_timeframe = {"1m": "1m", "5m": "5m", "15m": "15m", "30m": "30m", "1h": "1h", "4h": "4h", "1d": "1d", "1w": "1w"}
-
-        intervals = {"1m": 60, "5m": 300, "15m": 900, "30m": 1800, "1h": 3600, "4h": 14400, "1d": 86400, "1w": 604800}
-
-        end_time = datetime.now()
-        start_time = end_time - timedelta(seconds=intervals[timeframe] * limit)
-
-        dates = pd.date_range(start=start_time, end=end_time, periods=limit)
-        base_price = 100.0
-        if "BTC" in symbol:
-            base_price = 50000.0
-        elif "ETH" in symbol:
-            base_price = 3000.0
-
-        data = {"timestamp": dates, "open": [base_price * (1 + np.random.uniform(-0.01, 0.01)) for _ in range(limit)], "high": [], "low": [], "close": [], "volume": [np.random.uniform(1000, 10000) for _ in range(limit)]}
-
-        for i in range(limit):
-            close = base_price * (1 + np.random.uniform(-0.02, 0.02))
-            data["close"].append(close)
-            data["high"].append(max(data["open"][i], close) * (1 + np.random.uniform(0, 0.01)))
-            data["low"].append(min(data["open"][i], close) * (1 - np.random.uniform(0, 0.01)))
-
-        return pd.DataFrame(data)
+        """Fetch candlestick data from the broker gateway."""
+        try:
+            broker = self.broker_gateway.get_best_broker(symbol)
+            market_data = await broker.get_market_data(symbol)
+            # If broker provides historical data, use it; otherwise return empty DataFrame
+            if hasattr(broker, 'get_historical_data'):
+                return await broker.get_historical_data(symbol, timeframe, limit)
+            # Fallback: return minimal DataFrame with latest market data
+            logger.warning(f"Historical data not available for {symbol}, returning empty candles")
+            return pd.DataFrame(columns=["timestamp", "open", "high", "low", "close", "volume"])
+        except Exception as e:
+            logger.error(f"Error fetching candles for {symbol}: {e}")
+            return pd.DataFrame(columns=["timestamp", "open", "high", "low", "close", "volume"])
 
     def _update_metrics(self):
         if not self.trade_history:
@@ -309,7 +300,7 @@ def create_trading_terminal() -> tuple[Flask, SocketIO, TradingTerminal]:
         Flask app, SocketIO instance, and TradingTerminal
     """
     app = Flask(__name__, template_folder="../../templates", static_folder="../../static")
-    app.config["SECRET_KEY"] = "trading-terminal-secret-key"
+    app.config["SECRET_KEY"] = os.environ.get("TRADING_TERMINAL_SECRET_KEY", os.urandom(24).hex())
     socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
     terminal = TradingTerminal(app, socketio)

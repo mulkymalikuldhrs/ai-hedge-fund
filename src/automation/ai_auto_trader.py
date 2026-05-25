@@ -507,35 +507,17 @@ class AIAutoTrader:
         return {"status": "running" if self.trading_enabled else "stopped", "trading_enabled": self.trading_enabled, "auto_execution": self.auto_execution, "watchlist_count": len(self.watchlist), "active_trades": len(self.active_trades), "completed_trades": len(self.completed_trades), "performance": self.performance_metrics, "total_equity": total_equity, "pending_signals": len(self.pending_signals)}
 
     async def _fetch_candles(self, symbol: str, timeframe: str, limit: int) -> pd.DataFrame:
-        intervals = {"1m": 60, "5m": 300, "15m": 900, "30m": 1800, "1h": 3600, "4h": 14400, "1d": 86400, "1w": 604800}
-
-        end_time = datetime.now()
-        start_time = end_time - timedelta(seconds=intervals[timeframe] * limit)
-
-        dates = pd.date_range(start=start_time, end=end_time, periods=limit)
-        base_price = 100.0
-        if "BTC" in symbol:
-            base_price = 50000.0
-        elif "ETH" in symbol:
-            base_price = 3000.0
-        elif "EURUSD" in symbol:
-            base_price = 1.08
-        elif "XAUUSD" in symbol:
-            base_price = 2000.0
-        elif "AAPL" in symbol:
-            base_price = 175.0
-        elif "NVDA" in symbol:
-            base_price = 500.0
-
-        data = {"timestamp": dates, "open": [base_price * (1 + np.random.uniform(-0.01, 0.01)) for _ in range(limit)], "high": [], "low": [], "close": [], "volume": [np.random.uniform(1000, 10000) for _ in range(limit)]}
-
-        for i in range(limit):
-            close = base_price * (1 + np.random.uniform(-0.02, 0.02))
-            data["close"].append(close)
-            data["high"].append(max(data["open"][i], close) * (1 + np.random.uniform(0, 0.01)))
-            data["low"].append(min(data["open"][i], close) * (1 - np.random.uniform(0, 0.01)))
-
-        return pd.DataFrame(data)
+        """Fetch candlestick data from the broker gateway."""
+        try:
+            broker = self.broker_gateway.get_best_broker(symbol)
+            if hasattr(broker, 'get_historical_data'):
+                return await broker.get_historical_data(symbol, timeframe, limit)
+            # Fallback: return empty DataFrame if no data source available
+            logger.warning(f"Historical data not available for {symbol}, returning empty candles")
+            return pd.DataFrame(columns=["timestamp", "open", "high", "low", "close", "volume"])
+        except Exception as e:
+            logger.error(f"Error fetching candles for {symbol}: {e}")
+            return pd.DataFrame(columns=["timestamp", "open", "high", "low", "close", "volume"])
 
 
 def create_auto_trader() -> AIAutoTrader:
