@@ -72,15 +72,16 @@ class EntryAnalysis:
         """Get retail strategy signals"""
         retail_signals = []
 
-        # Mock market data for retail strategies
+        # Note: In production, this should fetch real market data.
         import pandas as pd
-        import numpy as np
+        import logging
 
-        dates = pd.date_range(start="2024-01-01", periods=100, freq="1D")
-        data = pd.DataFrame({"open": np.random.randn(100).cumsum() + 100, "high": np.random.randn(100).cumsum() + 105, "low": np.random.randn(100).cumsum() + 95, "close": np.random.randn(100).cumsum() + 100, "volume": np.random.randint(1000, 10000, 100)}, index=dates)
+        logger = logging.getLogger(__name__)
+        logger.warning(f"Using placeholder data for {ticker} - connect to a real data provider for production use")
+        data = pd.DataFrame(columns=["open", "high", "low", "close", "volume"])
 
-        current_price = data["close"].iloc[-1]
-        portfolio_value = 10000  # Mock
+        current_price = 0.0  # Placeholder
+        portfolio_value = 0  # Placeholder
 
         # Test key retail strategies
         strategies_to_test = ["scalping_momentum", "swing_trading", "breakout_trading"]

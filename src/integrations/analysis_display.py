@@ -5,6 +5,7 @@ Shows all strategies, agents, and entry analysis in organized format
 
 import sys
 import os
+import logging
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 
@@ -25,6 +26,8 @@ except ImportError:
 from src.integrations.retail_strategies import retail_strategies, RetailSignal
 from src.agents.enhanced_agents import run_enhanced_multi_agent_analysis
 from src.strategies.quantitative_strategies import analyze_with_all_strategies
+
+logger = logging.getLogger(__name__)
 
 
 class AnalysisDisplay:
@@ -65,17 +68,17 @@ class AnalysisDisplay:
 
     def _run_retail_strategies(self, ticker: str) -> List[RetailSignal]:
         """Run all retail strategies"""
-        # Mock data for demonstration
         import pandas as pd
         import numpy as np
 
-        # Generate sample data
+        # Note: In production, this should fetch real market data.
+        # Using placeholder data structure for demonstration.
         dates = pd.date_range(start="2024-01-01", periods=100, freq="1D")
-        np.random.seed(42)
-        data = pd.DataFrame({"open": np.random.randn(100).cumsum() + 100, "high": np.random.randn(100).cumsum() + 105, "low": np.random.randn(100).cumsum() + 95, "close": np.random.randn(100).cumsum() + 100, "volume": np.random.randint(1000, 10000, 100)}, index=dates)
+        logger.warning(f"Using placeholder data for {ticker} - connect to a real data provider for production use")
+        data = pd.DataFrame(columns=["open", "high", "low", "close", "volume"], index=dates)
 
-        current_price = data["close"].iloc[-1]
-        portfolio_value = 10000  # Mock
+        current_price = 0.0  # Placeholder
+        portfolio_value = 0  # Placeholder
 
         retail_signals = []
         for strategy_name in ["scalping_momentum", "swing_trading", "breakout_trading"]:
